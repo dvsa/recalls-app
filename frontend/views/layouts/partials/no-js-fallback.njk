@@ -1,0 +1,11 @@
+<!-- js-enable script -->
+<!--[if (gte IE 9) | (!IE)]><!-->
+<script type="text/javascript">
+(function(document) {
+    var jsEnableClass = 'js-enabled';
+    var bodyClass = document.body.className ? document.body.className + ' ' + jsEnableClass : jsEnableClass;
+    document.body.className = bodyClass;
+})(document);
+</script>
+<!--<![endif]-->
+<!-- js-enable script -->
