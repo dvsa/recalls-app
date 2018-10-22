@@ -1,0 +1,68 @@
+{
+  "name": "recalls-app-backend",
+  "engines": {
+    "node": "=8.10.0"
+  },
+  "version": "0.1.0",
+  "description": "CVR backend lambda app, used for checking vehicle recalls",
+  "main": "src/lambda.js",
+  "scripts": {
+    "start": "nodemon ./src/functions/local.js",
+    "test": "nyc mocha \"src/test/**/*.test.js\" --exit",
+    "lint": "eslint .",
+    "build": "npm install && npm run lint && npm test && zip -r ../cvr-backend.zip * --exclude /src/test",
+    "prod": "npm prune --production && npm install --production && zip -r ../cvr-backend.zip * --exclude /src/test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dvsa/recalls-app.git"
+  },
+  "keywords": [
+    "recalls"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/dvsa/recalls-app#readme",
+  "dependencies": {
+    "aws-serverless-express": "^3.3.5",
+    "aws-sdk": "^2.338.0",
+    "body-parser": "^1.18.3",
+    "express": "^4.16.4"
+  },
+  "devDependencies": {
+    "eslint": "^5.7.0",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-plugin-import": "^2.14.0",
+    "mocha": "^5.2.0",
+    "nodemon": "^1.18.4",
+    "nyc": "^13.1.0"
+  },
+  "nyc": {
+    "check-coverage": true,
+    "per-file": true,
+    "lines": 60,
+    "statements": 60,
+    "functions": 60,
+    "branches": 60,
+    "include": [
+      "/src/*/**/*.js",
+      "src/app.js"
+    ],
+    "exclude": [
+      "src/functions/*.js",
+      "src/routes/*.js",
+      "src/test/*.js",
+      "src/test/*/*.js"
+    ],
+    "extension": [
+      ".js"
+    ],
+    "cache": true,
+    "all": true
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm test",
+      "pre-push": "npm run lint && npm test"
+    }
+  }
+}
