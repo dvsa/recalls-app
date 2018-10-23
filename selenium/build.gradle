@@ -1,0 +1,62 @@
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
+import org.gradle.api.tasks.testing.logging.TestLogEvent
+
+group 'uk.gov.dvsa.recalls.selenium'
+version '0.1'
+
+apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'eclipse'
+apply plugin: 'idea'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile "org.seleniumhq.selenium:selenium-java:2.53.1"
+    compile "org.testng:testng:6.10"
+    compile("org.uncommons:reportng:1.1.4") {
+        exclude group: "org.testng", module: "testng"
+    }
+    compile "com.google.inject:guice:4.1.0"
+}
+
+task selenium(type: Test) {
+
+    testLogging {
+        events = [TestLogEvent.PASSED,
+                  TestLogEvent.SKIPPED,
+                  TestLogEvent.FAILED,
+                  TestLogEvent.STANDARD_OUT]
+        showStandardStreams = true
+        exceptionFormat = TestExceptionFormat.FULL
+        showExceptions = true
+        showStackTraces = true
+        showCauses = true
+
+        afterSuite { desc, result ->
+            if (!desc.parent) { // will match the outermost suite
+                def output = "Results: ${result.resultType} (${result.testCount} tests, ${result.successfulTestCount} successes, ${result.failedTestCount} failures, ${result.skippedTestCount} skipped)"
+                def startItem = '|  ', endItem = '  |'
+                def repeatLength = startItem.length() + output.length() + endItem.length()
+                println('\n' + ('-' * repeatLength) + '\n' + startItem + output + endItem + '\n' + ('-' * repeatLength))
+            }
+        }
+    }
+
+    useTestNG {
+        options ->
+            options.parallel = 'classes' //modes: methods, tests, classes or instances.
+            options.threadCount = 1
+            options.useDefaultListeners = true
+            options.listeners << 'org.uncommons.reportng.HTMLReporter'
+            options.listeners << 'org.uncommons.reportng.JUnitXMLReporter'
+    }
+
+    systemProperties = (Map<String, String>)System.getProperties().findAll {it.key.startsWith("test.")}
+}
+
+test.dependsOn selenium

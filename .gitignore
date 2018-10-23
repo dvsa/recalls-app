@@ -59,3 +59,10 @@ typings/
 
 # next.js build output
 .next
+
+#selenium
+selenium/.idea
+selenium/.gradle
+selenium/selenium.iml
+selenium/build
+
