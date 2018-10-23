@@ -9,9 +9,10 @@ module.exports = {
         'import/no-extraneous-dependencies': ['error', {
             'devDependencies': ['**/*.test.js']
         }],
-        "no-console": ["error", {
+        "no-console": ["warn", {
              allow: ["warn", "error", "info"] 
         }],
-        "no-restricted-syntax": ["warn", "WithStatement"]        
+        "no-restricted-syntax": ["warn", "WithStatement"],     
+        "prefer-destructuring": ["error", {"object": false, "array": false}]   
     }
 };

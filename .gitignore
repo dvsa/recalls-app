@@ -66,3 +66,5 @@ selenium/.gradle
 selenium/selenium.iml
 selenium/build
 
+#InitelliJ Idea
+.idea
