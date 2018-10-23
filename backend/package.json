@@ -7,10 +7,11 @@
   "description": "CVR backend lambda app, used for checking vehicle recalls",
   "main": "src/lambda.js",
   "scripts": {
-    "start": "nodemon ./src/functions/local.js",
+    "start": "nodemon ./src/scripts/local.js",
+    "debug": "nodemon --inspect-brk=9229 --nolazy ./src/scripts/local.js ",
     "test": "nyc mocha \"src/test/**/*.test.js\" --exit",
     "lint": "eslint .",
-    "build": "npm install && npm run lint && npm test && zip -r ../cvr-backend.zip * --exclude /src/test",
+    "build": "npm install && npm test && zip -r ../cvr-backend.zip * --exclude /src/test",
     "prod": "npm prune --production && npm install --production && zip -r ../cvr-backend.zip * --exclude /src/test"
   },
   "repository": {
@@ -44,8 +45,7 @@
     "functions": 60,
     "branches": 60,
     "include": [
-      "/src/*/**/*.js",
-      "src/app.js"
+      "/src/*/**/*.js"
     ],
     "exclude": [
       "src/functions/*.js",
