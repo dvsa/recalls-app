@@ -5,7 +5,7 @@ import org.testng.annotations.Test;
 import uk.gov.dvsa.recalls.base.BaseTest;
 import uk.gov.dvsa.recalls.ui.page.RecallInformationSearchPage;
 
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.assertFalse;
 
 public class RecallInformationSearchTests extends BaseTest {
 
@@ -17,6 +17,6 @@ public class RecallInformationSearchTests extends BaseTest {
         RecallInformationSearchPage recallInformationSearchPage = recalls.goToRecallInformationSearchPage();
 
         //Then I will see screen with "Continue" button
-        assertTrue(recallInformationSearchPage.continueButtonExists());
+        assertFalse(recallInformationSearchPage.continueButtonExists());
     }
 }
