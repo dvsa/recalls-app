@@ -40,16 +40,16 @@ public abstract class Page {
 
     protected void selfVerify() {
 
-        if (!getTitle().contains(getPageTitle())) {
+        if (!getTitle().contains(getExpectedPageTitle())) {
 
             throw new PageIdentityVerificationException("Page identity verification failed: " +
                     String.format("\n Expected: %s page, \n Found: %s page",
-                            getPageTitle(), getTitle())
+                            getExpectedPageTitle(), getTitle())
             );
         }
     }
 
-    protected abstract String getPageTitle();
+    protected abstract String getExpectedPageTitle();
 
     @Override
     public final String toString() {

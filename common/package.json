@@ -1,0 +1,10 @@
+{
+  "name": "cvr-common",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "test": "test"
+  },
+  "author": "",
+  "license": "MIT"
+}
