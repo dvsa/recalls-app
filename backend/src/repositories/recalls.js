@@ -14,6 +14,14 @@ class Recalls {
 
     this.dbClient.database.scan(params, callback);
   }
+
+  getAllMakes(callback) {
+    const params = {
+      TableName: this.dbClient.tableName,
+    };
+
+    this.dbClient.database.scan(params, callback);
+  }
 }
 
 module.exports = Recalls;
