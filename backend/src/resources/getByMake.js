@@ -1,5 +1,5 @@
 const Recalls = require('../repositories/recalls');
-const RecallDto = require('../../../common/dto/recall');
+const RecallDto = require('../../common/dto/recall');
 
 const recallsRepository = new Recalls();
 
