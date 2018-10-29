@@ -4,8 +4,17 @@ const router = express.Router();
 const frontendController = require('../controllers/frontendController');
 
 router.get('/recalls', (req, response) => {
-  const make = req.query.make; // TODO: amend it in BL-8752; it does not belong to the home page
-  frontendController.homePage(make, response);
+  frontendController.homePage(response);
+});
+
+router.get('/vehicle-make', (req, response) => {
+  const make = req.query.make;
+  frontendController.vehicleMake(make, response);
+});
+
+router.post('/results-page', (req, response) => {
+  const make = req.query.make;
+  frontendController.resultsPage(make, response);
 });
 
 module.exports = router;
