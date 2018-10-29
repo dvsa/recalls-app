@@ -1,7 +1,9 @@
 const AWS = require('aws-sdk');
 const envVariables = require('../config/environmentVariables');
 
-const TABLE_NAME = envVariables.tableName;
+const RECALLS_TABLE_NAME = `cvr-${envVariables.environment}-recalls`;
+const MAKES_TABLE_NAME = `cvr-${envVariables.makesTableName}-makes`;
+const MODELS_TABLE_NAME = `cvr-${envVariables.modelsTableName}-models`;
 const AWS_REGION = envVariables.awsRegion;
 
 AWS.config.update({ region: AWS_REGION });
@@ -9,7 +11,9 @@ AWS.config.update({ region: AWS_REGION });
 class DbClient {
   constructor(database) {
     this.database = database || DbClient.createDynamoDBClient();
-    this.tableName = TABLE_NAME;
+    this.recallsTable = RECALLS_TABLE_NAME;
+    this.makesTable = MAKES_TABLE_NAME;
+    this.modelsTable = MODELS_TABLE_NAME;
   }
 
   // private

@@ -1,0 +1,89 @@
+{% extends 'layouts/mts-without-container.layout.njk' %}
+{% set pageTitle = make %}
+{% set pageBreadcrumbItems = [
+{ text: 'Home', url: '/prototypes' },
+{ text: 'MOT test results', url: '/prototypes/mot-test' },
+{ text: 'Brake test' }
+] %}
+{% block content %}
+
+<main id="content">
+  <a href="vehicle-make?recallType={{recallType}}" class="link-back">Back</a>
+  <header class="content-header">
+    <h1 id="vehicle-or-component-title" class="heading-large heading heading--page-heading heading--small-margin-bottom">
+      {{ make | escape }}
+    </h1>
+  </header>
+  <p class="lede">{{foundRecallsCountHeader | safe}}</p>
+  <div class="js-accordion js-accordion--up-down-arrows js-accordion--js-enabled" role="presentation">
+    <div class="js-accordion__top-section">
+      <button class="js-accordion__expand-button">
+        Open All
+      </button>
+    </div>
+    {% for recall in recalls %}
+    <div class="js-accordion__wrapper">
+      <div class="js-accordion__section" data-section-category="category-{{loop.index}}" data-section-state-index-id="{{loop.index0}}">
+
+        <div class="js-accordion__header" role="region" aria-controls="id{{loop.index0}}" aria-expanded="false">
+          <div class="js-accordion__header-left">
+            <h2 class="js-accordion__title">
+              <button class="js-accordion__title-button">
+                {{recall.concern}}
+              </button>
+            </h2>
+            <div class="grid-row">
+              <div class="column-one-third">
+                <p class="js-accordion__description">
+                  <span class="form-hint">Recall number</span>
+                  {{recall.recallNumber}}
+                </p>
+              </div>
+              <div class="column-one-third">
+                <p class="js-accordion__description">
+                  <span class="form-hint">Recall date</span>
+                  {{recall.launchDate}}
+                </p>
+              </div>
+              <div class="column-one-third">
+              </div>
+            </div>
+          </div>
+          <div class="js-accordion__header-right">
+            <button class="js-accordion__header-icon"></button>
+          </div>
+        </div>
+
+        <div class="js-accordion__content" id="id{{loop.index0}}" aria-hidden="true">
+          <div class="grid-row">
+            <div class="column-two-thirds">
+              <header>
+                <h1 class="heading heading--small heading-small">Reason for recall</h1>
+              </header>
+              <p>{{recall.defectDescription}}</p>
+              <header>
+                <h1 class="heading heading--small heading-small">How to check if the vehicle is recalled</h1>
+              </header>
+              <p>Contact the local {{make}} dealership or manufacturer. You will not need to pay for anything involving
+                the recall.</p>
+              <header>
+                <h1 class="heading heading--small heading-small">How the manufacturer will repair</h1>
+              </header>
+              <p>{{recall.remedy}}</p>
+              <header>
+                <h1 class="heading heading--small heading-small">Number of affected vehicles</h1>
+              </header>
+              <p>{{recall.affectedVehiclesNumber}}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  <br>
+  <div>
+    <a class="button" id="search-again" href="recalls" style="margin-bottom:30px">Search again</a>
+  </div>
+</main>
+{% endblock %}
