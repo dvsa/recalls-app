@@ -1,11 +1,11 @@
 const Recalls = require('../repositories/recalls');
-const RecallDto = require('../../common/dto/recall');
+const RecallDto = require('../../../common/dto/recall');
 
 const recallsRepository = new Recalls();
 
 function getByMake(make, callback) {
   recallsRepository.getByMake(make, (err, data) => {
-    if (!err) {
+    if (err) {
       console.error(err);
       callback(err);
     } else {
