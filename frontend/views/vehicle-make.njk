@@ -1,18 +1,12 @@
 {% extends 'layouts/mts-without-container.layout.njk' %}
   {% set pageTitle = 'homepage' %}
-  {% set pageBreadcrumbItems = [
-    { text: 'Home', url: '/prototypes' },
-    { text: 'MOT test results', url: '/prototypes/mot-test' },
-    { text: 'Brake test' }
-  ] 
-  %}
 
 {% block content %}
 <main id="content">
-  <a href="/prototypes/recalls/V3/type-of-recall" class="link-back">Back</a> 
+  <a href="recalls" class="link-back">Back</a> 
     <header class="content-header">
       <h1 class="heading-large heading heading--page-heading heading--small-margin-bottom">
-        What is the vehicle make?
+ make
       </h1>
     </header>                       
 
@@ -20,10 +14,10 @@
     <div class="col-lg-12">
     <div class="grid-row">
     <div class="column-three-quarters">
-      <form method="POST" action="/results-page">
+      <form method="POST" action="results-page">
         <div class="form-group">
-          <p class="">This service only includes vehicles that have been recalled. Any vehicle not listed in this service has now had a recall announced against them in England, Scotland and Wales.</p>
-            <select class="form-control" id="select-box" name="select-box">
+          <p class="">This service only includes vehicles that have been recalled.</p>
+            <select class="form-control" id="vehicleMake" name="vehicleMake">
               <!-- TODO: load all options from the API -->
               <!-- TODO: fix indentation -->
               <option value="zero">Choose a make</option>
