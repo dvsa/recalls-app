@@ -8,12 +8,11 @@ router.get('/recalls', (req, response) => {
 });
 
 router.get('/vehicle-make', (req, response) => {
-  const make = req.query.make;
-  frontendController.vehicleMake(make, response);
+  frontendController.vehicleMake(response);
 });
 
 router.post('/results-page', (req, response) => {
-  const make = req.query.make;
+  const make = req.body.make;
   frontendController.resultsPage(make, response);
 });
 
