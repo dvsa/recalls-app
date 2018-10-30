@@ -7,8 +7,8 @@
   "description": "CVR frontend lambda app, used to render views for checking vehicle recalls",
   "main": "lambda.js",
   "scripts": {
-    "start": "nodemon ./scripts/local.js",
-    "debug": "nodemon --nolazy --inspect-brk=8228 ./scripts/local.js --ext js,njk",
+    "start": "nodemon ./scripts/local.js --watch ../common --watch ./",
+    "debug": "nodemon --nolazy --inspect-brk=8228 ./scripts/local.js --ext js,njk --watch ../common --watch ./",
     "test": "nyc mocha \"test/**/*.test.js\" --exit",
     "lint": "eslint .",
     "build": "npm install && npm run lint && npm test && zip -r ../cvr-frontend.zip * ../common --exclude /test",
@@ -26,6 +26,7 @@
   "dependencies": {
     "aws-serverless-express": "^3.3.5",
     "body-parser": "^1.18.3",
+    "cvr-common": "file:../common",
     "express": "^4.16.4",
     "nunjucks": "^3.1.3",
     "request": "^2.88.0"
