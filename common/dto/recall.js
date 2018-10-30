@@ -9,6 +9,38 @@ class RecallDto {
     this.remedy = remedy;
     this.affectedVehiclesNumber = affectedVehiclesNumber;
   }
+
+  set make(make) {
+    this.make = make;
+  }
+
+  set model(model) {
+    this.model = model;
+  }
+
+  set recallNumber(recallNumber) {
+    this.recallNumber = recallNumber;
+  }
+
+  set defectDescription(defectDescription) {
+    this.defectDescription = defectDescription;
+  }
+
+  set launchDate(launchDate) {
+    this.launchDate = launchDate;
+  }
+
+  set concern(concern) {
+    this.concern = concern;
+  }
+
+  set remedy(remedy) {
+    this.remedy = remedy;
+  }
+
+  set affectedVehiclesNumber(affectedVehiclesNumber) {
+    this.affectedVehiclesNumber = affectedVehiclesNumber;
+  }
 }
 
 module.exports = RecallDto;
