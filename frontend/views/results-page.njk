@@ -1,5 +1,5 @@
 {% extends 'layouts/mts-without-container.layout.njk' %}
- {% set pageTitle = 'homepage' %}
+ {% set pageTitle = make + " " + model %}
  {% set pageBreadcrumbItems = [
   { text: 'Home', url: '/prototypes' },
   { text: 'MOT test results', url: '/prototypes/mot-test' },
@@ -11,7 +11,7 @@
     
     <a href="vehicle-make" class="link-back">Back</a> 
      <header class="content-header">
-        <h1 class="heading-large heading heading--page-heading heading--small-margin-bottom">
+        <h1 id="vehicle-or-component-title" class="heading-large heading heading--page-heading heading--small-margin-bottom">
             {{ make }} {{ model }} 
         </h1>
     </header> 
@@ -28,7 +28,7 @@
                 
                 <div class="js-accordion__header">
                     <div class="js-accordion__header-left">
-                        <h2 class="js-accordion__title">
+                        <h2 class="js-accordion__title recall-title">
                             <button class="js-accordion__title-button">
                             {{recall.concern}}
                             </button>
