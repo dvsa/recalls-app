@@ -10,8 +10,7 @@ import static org.testng.Assert.assertTrue;
 public class RecallInformationSearchTests extends BaseTest {
 
     @Test(description = "Recalls Information Search Page exists")
-    public void recallInformationSearchPageTest()
-    {
+    public void recallInformationSearchPageTest() {
         //Given I am a user of the site
         //When I open home page
         RecallInformationSearchPage recallInformationSearchPage = recalls.goToRecallInformationSearchPage();
