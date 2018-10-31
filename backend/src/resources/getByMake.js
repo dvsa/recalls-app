@@ -1,5 +1,5 @@
+const RecallDto = require('cvr-common/dto/recall');
 const Recalls = require('../repositories/recalls');
-const RecallDto = require('../../common/dto/recall');
 
 const recallsRepository = new Recalls();
 
