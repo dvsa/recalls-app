@@ -11,8 +11,11 @@ class FrontendController {
   }
 
   static vehicleMake(response) {
-    response.render('vehicle-make.njk', {
-      assetsBaseUrl: ASSETS_BASE_URL,
+    recallSearch.fetchAllMakes((err, makes) => {
+      response.render('vehicle-make.njk', {
+        assetsBaseUrl: ASSETS_BASE_URL,
+        makes,
+      });
     });
   }
 

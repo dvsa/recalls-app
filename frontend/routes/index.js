@@ -12,7 +12,7 @@ router.get('/vehicle-make', (req, response) => {
 });
 
 router.post('/results-page', (req, response) => {
-  const make = req.body.make;
+  const make = req.body.vehicleMake;
   frontendController.resultsPage(make, response);
 });
 

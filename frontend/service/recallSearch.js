@@ -4,17 +4,30 @@ const envVariables = require('../config/environmentVariables');
 
 const RECALLS_BACKEND_URL = envVariables.recallsBackendUrl;
 const BY_MAKE_ENDPOINT = 'search-by-make';
+const FETCH_ALL_MAKES_ENDPOINT = 'fetch-all-makes';
 
 class RecallSearch {
+  static fetchAllMakes(callback) {
+    request(`${RECALLS_BACKEND_URL}/${FETCH_ALL_MAKES_ENDPOINT}`, (err, res, body) => {
+      console.info(`HTTP response status from /${FETCH_ALL_MAKES_ENDPOINT}: `, res && res.statusCode);
+
+      if (err != null) {
+        console.error(`Error while calling API /${FETCH_ALL_MAKES_ENDPOINT} `, err);
+        callback(err);
+      } else {
+        callback(null, JSON.parse(body));
+      }
+    });
+  }
+
   static byMake(make, callback) {
     request(`${RECALLS_BACKEND_URL}/${BY_MAKE_ENDPOINT}/?make=${make}`, (err, res, body) => {
-      console.info(`Requesting make from /${BY_MAKE_ENDPOINT}: `, make);
+      console.info(`HTTP response status from /${BY_MAKE_ENDPOINT} for make '${make}': `, res && res.statusCode);
+
       if (err != null) {
-        // TODO: BL-8752 Report non-200 HTTP responses
         console.error(`Error while calling API /${BY_MAKE_ENDPOINT} `, err);
         callback(err);
       }
-      console.info(`HTTP response status from /${BY_MAKE_ENDPOINT}: `, res && res.statusCode);
 
       // TODO: map the data from request body
       console.info(`requested body: ${body}`); // TODO: remove
