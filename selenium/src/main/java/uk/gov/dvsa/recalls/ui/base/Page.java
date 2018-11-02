@@ -87,4 +87,13 @@ public abstract class Page {
             return getElement(selector);
         }
     }
+
+    protected String getLinkHref(By selector) {
+
+        try {
+            return driver.findElement(selector).getAttribute("href");
+        } catch (StaleElementReferenceException ex) {
+            return getLinkHref(selector);
+        }
+    }
 }
