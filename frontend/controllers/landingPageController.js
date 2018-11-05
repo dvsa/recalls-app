@@ -1,13 +1,9 @@
 const url = require('url');
-const envVariables = require('../config/environmentVariables');
 const typeValidator = require('../validators/recallType');
-
-const ASSETS_BASE_URL = envVariables.assetsBaseUrl;
 
 class FrontendController {
   static homePage(errorMessage, response) {
     response.render('type-of-recall.njk', {
-      assetsBaseUrl: ASSETS_BASE_URL,
       errorMessage,
     });
   }

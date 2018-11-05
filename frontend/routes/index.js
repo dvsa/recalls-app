@@ -30,4 +30,12 @@ router.get('/results-page', (req, response) => {
   resultsController.resultsPage(make, response);
 });
 
+router.get('/cookies', (req, response) => {
+  frontendController.cookies(response);
+});
+
+router.get('/terms-and-conditions', (req, response) => {
+  frontendController.termsAndConditions(response);
+});
+
 module.exports = router;
