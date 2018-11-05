@@ -10,7 +10,7 @@ function getAllMakes(type, callback) {
       callback(err);
     } else {
       console.log(data);
-      const makes = data.Items;
+      const makes = data.Item.makes;
       console.log('Filtered makes:');
       console.log(makes);
       callback(null, makes);
