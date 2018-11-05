@@ -8,4 +8,12 @@ router.get('/recalls', (req, response) => {
   frontendController.homePage(make, response);
 });
 
+router.get('/cookies', (req, response) => {
+  frontendController.cookies(response);
+});
+
+router.get('/terms-and-conditions', (req, response) => {
+  frontendController.termsAndConditions(response);
+});
+
 module.exports = router;
