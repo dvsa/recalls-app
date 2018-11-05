@@ -1,12 +1,11 @@
 const express = require('express');
 
 const router = express.Router();
-const envVariables = require('../config/environmentVariables');
+const frontendController = require('../controllers/frontendController');
 
-const ASSETS_BASE_URL = envVariables.assetsBaseUrl;
-
-router.get('/recalls', (req, res) => {
-  res.render('type-of-recall.njk', { assetsBaseUrl: ASSETS_BASE_URL });
+router.get('/recalls', (req, response) => {
+  const make = req.query.make; // TODO: amend it in BL-8752; it does not belong to the home page
+  frontendController.homePage(make, response);
 });
 
 module.exports = router;

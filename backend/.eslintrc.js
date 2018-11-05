@@ -10,9 +10,8 @@ module.exports = {
             'devDependencies': ['**/*.test.js']
         }],
         "no-console": ["warn", {
-             allow: ["warn", "error", "info"] 
+             allow: ["warn", "error", "info"]
         }],
-        "no-restricted-syntax": ["warn", "WithStatement"],     
-        "prefer-destructuring": ["error", {"object": false, "array": false}]   
+        "no-restricted-syntax": ["warn", "WithStatement"]
     }
 };
