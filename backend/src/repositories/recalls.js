@@ -7,7 +7,7 @@ class Recalls {
 
   getByMake(make, callback) {
     const params = {
-      TableName: this.dbClient.tableName,
+      TableName: this.dbClient.recallsTable,
       FilterExpression: 'make = :make',
       ExpressionAttributeValues: { ':make': make },
     };
@@ -17,7 +17,7 @@ class Recalls {
 
   getAllMakes(type, callback) {
     const params = {
-      TableName: this.dbClient.tableName,
+      TableName: this.dbClient.makesTable,
       Key: {
         HashKey: type
       }
