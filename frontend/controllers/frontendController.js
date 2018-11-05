@@ -5,13 +5,15 @@ const ASSETS_BASE_URL = envVariables.assetsBaseUrl;
 
 class FrontendController {
   static homePage(response) {
+    // TODO: if validation was successful, redirect to the next page,
+    // otherwise display this page again (with errors)
     response.render('type-of-recall.njk', {
       assetsBaseUrl: ASSETS_BASE_URL,
     });
   }
 
-  static vehicleMake(response) {
-    recallSearch.fetchAllMakes((err, makes) => {
+  static vehicleMake(recallType, response) {
+    recallSearch.fetchAllMakes(recallType, (err, makes) => {
       response.render('vehicle-make.njk', {
         assetsBaseUrl: ASSETS_BASE_URL,
         makes,

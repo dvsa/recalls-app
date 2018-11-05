@@ -19,7 +19,7 @@ class Recalls {
     const params = {
       TableName: this.dbClient.makesTable,
       Key: {
-        HashKey: type
+        type: type
       }
     };
 

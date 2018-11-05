@@ -8,7 +8,8 @@ router.get('/recalls', (req, response) => {
 });
 
 router.get('/vehicle-make', (req, response) => {
-  frontendController.vehicleMake(response);
+  const recallType = req.body.recallType;
+  frontendController.vehicleMake(recallType, response);
 });
 
 router.post('/results-page', (req, response) => {
