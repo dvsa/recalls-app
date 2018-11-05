@@ -1,4 +1,4 @@
-class FrontendController {
+class FooterController {
   static cookies(response) {
     response.render('cookies.njk');
   }
@@ -8,4 +8,4 @@ class FrontendController {
   }
 }
 
-module.exports = FrontendController;
+module.exports = FooterController;

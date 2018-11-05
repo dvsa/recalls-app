@@ -1,6 +1,7 @@
 const express = require('express');
 
 const router = express.Router();
+const footerController = require('../controllers/footerController');
 const landingPageController = require('../controllers/landingPageController');
 const vehicleMakeController = require('../controllers/vehicleMakeController');
 const resultsController = require('../controllers/resultsController');
@@ -31,11 +32,11 @@ router.get('/results-page', (req, response) => {
 });
 
 router.get('/cookies', (req, response) => {
-  frontendController.cookies(response);
+  footerController.cookies(response);
 });
 
 router.get('/terms-and-conditions', (req, response) => {
-  frontendController.termsAndConditions(response);
+  footerController.termsAndConditions(response);
 });
 
 module.exports = router;
