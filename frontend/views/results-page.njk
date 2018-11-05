@@ -8,27 +8,27 @@
  {% block content %}
 <!-- TODO: fix indentation -->
  <main id="content">
-    
-    <a href="vehicle-make" class="link-back">Back</a> 
+
+    <a href="vehicle-make" class="link-back">Back</a>
      <header class="content-header">
         <h1 id="vehicle-or-component-title" class="heading-large heading heading--page-heading heading--small-margin-bottom">
-            {{ make }} {{ model }} 
+            {{ make }} {{ model }}
         </h1>
-    </header> 
-     <p class="lede"> This vehicle has <strong>{{recallsNumber}} recall(s).</strong></p>                       
-         <div class="js-accordion js-accordion--up-down-arrows">
-  <div class="js-accordion__top-section">
-    <button class="js-accordion__expand-button">
-      Open All
-    </button>
-  </div>
+    </header>
+     <p class="lede"> This vehicle has <strong>{{recallsNumber}} recall(s).</strong></p>
+         <div class="js-accordion js-accordion--up-down-arrows js-accordion--js-enabled" role="presentation">
+            <div class="js-accordion__top-section">
+              <button class="js-accordion__expand-button">
+                Open All
+              </button>
+            </div>
         {% for recall in recalls %}
         <div class="js-accordion__wrapper">
-            <div class="js-accordion__section" data-section-category="category-one">
-                
-                <div class="js-accordion__header">
+            <div class="js-accordion__section" data-section-category="category-{{loop.index}}" data-section-state-index-id="{{loop.index0}}">
+
+                <div class="js-accordion__header" role="region" aria-controls="id{{loop.index0}}" aria-expanded="false">
                     <div class="js-accordion__header-left">
-                        <h2 class="js-accordion__title recall-title">
+                        <h2 class="js-accordion__title">
                             <button class="js-accordion__title-button">
                             {{recall.concern}}
                             </button>
@@ -54,8 +54,8 @@
                         <button class="js-accordion__header-icon"></button>
                     </div>
                 </div>
-                
-                <div class="js-accordion__content">
+
+                <div class="js-accordion__content" id="id{{loop.index0}}" aria-hidden="true">
                     <div class="grid-row">
                         <div class="column-two-thirds">
                             <header>
@@ -80,9 +80,10 @@
                  </div>
             </div>
             {% endfor %}
+        </div>
         <br>
         <div>
             <a class="button" id="search-again" href="recalls" style="margin-bottom:30px">Search again</a>
         </div>
  </main>
- {% endblock %} 
+ {% endblock %}
