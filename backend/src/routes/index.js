@@ -21,7 +21,7 @@ router.get('/search-by-make', (req, res) => {
 });
 
 router.get('/fetch-all-makes', (req, res) => {
-  getAllMakes((err, data) => {
+  getAllMakes(req.query.type, (err, data) => {
     if (err) {
       console.error(err);
       res.status(500).json(err).end();

@@ -15,12 +15,15 @@ class Recalls {
     this.dbClient.database.scan(params, callback);
   }
 
-  getAllMakes(callback) {
+  getAllMakes(type, callback) {
     const params = {
       TableName: this.dbClient.tableName,
+      Key: {
+        HashKey: type
+      }
     };
 
-    this.dbClient.database.scan(params, callback);
+    this.dbClient.database.get(params, callback);
   }
 }
 
