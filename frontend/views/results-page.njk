@@ -15,7 +15,7 @@
             {{ make }} {{ model }}
         </h1>
     </header>
-     <p class="lede"> This vehicle has <strong>{{recallsNumber}} recall(s).</strong></p>
+     <p class="lede">{{foundRecallsCountHeader | safe}}</p>
          <div class="js-accordion js-accordion--up-down-arrows js-accordion--js-enabled" role="presentation">
             <div class="js-accordion__top-section">
               <button class="js-accordion__expand-button">
