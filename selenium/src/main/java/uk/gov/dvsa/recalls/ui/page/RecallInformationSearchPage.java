@@ -9,6 +9,8 @@ import uk.gov.dvsa.recalls.ui.base.Page;
 public class RecallInformationSearchPage extends Page {
 
     private static final String CONTINUE_BUTTON_ID = "continue-button";
+    private static final String CSV_DATA_LINK_ID = "csv-data-link";
+    private static final String DATA_GUIDE_LINK_ID = "data-guide-link";
 
     @Override
     protected String getPageTitle() {
@@ -18,5 +20,25 @@ public class RecallInformationSearchPage extends Page {
     public boolean continueButtonExists()
     {
         return isElementVisible(By.id(CONTINUE_BUTTON_ID));
+    }
+
+    public boolean csvDataLinkExists()
+    {
+        return isElementVisible(By.id(CSV_DATA_LINK_ID));
+    }
+
+    public String getCsvDataLink()
+    {
+        return getLinkHref(By.id(CSV_DATA_LINK_ID));
+    }
+
+    public boolean dataGuideLinkExists()
+    {
+        return isElementVisible(By.id(DATA_GUIDE_LINK_ID));
+    }
+
+    public String getDataGuideLink()
+    {
+        return getLinkHref(By.id(DATA_GUIDE_LINK_ID));
     }
 }
