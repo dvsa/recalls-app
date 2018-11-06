@@ -124,7 +124,6 @@ public class DriverFactory {
             switch (configurator.getBrowser()) {
                 case FIREFOX: {
                     FirefoxProfile profile = new FirefoxProfile();
-                    // TODO: Remove the disabling of the redirect prompt when the mock payment gateway is fixed
                     profile.setPreference("network.http.prompt-temp-redirect", false);
                     profile.setPreference("javascript.enabled", configurator.getJavascriptStatus());
                     capability.setCapability(FirefoxDriver.PROFILE, profile);
@@ -177,7 +176,6 @@ public class DriverFactory {
                 capability = DesiredCapabilities.firefox();
 
                 FirefoxProfile profile = new FirefoxProfile();
-                // TODO: Remove the disabling of the redirect prompt when the mock payment gateway is fixed
                 profile.setPreference("network.http.prompt-temp-redirect", false);
                 profile.setPreference("javascript.enabled", javascriptEnabled);
                 capability.setCapability(FirefoxDriver.PROFILE, profile);

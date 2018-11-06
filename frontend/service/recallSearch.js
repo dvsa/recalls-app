@@ -8,6 +8,7 @@ const FETCH_ALL_MAKES_ENDPOINT = 'fetch-all-makes';
 
 class RecallSearch {
   static fetchAllMakes(type, callback) {
+    // TODO: encode/decode recall type in URL?
     request(`${RECALLS_BACKEND_URL}/${FETCH_ALL_MAKES_ENDPOINT}?type=${type}`, (err, res, body) => {
       console.info(`HTTP response status from /${FETCH_ALL_MAKES_ENDPOINT} for ${type}: `, res && res.statusCode);
 
@@ -29,14 +30,13 @@ class RecallSearch {
         callback(err);
       }
 
-      // TODO: map the data from request body
       console.info(`requested body: ${body}`); // TODO: remove
       let recalls = [
-        new RecallDto('Audi', 'A6', 'recallNumber', 'defectDesc', 'launchDate', 'concern', 'remedy', '999'), // TODO: remove
-        new RecallDto('Make2', 'Model2', 'recallNumber2', 'defectDesc2', 'launchDate2', 'concern2', 'remedy2', '9999'), // TODO: remove
+        // TODO: remove adding dummy data to real recalls
+        new RecallDto('Audi', 'A6', 'recallNumber', 'defectDesc', 'launchDate', 'concern', 'remedy', '999'),
+        new RecallDto('Make2', 'Model2', 'recallNumber2', 'defectDesc2', 'launchDate2', 'concern2', 'remedy2', '9999'),
       ];
 
-      // TODO: remove adding dummy data to real recalls
       recalls = recalls.concat(this.mapRecallsToDto(body));
 
       callback(null, recalls);

@@ -5,24 +5,7 @@ const envVariables = require('../config/environmentVariables');
 const ASSETS_BASE_URL = envVariables.assetsBaseUrl;
 const FOUND_RECALLS_COUNT_HEADER = 'This vehicle has <strong>[num] recall{s}.</strong>';
 
-class FrontendController {
-  static homePage(response) {
-    // TODO: if validation was successful, redirect to the next page,
-    // otherwise display this page again (with errors)
-    response.render('type-of-recall.njk', {
-      assetsBaseUrl: ASSETS_BASE_URL,
-    });
-  }
-
-  static vehicleMake(recallType, response) {
-    recallSearch.fetchAllMakes(recallType, (err, makes) => {
-      response.render('vehicle-make.njk', {
-        assetsBaseUrl: ASSETS_BASE_URL,
-        makes,
-      });
-    });
-  }
-
+class ResultsController {
   static resultsPage(make, response) {
     recallSearch.byMake(make, (err, recalls) => {
       const thisMake = recalls[0].make; // TODO: check errors/nulls
@@ -35,10 +18,10 @@ class FrontendController {
         make: thisMake,
         model,
         foundRecallsCountHeader,
-        recalls, // TODO: BL-8752 pass this response to a new page
+        recalls,
       });
     });
   }
 }
 
-module.exports = FrontendController;
+module.exports = ResultsController;

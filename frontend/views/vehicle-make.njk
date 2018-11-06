@@ -1,40 +1,56 @@
 {% extends 'layouts/mts-without-container.layout.njk' %}
-  {% set pageTitle = 'What make is the vehicle?' %}
+{% set pageTitle = 'What make is the vehicle?' %}
 
 {% block content %}
 <main id="content">
-  <a href="recalls" class="link-back">Back</a> 
-    <header class="content-header">
-      <h1 class="heading-large heading heading--page-heading heading--small-margin-bottom">
-        What make is the vehicle?
-      </h1>
-    </header>                       
+  <a href="recalls" class="link-back">Back</a>
 
-    <div class="row contents">
+  {% if errorMessage %}
+  {# TODO: move to a partial #}
+  <div class="error-summary" role="alert" aria-labelledby="error-summary-example-heading-one" tabindex="-1">
+    <h2 class="heading-medium error-summary-heading" id="error-summary-example-heading-one">
+      There was a problem
+    </h2>
+    <ul class="error-summary-list">
+      <li>
+        <a href="#make">
+          {{ errorMessage }}
+        </a>
+      </li>
+    </ul>
+  </div>
+  {% endif %}
+
+  <header class="content-header">
+    <h1 class="heading-large heading heading--page-heading heading--small-margin-bottom">
+      What make is the vehicle?
+    </h1>
+  </header>
+
+  <div class="row contents">
     <div class="col-lg-12">
-    <div class="grid-row">
-    <div class="column-three-quarters">
-      <form method="POST" action="results-page">
-        <div class="form-group">
-          <p class="">This service only includes vehicles that have been recalled.</p>
-            <select class="form-control" id="vehicleMake" name="vehicleMake">
-              <!-- TODO: load all options from the API -->
-              <!-- TODO: fix indentation -->
-              <option value="zero">Choose a make</option>
-              <option value="Alfa Romeo">Alfa Romeo</option>
-              <option value="bentley">Bentley</option>
-              <option value="BMW">BMW</option>
-              <option value="honda">Honda</option>
-              {% for make in makes %}
+      <div class="grid-row">
+        <div class="column-three-quarters">
+          <form method="POST" action="vehicle-make">
+            <div class="form-group">
+              <p class="">This service only includes vehicles that have been recalled.</p>
+              <select class="form-control" id="make" name="make">
+                <option value="">Choose a make</option>
+                <!-- TODO: remove the hardcoded options -->
+                <option value="Alfa Romeo">Alfa Romeo</option>
+                <option value="bentley">Bentley</option>
+                <option value="BMW">BMW</option>
+                <option value="honda">Honda</option>
+                {% for make in makes %}
                 <option value="{{make}}">{{make}}</option>
-              {% endfor %}
-            </select>
-          </div>
-        <div>
-          <input id="continue-button" class="button" type="submit" value="Continue" style="margin-top:30px">
+                {% endfor %}
+              </select>
+            </div>
+            <div>
+              <input id="continue-button" class="button" type="submit" value="Continue" style="margin-top:30px">
+            </div>
+          </form>
         </div>
-      </form>
-     </div>
-</div>            
+      </div>
 </main>
- {% endblock %} 
+{% endblock %}

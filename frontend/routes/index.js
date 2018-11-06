@@ -1,20 +1,33 @@
 const express = require('express');
 
 const router = express.Router();
-const frontendController = require('../controllers/frontendController');
+const landingPageController = require('../controllers/landingPageController');
+const vehicleMakeController = require('../controllers/vehicleMakeController');
+const resultsController = require('../controllers/resultsController');
 
 router.get('/recalls', (req, response) => {
-  frontendController.homePage(response);
+  landingPageController.homePage(null, response);
+});
+
+router.post('/recalls', (req, response) => {
+  const recallType = req.body.recallType;
+  landingPageController.submitRecallType(req, response, recallType);
 });
 
 router.get('/vehicle-make', (req, response) => {
   const recallType = req.query.recallType;
-  frontendController.vehicleMake(recallType, response);
+  vehicleMakeController.makesList(null, response, recallType);
 });
 
-router.post('/results-page', (req, response) => {
-  const make = req.body.vehicleMake;
-  frontendController.resultsPage(make, response);
+router.post('/vehicle-make', (req, response) => {
+  const recallType = req.query.recallType;
+  const make = req.body.make;
+  vehicleMakeController.submitMake(make, recallType, response);
+});
+
+router.get('/results-page', (req, response) => {
+  const make = req.query.make;
+  resultsController.resultsPage(make, response);
 });
 
 module.exports = router;

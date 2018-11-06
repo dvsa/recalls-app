@@ -57,6 +57,7 @@
       "routes/*.js",
       "service/*.js",
       "controllers/*.js",
+      "validators/*.js",
       "test/*.js",
       "test/*/*.js"
     ],
