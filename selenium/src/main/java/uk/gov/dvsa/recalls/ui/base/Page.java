@@ -19,6 +19,12 @@ public abstract class Page {
     @FindBy(tagName = "h1")
     protected WebElement title;
 
+    @FindBy(id = "cookies-link")
+    protected WebElement cookiesLink;
+
+    @FindBy(id = "terms-and-conditions-link")
+    protected WebElement termsAndConditionsLink;
+
     public Page() {
 
         this.driver = WebDriverConfiguratorRegistry.get().getDriver();
