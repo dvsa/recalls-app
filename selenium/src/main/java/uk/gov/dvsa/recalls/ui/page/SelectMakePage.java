@@ -11,7 +11,7 @@ import uk.gov.dvsa.recalls.ui.base.Page;
 public class SelectMakePage extends Page {
 
     @FindBy(id = "continue-button") private WebElement continueButton;
-    @FindBy(id = "vehicleMake") private WebElement vehicleMakeDropdown;
+    @FindBy(id = "make") private WebElement vehicleMakeDropdown;
 
     @Override
     protected String getPageTitle() {
