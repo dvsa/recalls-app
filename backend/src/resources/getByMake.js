@@ -14,7 +14,7 @@ function mapToRecallList(resultList) {
       resultList[i].launch_date,
       resultList[i].concern,
       resultList[i].remedy,
-      resultList[i].vehicle_number
+      resultList[i].vehicle_number,
     );
     recallList.push(recall);
   }
