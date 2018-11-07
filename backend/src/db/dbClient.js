@@ -2,8 +2,8 @@ const AWS = require('aws-sdk');
 const envVariables = require('../config/environmentVariables');
 
 const RECALLS_TABLE_NAME = `cvr-${envVariables.environment}-recalls`;
-const MAKES_TABLE_NAME = `cvr-${envVariables.makesTableName}-makes`;
-const MODELS_TABLE_NAME = `cvr-${envVariables.modelsTableName}-models`;
+const MAKES_TABLE_NAME = `cvr-${envVariables.environment}-makes`;
+const MODELS_TABLE_NAME = `cvr-${envVariables.environment}-models`;
 const AWS_REGION = envVariables.awsRegion;
 
 AWS.config.update({ region: AWS_REGION });
