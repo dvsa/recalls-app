@@ -8,7 +8,7 @@ const FETCH_ALL_MAKES_ENDPOINT = 'fetch-all-makes';
 
 class RecallSearch {
   static fetchAllMakes(type, callback) {
-    request(`${RECALLS_BACKEND_URL}/${FETCH_ALL_MAKES_ENDPOINT}?type=${type}`, (err, res, body) => {
+    request.get(`${RECALLS_BACKEND_URL}/${FETCH_ALL_MAKES_ENDPOINT}?type=${type}`, (err, res, body) => {
       console.info(`HTTP response status from /${FETCH_ALL_MAKES_ENDPOINT} for ${type}: `, res && res.statusCode);
 
       if (err != null) {
@@ -21,7 +21,7 @@ class RecallSearch {
   }
 
   static byMake(make, callback) {
-    request(`${RECALLS_BACKEND_URL}/${BY_MAKE_ENDPOINT}?make=${make}`, (err, res, body) => {
+    request.get(`${RECALLS_BACKEND_URL}/${BY_MAKE_ENDPOINT}?make=${make}`, (err, res, body) => {
       console.info(`HTTP response status from /${BY_MAKE_ENDPOINT} for make '${make}': `, res && res.statusCode);
 
       if (err != null) {

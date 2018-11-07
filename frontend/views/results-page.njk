@@ -1,12 +1,7 @@
 {% extends 'layouts/mts-without-container.layout.njk' %}
 {% set pageTitle = make %}
-{% set pageBreadcrumbItems = [
-{ text: 'Home', url: '/prototypes' },
-{ text: 'MOT test results', url: '/prototypes/mot-test' },
-{ text: 'Brake test' }
-] %}
-{% block content %}
 
+{% block content %}
 <main id="content">
   <a href="vehicle-make?recallType={{recallType}}" class="link-back">Back</a>
   <header class="content-header">
