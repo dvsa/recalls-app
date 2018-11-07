@@ -13,7 +13,7 @@ public class SearchByMakeTests extends BaseTest {
 
     @Test(description = "User can check recalls for a vehicle of particular make")
     public void searchByMakeTest() {
-        String make = "land rover";
+        String make = "LAND ROVER";
         String expectedRecallTitle = "front passenger airbag may not deploy";
 
         //Given I am a user of the site and I want to check vehicle recalls

@@ -12,6 +12,7 @@ router.get('/*', (req, res, next) => {
 router.get('/search-by-make', (req, res) => {
   getByMake(req.query.make, (err, data) => {
     if (err) {
+      console.error(`Error when searching by make for the following data: ${data}`);
       console.error(err);
       res.status(500).json(err).end();
     } else {

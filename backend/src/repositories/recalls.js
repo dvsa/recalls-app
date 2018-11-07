@@ -12,6 +12,8 @@ class RecallsRepository {
       ExpressionAttributeValues: { ':make': make },
     };
 
+    console.log(`DB request params: ${params}`);
+
     this.dbClient.database.scan(params, callback);
   }
 
