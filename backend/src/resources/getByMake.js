@@ -5,7 +5,7 @@ const recallsRepository = new RecallsRepository();
 
 function mapToRecallList(resultList) {
   const recallList = [];
-  for (let i = 0; i < resultList.length; i + 1) {
+  for (let i = 0; i < resultList.length; i += 1) {
     const recall = new RecallDto(
       resultList[i].make,
       resultList[i].model,
