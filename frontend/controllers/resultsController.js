@@ -3,6 +3,9 @@ const pluralForm = require('../service/pluralForm');
 const envVariables = require('../config/environmentVariables');
 
 const ASSETS_BASE_URL = envVariables.assetsBaseUrl;
+const FOUND_RECALLS_COUNT_HEADER_VEHICLE = 'This vehicle has <strong>[num] recall{s}.</strong>';
+const FOUND_RECALLS_COUNT_HEADER_EQUIPMENT = 'This equipment has <strong>[num] recall{s}.</strong>';
+
 class ResultsController {
   static resultsPage(make, recallType, response) {
     recallSearch.byMake(make, (err, recalls) => {
@@ -25,7 +28,7 @@ class ResultsController {
   }
 
   static getRecallsCountHeader(recallType) {
-    return `This ${recallType} has <strong>[num] recall{s}.</strong>`;
+    return (recallType === 'equipment') ? FOUND_RECALLS_COUNT_HEADER_EQUIPMENT : FOUND_RECALLS_COUNT_HEADER_VEHICLE;
   }
 }
 
