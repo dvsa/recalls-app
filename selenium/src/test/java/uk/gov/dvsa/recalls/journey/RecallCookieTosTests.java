@@ -3,7 +3,6 @@ package uk.gov.dvsa.recalls.journey;
 import org.testng.annotations.Test;
 import uk.gov.dvsa.recalls.base.BaseTest;
 import uk.gov.dvsa.recalls.ui.page.CookiesPage;
-import uk.gov.dvsa.recalls.ui.page.RecallInformationSearchPage;
 import uk.gov.dvsa.recalls.ui.page.TermsAndConditionsPage;
 
 import static org.testng.Assert.assertEquals;
@@ -15,11 +14,8 @@ public class RecallCookieTosTests extends BaseTest {
 
         //Given I am a user of the site
         //When I open home page
-        RecallInformationSearchPage recallInformationSearchPage = recalls.goToRecallInformationSearchPage();
-
-        //Given I am a user of the site
-        //When I click the cookies link in footer of the page
-        CookiesPage cookiesPage = recallInformationSearchPage.clickCookiesLink();
+        //And I click the cookies link in footer of the page
+        CookiesPage cookiesPage =  recalls.goToRecallInformationSearchPage().clickCookiesLink();
 
         //Then I am taken to the cookies page
         assertEquals(cookiesPage.getTitle(), "Cookie policy", "Cookies page is not returned");
@@ -30,11 +26,8 @@ public class RecallCookieTosTests extends BaseTest {
 
         //Given I am a user of the site
         //When I open home page
-        RecallInformationSearchPage recallInformationSearchPage = recalls.goToRecallInformationSearchPage();
-
-        //Given I am a user of the site
-        //When I click the terms and conditions link in footer of the page
-        TermsAndConditionsPage termsAndConditionsPage = recallInformationSearchPage.clickTermsAndConditionsLink();
+        //And I click the terms and conditions link in footer of the page
+        TermsAndConditionsPage termsAndConditionsPage = recalls.goToRecallInformationSearchPage().clickTermsAndConditionsLink();
 
         //Then I am taken to the terms and conditions page
         assertEquals(termsAndConditionsPage.getTitle(), "Terms and conditions", "Terms and conditions page is not returned");
