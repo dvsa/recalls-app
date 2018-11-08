@@ -41,4 +41,16 @@ public class RecallInformationSearchPage extends Page {
     {
         return getLinkHref(By.id(DATA_GUIDE_LINK_ID));
     }
+
+    public CookiesPage clickCookiesLink()
+    {
+        cookiesLink.click();
+        return new CookiesPage();
+    }
+
+    public TermsAndConditionsPage clickTermsAndConditionsLink()
+    {
+        termsAndConditionsLink.click();
+        return new TermsAndConditionsPage();
+    }
 }
