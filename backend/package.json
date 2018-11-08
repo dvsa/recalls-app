@@ -4,7 +4,7 @@
     "node": "=8.10.0"
   },
   "version": "0.1.0",
-  "description": "A CVR backend lambda app, used for checking vehicle recalls",
+  "description": "Aa CVR backend lambda app, used for checking vehicle recalls",
   "main": "src/lambda.js",
   "scripts": {
     "start": "nodemon ./src/scripts/local.js --watch ../common --watch ./",
