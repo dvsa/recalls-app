@@ -4,7 +4,7 @@
     "node": "=8.10.0"
   },
   "version": "0.1.0",
-  "description": "CVR frontend lambda app, used to render views for checking vehicle recalls",
+  "description": "A CVR frontend lambda app, used to render views for checking vehicle recalls",
   "main": "lambda.js",
   "scripts": {
     "start": "nodemon ./scripts/local.js --watch ../common --watch ./",
