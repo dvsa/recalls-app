@@ -4,7 +4,6 @@ const ENVIRONMENT = process.env.ENVIRONMENT;
 const RECALLS_TABLE_NAME = `cvr-${ENVIRONMENT}-recalls`;
 const MAKES_TABLE_NAME = `cvr-${ENVIRONMENT}-makes`;
 const MODELS_TABLE_NAME = `cvr-${ENVIRONMENT}-models`;
-console.info(MAKES_TABLE_NAME);
 
 AWS.config.update({ region: process.env.AWS_REGION });
 
@@ -14,8 +13,8 @@ const vehicleMakes = [];
 const equipmentMakes = [];
 const models = new Map();
 
-function setNullIfEmptyString(string) {
-  return (string === '' || !string) ? null : string;
+function escapeStringOrSetSpaceIfEmpty(string) {
+  return (string === '' || !string) ? ' ' : string.trim();
 }
 
 function mapRecallNumberToRecallType(recallNumber) {
@@ -40,25 +39,25 @@ function addToMapIfNotYetExists(map, key, value) {
 
 function Recall(launchDate, recallNumber, make, concern, defect, remedy, vehicleNumber, model, vinStart, vinEnd, buildStart, buildEnd) {
   this.recallType = mapRecallNumberToRecallType(recallNumber);
-  this.launchDate = setNullIfEmptyString(launchDate);
-  this.recallNumber = setNullIfEmptyString(recallNumber);
-  this.make = setNullIfEmptyString(make);
-  this.concern = setNullIfEmptyString(concern);
-  this.defect = setNullIfEmptyString(defect);
-  this.remedy = setNullIfEmptyString(remedy);
-  this.vehicleNumber = setNullIfEmptyString(vehicleNumber);
-  this.model = setNullIfEmptyString(model);
-  this.vinStart = setNullIfEmptyString(vinStart);
-  this.vinEnd = setNullIfEmptyString(vinEnd);
-  this.buildStart = setNullIfEmptyString(buildStart);
-  this.buildEnd = setNullIfEmptyString(buildEnd);
+  this.launchDate = escapeStringOrSetSpaceIfEmpty(launchDate);
+  this.recallNumber = escapeStringOrSetSpaceIfEmpty(recallNumber);
+  this.make = escapeStringOrSetSpaceIfEmpty(make);
+  this.concern = escapeStringOrSetSpaceIfEmpty(concern);
+  this.defect = escapeStringOrSetSpaceIfEmpty(defect);
+  this.remedy = escapeStringOrSetSpaceIfEmpty(remedy);
+  this.vehicleNumber = escapeStringOrSetSpaceIfEmpty(vehicleNumber);
+  this.model = escapeStringOrSetSpaceIfEmpty(model);
+  this.vinStart = escapeStringOrSetSpaceIfEmpty(vinStart);
+  this.vinEnd = escapeStringOrSetSpaceIfEmpty(vinEnd);
+  this.buildStart = escapeStringOrSetSpaceIfEmpty(buildStart);
+  this.buildEnd = escapeStringOrSetSpaceIfEmpty(buildEnd);
 
   if (this.recallType == 'vehicle') {
-    addToArrayIfNotYetExists(vehicleMakes, make);
-    addToMapIfNotYetExists(models, 'vehicle-' + make, model);
+    addToArrayIfNotYetExists(vehicleMakes, this.make);
+    addToMapIfNotYetExists(models, 'vehicle-' + this.make, this.model);
   } else {
     addToArrayIfNotYetExists(equipmentMakes, make);
-    addToMapIfNotYetExists(models, 'equipment-' + make, model);
+    addToMapIfNotYetExists(models, 'equipment-' + this.make, this.model);
   }
 }
 
@@ -89,42 +88,43 @@ CSV.fromPath('../documents/RecallsFile.csv')
         'vin_end': recall.vinEnd,
         'build_start': recall.buildStart,
         'build_end': recall.buildEnd
-      }
+      },
+      ReturnConsumedCapacity: 'TOTAL'
     };
     documentClient.put(recallsParams, function(err, data) {
       if (err) {
         console.error('Unable to add recall ', recall.recallType, '. Error JSON:', JSON.stringify(err, null, 2));
         return process.exit(1);
+      } else {
+        console.info(data);
       }
     });
   });
 
   // Insert makes to the db
-  const makesParams = {
-    RequestItems: {
-      MAKES_TABLE_NAME: [
-        {
-          PutRequest: {
-            Item: {
-              'type': 'vehicle',
-              'makes': vehicleMakes.sort()
-            }
-          }
-        },
-        {
-          PutRequest: {
-            Item: {
-              'type': 'equipment',
-              'makes': equipmentMakes.sort()
-            }
-          }
-        }
-      ]
+  const vehicleMakesParams = {
+    TableName: MAKES_TABLE_NAME,
+    Item: {
+      'type': 'vehicle',
+      'makes': vehicleMakes.sort()
     }
   };
-  documentClient.batchWrite(makesParams, function(err, data) {
+  const equipmentMakesParams = {
+    TableName: MAKES_TABLE_NAME,
+    Item: {
+      'type': 'equipment',
+      'makes': equipmentMakes.sort()
+    }
+  };
+  documentClient.put(vehicleMakesParams, (err, data) => {
     if (err) {
-      console.error('Unable to add makes. Error JSON:', JSON.stringify(err, null, 2));
+      console.error('Unable to add equipment make. Error JSON:', JSON.stringify(err, null, 2));
+      return process.exit(1);
+    }
+  });
+  documentClient.put(equipmentMakesParams, (err, data) => {
+    if (err) {
+      console.error('Unable to add vehicle make. Error JSON:', JSON.stringify(err, null, 2));
       return process.exit(1);
     }
   });
