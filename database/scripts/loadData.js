@@ -62,7 +62,7 @@ function Recall(launchDate, recallNumber, make, concern, defect, remedy, vehicle
 }
 
 // Read csv file and save it as an array of Recalls
-CSV.fromPath('../documents/RecallsFile.csv')
+CSV.fromPath('../documents/RecallsFileSmall.csv')
 .on('data', function(line) {
   if (line[0] != 'Launch Date') {
     recallData.push(new Recall(line[0], line[1], line[2], line[4], line[5], line[6], line[7], line[9], line[10], line[11], line[12], line[13]));
