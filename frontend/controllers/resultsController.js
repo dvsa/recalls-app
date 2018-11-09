@@ -1,8 +1,6 @@
 const recallSearch = require('../service/recallSearch');
 const pluralForm = require('../service/pluralForm');
-const envVariables = require('../config/environmentVariables');
 
-const ASSETS_BASE_URL = envVariables.assetsBaseUrl;
 const FOUND_RECALLS_COUNT_HEADER_VEHICLE = 'This vehicle has <strong>[num] recall{s}.</strong>';
 const FOUND_RECALLS_COUNT_HEADER_EQUIPMENT = 'This equipment has <strong>[num] recall{s}.</strong>';
 
@@ -17,7 +15,6 @@ class ResultsController {
           .getSingularOrPlural(recallsCountHeader, recalls.length);
 
         response.render('results-page.njk', {
-          assetsBaseUrl: ASSETS_BASE_URL,
           make,
           foundRecallsCountHeader,
           recallType,
