@@ -5,7 +5,7 @@ import uk.gov.dvsa.recalls.ui.base.Page;
 public class CookiesPage extends Page {
 
     @Override
-    protected String getPageTitle() {
+    protected String getExpectedPageTitle() {
 
         return "Cookie policy";
     }
