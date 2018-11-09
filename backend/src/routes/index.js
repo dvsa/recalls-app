@@ -1,8 +1,10 @@
 const express = require('express');
-const getByMake = require('../resources/getByMake');
-const getAllMakes = require('../resources/getAllMakes');
+const RecallsRepository = require('../repositories/recalls');
+const RecallsResource = require('../resources/recalls');
+const MakesResource = require('../resources/makes');
 
 const router = express.Router();
+const recallsRepository = new RecallsRepository();
 
 router.get('/*', (req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
@@ -10,9 +12,10 @@ router.get('/*', (req, res, next) => {
 });
 
 router.get('/search-by-make', (req, res) => {
-  getByMake(req.query.make, (err, data) => {
+  const recallsResource = new RecallsResource(recallsRepository);
+  recallsResource.getByMake(req.query.make, (err, data) => {
     if (err) {
-      console.error(`Error when searching by make for the following data: ${data}`);
+      console.error(`Error when searching by make for the following data: ${req.query.make}`);
       console.error(err);
       res.status(500).json(err).end();
     } else {
@@ -22,7 +25,8 @@ router.get('/search-by-make', (req, res) => {
 });
 
 router.get('/fetch-all-makes', (req, res) => {
-  getAllMakes(req.query.type, (err, data) => {
+  const makesResource = new MakesResource(recallsRepository);
+  makesResource.getAllMakes(req.query.type, (err, data) => {
     if (err) {
       console.error(err);
       res.status(500).json(err).end();
