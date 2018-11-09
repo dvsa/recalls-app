@@ -4,7 +4,7 @@
   "description": "Helper module responsible for loading data from CSV file to database.",
   "main": "index.js",
   "scripts": {
-    "loadData": "node ./scripts/loadData.js $AWS_REGION $ENVIRONMENT"
+    "loadDevData": "node ./scripts/loadDevData.js $AWS_REGION $ENVIRONMENT"
   },
   "author": "",
   "license": "MIT",
