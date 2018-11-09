@@ -5,6 +5,14 @@ const landingPageController = require('../controllers/landingPageController');
 const vehicleMakeController = require('../controllers/vehicleMakeController');
 const resultsController = require('../controllers/resultsController');
 
+router.get('/cookies', (req, response) => {
+  landingPageController.cookies(response);
+});
+
+router.get('/terms-and-conditions', (req, response) => {
+  landingPageController.termsAndConditions(response);
+});
+
 router.get('/recalls', (req, response) => {
   landingPageController.homePage(null, response);
 });
@@ -29,14 +37,6 @@ router.get('/results-page', (req, response) => {
   const make = req.query.make;
   const recallType = req.query.recallType;
   resultsController.resultsPage(make, recallType, response);
-});
-
-router.get('/cookies', (req, response) => {
-  frontendController.cookies(response);
-});
-
-router.get('/terms-and-conditions', (req, response) => {
-  frontendController.termsAndConditions(response);
 });
 
 module.exports = router;
