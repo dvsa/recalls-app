@@ -7,12 +7,25 @@ class RecallsRepository {
 
   getByMake(make, callback) {
     const params = {
-      TableName: this.dbClient.tableName,
+      TableName: this.dbClient.recallsTable,
       FilterExpression: 'make = :make',
       ExpressionAttributeValues: { ':make': make },
     };
 
+    console.log(`DB request params: ${JSON.stringify(params)}`);
+
     this.dbClient.database.scan(params, callback);
+  }
+
+  getAllMakes(type, callback) {
+    const params = {
+      TableName: this.dbClient.makesTable,
+      Key: {
+        type,
+      },
+    };
+
+    this.dbClient.database.get(params, callback);
   }
 }
 

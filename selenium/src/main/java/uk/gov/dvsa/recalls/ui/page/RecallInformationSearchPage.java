@@ -1,45 +1,69 @@
 package uk.gov.dvsa.recalls.ui.page;
 
-import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.FindBy;
 
 import uk.gov.dvsa.recalls.navigation.GotoUrl;
 import uk.gov.dvsa.recalls.ui.base.Page;
 
+import static org.testng.Assert.assertFalse;
+
 @GotoUrl("/recalls")
 public class RecallInformationSearchPage extends Page {
 
-    private static final String CONTINUE_BUTTON_ID = "continue-button";
-    private static final String CSV_DATA_LINK_ID = "csv-data-link";
-    private static final String DATA_GUIDE_LINK_ID = "data-guide-link";
+    @FindBy(id = "csv-data-link") private WebElement csvDataLink;
+    @FindBy(id = "data-guide-link") private WebElement dataGuideLink;
+    @FindBy(id = "continue-button") private WebElement continueButton;
+    @FindBy(id = "recalls-vehicle") private WebElement vehicleRecallsRadioButton;
+    @FindBy(id = "recalls-other") private WebElement equipmentRecallsRadioButton;
+    @FindBy(className = "error-message") private WebElement errorMessage;
 
     @Override
-    protected String getPageTitle() {
+    protected String getExpectedPageTitle() {
         return "What type of recall information are you looking for?";
     }
 
-    public boolean continueButtonExists()
-    {
-        return isElementVisible(By.id(CONTINUE_BUTTON_ID));
+    public boolean continueButtonExists() {
+        return continueButton.isDisplayed();
     }
 
-    public boolean csvDataLinkExists()
-    {
-        return isElementVisible(By.id(CSV_DATA_LINK_ID));
+    public SelectVehicleMakePage selectVehicleRecallAndContinue() {
+        vehicleRecallsRadioButton.click();
+        continueButton.click();
+        return new SelectVehicleMakePage();
     }
 
-    public String getCsvDataLink()
-    {
-        return getLinkHref(By.id(CSV_DATA_LINK_ID));
+    public RecallInformationSearchPage clickContiniueWithNoOptionsSelected() {
+        assertFalse(vehicleRecallsRadioButton.isSelected());
+        assertFalse(equipmentRecallsRadioButton.isSelected());
+        continueButton.click();
+        return this;
     }
 
-    public boolean dataGuideLinkExists()
-    {
-        return isElementVisible(By.id(DATA_GUIDE_LINK_ID));
+    public boolean formErrorMessageIsVisible() {
+        return errorMessage.getText().contains("Please select an option");
     }
 
-    public String getDataGuideLink()
-    {
-        return getLinkHref(By.id(DATA_GUIDE_LINK_ID));
+    public SelectEquipmentMakePage selectEquipmentRecallAndContinue() {
+        equipmentRecallsRadioButton.click();
+        continueButton.click();
+        return new SelectEquipmentMakePage();
+    }
+
+    public boolean csvDataLinkExists() {
+        return csvDataLink.isDisplayed();
+    }
+
+    public String getCsvDataLink() {
+        return csvDataLink.getAttribute("href");
+    }
+
+    public boolean dataGuideLinkExists() {
+        return dataGuideLink.isDisplayed();
+    }
+
+    public String getDataGuideLink() {
+        return dataGuideLink.getAttribute("href");
     }
 
     public CookiesPage clickCookiesLink()

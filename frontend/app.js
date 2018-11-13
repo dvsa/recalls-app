@@ -1,5 +1,6 @@
 const TEMPLATES_PATH = './views';
 
+const bodyParser = require('body-parser');
 const express = require('express');
 const nunjucks = require('nunjucks');
 const helmet = require('helmet');
@@ -11,6 +12,9 @@ const app = express();
 
 const HSTS_MAX_AGE = 15768000;
 
+app.use(bodyParser.urlencoded({
+  extended: true,
+}));
 app.use(helmet());
 app.use(hsts({
   maxAge: HSTS_MAX_AGE,

@@ -3,6 +3,12 @@
 {% block content %}
   <main id="content">
     <a href="#" class="link-back">Back</a>
+
+      {% if errorMessage %}
+        {% set elementId = 'recalls-vehicle' %}
+        {% include './layouts/partials/error-message.njk' %}
+      {% endif %}
+
     <header class="content-header">
       <h1 class="heading-large heading heading--page-heading heading--small-margin-bottom">
         What type of recall information are you looking for?</h1>
@@ -11,16 +17,18 @@
       <div class="col-lg-12">
         <div class="grid-row">
           <div class="column-three-quarters">
-            <form method="POST" action="#">
-              <div class="form-group">
+            <form method="POST" action="recalls">
+              <div class="form-group {% if errorMessage %}form-group-error{% endif %}">
                 <fieldset>
+                  {% if errorMessage %}
+                    <span class="error-message">{{ errorMessage }}</span>
+                  {% endif %}
                   <div class="multiple-choice">
-
-                    <input id="recalls-vehicle" type="radio" name="radio-recalls-group" value="vehicle">
+                    <input id="recalls-vehicle" type="radio" name="recallType" value="vehicle">
                     <label for="recalls-vehicle">Vehicle safety recalls</label>
                   </div>
                   <div class="multiple-choice">
-                    <input id="recalls-other" type="radio" name="radio-recalls-group" value="other">
+                    <input id="recalls-other" type="radio" name="recallType" value="equipment">
                     <label for="recalls-other">Other recalled equipment<span class="form-hint">For example, tyres or child seats</span></label>
                   </div>
                 </fieldset>
@@ -50,6 +58,5 @@
         </div>
       </div>
     </div>
-    <!-- API RESPONSE: {{recallsResponse}} -->
   </main>
 {% endblock %}
