@@ -19,9 +19,11 @@
     {% include './partials/cookie-message.njk' %}
     {% include './partials/no-js-fallback.njk' %}
     {% include './partials/header.njk' %}
+    <main id="content">
+      {% include './partials/phase-banner.njk' %}
 
-    {% block bodyContentWrapper %}{% endblock %}
-
+      {% block bodyContentWrapper %}{% endblock %}
+    </main>
     {% include './partials/footer.njk' %}
     {% include './partials/body-scripts.njk' %}
 

@@ -1,6 +1,7 @@
 const url = require('url');
 const recallSearch = require('../service/recallSearch');
 const makeValidator = require('../validators/vehicleMake');
+const SmartSurveyFeedback = require('../helpers/SmartSurveyFeedback');
 
 class VehicleMakeController {
   static makesList(errorMessage, response, recallType) {
@@ -8,9 +9,13 @@ class VehicleMakeController {
       if (err) {
         console.error(err);
       } else {
+        const smartSurveyFeedback = SmartSurveyFeedback.getInstance();
+        smartSurveyFeedback.type = recallType;
+
         response.render('vehicle-make.njk', {
           makes,
           recallType,
+          smartSurveyFeedback,
           errorMessage,
         });
       }

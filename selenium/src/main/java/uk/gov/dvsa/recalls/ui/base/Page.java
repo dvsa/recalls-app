@@ -25,6 +25,9 @@ public abstract class Page {
     @FindBy(id = "terms-and-conditions-link")
     protected WebElement termsAndConditionsLink;
 
+    @FindBy(id = "phase-banner")
+    protected WebElement phaseBanner;
+
     public Page() {
 
         this.driver = WebDriverConfiguratorRegistry.get().getDriver();
@@ -45,6 +48,13 @@ public abstract class Page {
             throw new PageIdentityVerificationException("Page identity verification failed: " +
                     String.format("\n Expected: %s page, \n Found: %s page",
                             getExpectedPageTitle(), getTitle())
+            );
+        }
+
+        if (!phaseBanner.isDisplayed()) {
+            throw new PagePhaseBannerVerificationException("Page verification failed: " +
+                    String.format("\n Page %s expected to have a phase banner",
+                            getTitle())
             );
         }
     }
