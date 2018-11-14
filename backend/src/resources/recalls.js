@@ -20,8 +20,8 @@ class RecallsResource {
     });
   }
 
-  getByMake(make, callback) {
-    this.recallsRepository.getByMake(make, (err, data) => {
+  getByMakeAndModel(type, make, model, callback) {
+    this.recallsRepository.getByMakeAndModel(type, make, model, (err, data) => {
       if (err) {
         console.error(err);
         callback(err);

@@ -4,6 +4,8 @@ const should = require('chai').should();
 const RecallsRepository = require('../../repositories/recalls');
 const RecallsResource = require('../../resources/recalls');
 
+const TYPE_VEHICLE = 'vehicle';
+
 const MAKE_LAND_ROVER = 'LAND ROVER';
 
 const FIRST_MODEL = 'DISCOVERY SPORT';
@@ -49,18 +51,22 @@ const recallItems = {
   ],
 };
 
-function getByMake(make, callback) {
+function getByMakeAndModel(type, make, model, callback) {
   callback(null, recallItems);
 }
 
+function getByMakeAndModelWithError(type, make, model, callback) {
+  callback(new Error('Error'), null);
+}
+
 describe('RecallsResource', () => {
-  describe('getByMakes() method', () => {
+  describe('getByMakeAndModel() method', () => {
     it('Should return data from database mapped to list of Recall objects', (done) => {
       const recallsRepository = new RecallsRepository();
-      sinon.stub(recallsRepository, 'getByMake').callsFake(getByMake);
+      sinon.stub(recallsRepository, 'getByMakeAndModel').callsFake(getByMakeAndModel);
 
       const recallsResource = new RecallsResource(recallsRepository);
-      recallsResource.getByMake(MAKE_LAND_ROVER, (err, data) => {
+      recallsResource.getByMakeAndModel(TYPE_VEHICLE, MAKE_LAND_ROVER, FIRST_MODEL, (err, data) => {
         expect(data).to.be.an('array');
         expect(data).to.have.lengthOf(2);
         expect(data[0].recallNumber).to.equal('R/2017/153');
@@ -71,14 +77,13 @@ describe('RecallsResource', () => {
 
     it('Should return error when RecallsRepository returns an error', (done) => {
       const recallsRepository = new RecallsRepository();
-      sinon.stub(recallsRepository, 'getByMake').callsFake(function getByMake(make, callback) {
-        callback(new Error('Error'), null);
-      });
+      sinon.stub(recallsRepository, 'getByMakeAndModel').callsFake(getByMakeAndModelWithError);
 
       const recallsResource = new RecallsResource(recallsRepository);
-      recallsResource.getByMake(MAKE_LAND_ROVER, (err, data) => {
+      recallsResource.getByMakeAndModel(TYPE_VEHICLE, MAKE_LAND_ROVER, FIRST_MODEL, (err, data) => {
         expect(data).to.be.an('undefined');
         expect(err.message).to.equal('Error');
+        expect(getByMakeAndModelWithError).to.throw(Error);
         done();
       });
     });

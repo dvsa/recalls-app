@@ -8,20 +8,25 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import uk.gov.dvsa.recalls.helper.FormDataHelper;
 import uk.gov.dvsa.recalls.navigation.GotoUrl;
 import uk.gov.dvsa.recalls.ui.base.Page;
+import uk.gov.dvsa.recalls.ui.base.PageInstanceNotFoundException;
 
-@GotoUrl("/vehicle-make")
-public abstract class SelectMakePage extends Page {
+@GotoUrl("/vehicle-model")
+public abstract class SelectModelPage extends Page {
 
     private WebDriverWait wait = new WebDriverWait(driver, 5);
     @FindBy(id = "continue-button") private WebElement continueButton;
-    @FindBy(id = "make") private WebElement vehicleMakeDropdown;
+    @FindBy(id = "model") private WebElement vehicleModelDropdown;
     @FindBy(className = "error-message") private WebElement errorMessage;
     @FindBy(className = "link-back") private WebElement backButton;
 
     @Override
     protected abstract String getExpectedPageTitle();
 
-    public abstract SelectModelPage selectMakeAndContinue(String make);
+    public ResultsPage selectModelAndContinue(String model) {
+        FormDataHelper.selectFromDropDownByVisibleText(vehicleModelDropdown, model);
+        clickContinueButtonWhenReady();
+        return new ResultsPage();
+    }
 
     private void clickContinueButtonWhenReady() {
         title.click(); // Click some text to close a dropdown which might be obscuring the button
@@ -29,21 +34,20 @@ public abstract class SelectMakePage extends Page {
     }
 
     public void clickContiniueWithNoOptionsSelected() {
-        FormDataHelper.selectFromDropDownByVisibleText(vehicleMakeDropdown, "Choose a make");
+        FormDataHelper.selectFromDropDownByVisibleText(vehicleModelDropdown, "Choose a model");
         continueButton.click();
     }
 
     public boolean formErrorMessageIsVisible() {
-        return errorMessage.getText().contains("Select the vehicle make");
+        return errorMessage.getText().contains("Select the vehicle model");
     }
 
-    void selectMakePageCommon(String make) {
-        FormDataHelper.selectFromDropDownByVisibleText(vehicleMakeDropdown, make);
-        clickContinueButtonWhenReady();
-    }
-
-    public RecallInformationSearchPage clickBackButton() {
+    public SelectMakePage clickBackButton(Class<? extends SelectMakePage> clazz) {
         backButton.click();
-        return new RecallInformationSearchPage();
+        try {
+            return clazz.newInstance();
+        } catch (InstantiationException | IllegalAccessException e) {
+            throw new PageInstanceNotFoundException(String.format("Could not create a Make Page: %s", clazz.getName()));
+        }
     }
 }

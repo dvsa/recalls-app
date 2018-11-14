@@ -3,16 +3,15 @@ const RecallDto = require('cvr-common/dto/recall');
 const envVariables = require('../config/environmentVariables');
 
 const RECALLS_BACKEND_URL = envVariables.recallsBackendUrl;
-const BY_MAKE_ENDPOINT = 'search-by-make';
-const FETCH_ALL_MAKES_ENDPOINT = 'fetch-all-makes';
 
 class RecallSearch {
   static fetchAllMakes(type, callback) {
-    request.get(`${RECALLS_BACKEND_URL}/${FETCH_ALL_MAKES_ENDPOINT}?type=${type}`, (err, res, body) => {
-      console.info(`HTTP response status from /${FETCH_ALL_MAKES_ENDPOINT} for ${type}: `, res && res.statusCode);
+    const path = `${RECALLS_BACKEND_URL}/recall-types/${type}/makes`;
+    request.get(path, (err, res, body) => {
+      console.info(`RecallSearch.fetchAllMakes(${type}) - HTTP response code: `, res && res.statusCode);
 
       if (err != null) {
-        console.error(`Error while calling API /${FETCH_ALL_MAKES_ENDPOINT} `, err);
+        console.error('RecallSearch.fetchAllMakes() - Error while calling API: ', err);
         callback(err);
       } else {
         callback(null, JSON.parse(body));
@@ -20,12 +19,30 @@ class RecallSearch {
     });
   }
 
-  static byMake(make, callback) {
-    request.get(`${RECALLS_BACKEND_URL}/${BY_MAKE_ENDPOINT}?make=${make}`, (err, res, body) => {
-      console.info(`HTTP response status from /${BY_MAKE_ENDPOINT} for make '${make}': `, res && res.statusCode);
+  static fetchAllModels(type, make, callback) {
+    const encodedMake = encodeURIComponent(make);
+    const path = `${RECALLS_BACKEND_URL}/recall-types/${type}/makes/${encodedMake}/models`;
+    request.get(path, (err, res, body) => {
+      console.info(`RecallSearch.fetchAllModels(${type}, ${make}) - HTTP response code `, res && res.statusCode);
 
       if (err != null) {
-        console.error(`Error while calling API /${BY_MAKE_ENDPOINT} `, err);
+        console.error('RecallSearch.fetchAllModels() - Error while calling API: ', err);
+        callback(err);
+      } else {
+        callback(null, JSON.parse(body));
+      }
+    });
+  }
+
+  static byMakeAndModel(type, make, model, callback) {
+    const encodedMake = encodeURIComponent(make);
+    const encodedModel = encodeURIComponent(model);
+    const path = `${RECALLS_BACKEND_URL}/recall-types/${type}/makes/${encodedMake}/models/${encodedModel}/recalls`;
+    request.get(encodeURI(path), (err, res, body) => {
+      console.info(`RecallSearch.byMakeAndModel(${type}, ${make}, ${model}) - HTTP response code`, res && res.statusCode);
+
+      if (err != null) {
+        console.error('RecallSearch.byMakeAndModel() - Error while calling API: ', err);
         callback(err);
       } else {
         const recalls = this.mapRecallsToDto(body);

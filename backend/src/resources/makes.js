@@ -10,7 +10,8 @@ class MakesResource {
         callback(err);
       } else {
         const retrievedItem = data.Item;
-        callback(null, retrievedItem.makes);
+        const retrievedMakes = (retrievedItem || {}).makes;
+        callback(null, retrievedMakes || []);
       }
     });
   }

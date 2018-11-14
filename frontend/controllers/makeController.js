@@ -3,7 +3,7 @@ const recallSearch = require('../service/recallSearch');
 const makeValidator = require('../validators/vehicleMake');
 const SmartSurveyFeedback = require('../helpers/SmartSurveyFeedback');
 
-class VehicleMakeController {
+class MakeController {
   static makesList(errorMessage, response, recallType) {
     recallSearch.fetchAllMakes(recallType, (err, makes) => {
       if (err) {
@@ -25,7 +25,7 @@ class VehicleMakeController {
   static submitMake(make, recallType, response) {
     if (makeValidator.isValid(make)) {
       response.redirect(url.format({
-        pathname: 'results-page',
+        pathname: 'vehicle-model',
         query: { make, recallType },
       }));
     } else {
@@ -35,4 +35,4 @@ class VehicleMakeController {
   }
 }
 
-module.exports = VehicleMakeController;
+module.exports = MakeController;

@@ -5,16 +5,19 @@ class RecallsRepository {
     this.dbClient = new DbClient();
   }
 
-  getByMake(make, callback) {
+  getByMakeAndModel(recallType, make, model, callback) {
     const params = {
       TableName: this.dbClient.recallsTable,
-      FilterExpression: 'make = :make',
-      ExpressionAttributeValues: { ':make': make },
+      IndexName: this.dbClient.recallsSecondaryIndexName,
+      KeyConditionExpression: 'type_make_model = :typeMakeModel',
+      ExpressionAttributeValues: {
+        ':typeMakeModel': `${recallType}-${make}-${model}`,
+      },
     };
 
     console.log(`DB request params: ${JSON.stringify(params)}`);
 
-    this.dbClient.database.scan(params, callback);
+    this.dbClient.database.query(params, callback);
   }
 
   getAllMakes(type, callback) {
@@ -22,6 +25,17 @@ class RecallsRepository {
       TableName: this.dbClient.makesTable,
       Key: {
         type,
+      },
+    };
+
+    this.dbClient.database.get(params, callback);
+  }
+
+  getAllModels(type, make, callback) {
+    const params = {
+      TableName: this.dbClient.modelsTable,
+      Key: {
+        type_make: `${type}-${make}`,
       },
     };
 

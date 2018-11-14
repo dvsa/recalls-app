@@ -7,10 +7,12 @@ const TYPE = 'vehicle';
 
 function getAllMakes(type, callback) {
   callback(null, {
-    Item: {
-      makes: ['HONDA', 'TOYOTA', 'KIA']
-    }
-  }); 
+    Item: { makes: ['HONDA', 'TOYOTA', 'KIA'] },
+  });
+}
+
+function getAllMakesWithError(type, callback) {
+  callback(new Error('Error'), null);
 }
 
 describe('MakesResource', () => {
@@ -25,24 +27,21 @@ describe('MakesResource', () => {
         expect(data).to.have.lengthOf(3);
         expect(data[0]).to.equal('HONDA');
         expect(data[1]).to.equal('TOYOTA');
+        done();
       });
-
-      done();
     });
 
     it('Should return error when RecallsRepository returns an error', (done) => {
       const recallsRepository = new RecallsRepository();
-      sinon.stub(recallsRepository, 'getAllMakes').callsFake(function getAllMakes(type, callback) {
-        callback(new Error('Error'), null);
-      });
+      sinon.stub(recallsRepository, 'getAllMakes').callsFake(getAllMakesWithError);
 
       const makesResource = new MakesResource(recallsRepository);
       makesResource.getAllMakes(TYPE, (err, data) => {
         expect(data).to.be.an('undefined');
         expect(err.message).to.equal('Error');
+        expect(getAllMakesWithError).to.throw(Error);
+        done();
       });
-
-      done();
     });
   });
 });
