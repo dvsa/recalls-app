@@ -66,14 +66,12 @@ public class RecallInformationSearchPage extends Page {
         return dataGuideLink.getAttribute("href");
     }
 
-    public CookiesPage clickCookiesLink()
-    {
+    public CookiesPage clickCookiesLink() {
         cookiesLink.click();
         return new CookiesPage();
     }
 
-    public TermsAndConditionsPage clickTermsAndConditionsLink()
-    {
+    public TermsAndConditionsPage clickTermsAndConditionsLink() {
         termsAndConditionsLink.click();
         return new TermsAndConditionsPage();
     }

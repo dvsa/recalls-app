@@ -1,6 +1,8 @@
 const recallSearch = require('../service/recallSearch');
 const pluralForm = require('../service/pluralForm');
 
+const SmartSurveyFeedback = require('../helpers/SmartSurveyFeedback');
+
 const FOUND_RECALLS_COUNT_HEADER_VEHICLE = 'This vehicle has <strong>[num] recall{s}.</strong>';
 const FOUND_RECALLS_COUNT_HEADER_EQUIPMENT = 'This equipment has <strong>[num] recall{s}.</strong>';
 
@@ -13,13 +15,18 @@ class ResultsController {
         const recallsCountHeader = this.getRecallsCountHeader(recallType);
         const foundRecallsCountHeader = pluralForm
           .getSingularOrPlural(recallsCountHeader, recalls.length);
-
-        response.render('results-page.njk', {
+        const smartSurveyFeedback = SmartSurveyFeedback.getInstance();
+        const params = {
           make,
           foundRecallsCountHeader,
           recallType,
           recalls,
-        });
+        };
+
+        smartSurveyFeedback.setPageParams(params);
+        params.smartSurveyFeedback = smartSurveyFeedback;
+
+        response.render('results-page.njk', params);
       }
     });
   }
