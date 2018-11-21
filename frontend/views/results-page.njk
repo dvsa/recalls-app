@@ -1,11 +1,11 @@
 {% extends 'layouts/mts-without-container.layout.njk' %}
-{% set pageTitle = make %}
+{% set pageTitle = make + ' ' + model %}
 
 {% block content %}
-  <a href="vehicle-make?recallType={{recallType}}" class="link-back">Back</a>
+  <a href="vehicle-model?recallType={{recallType}}&make={{make | urlencode}}" class="link-back">Back</a>
   <header class="content-header">
     <h1 id="vehicle-or-component-title" class="heading-large heading heading--page-heading heading--small-margin-bottom">
-      {{ make | escape }}
+      {{ make + ' ' + model | escape }}
     </h1>
   </header>
   <p class="lede">{{foundRecallsCountHeader | safe}}</p>
@@ -40,6 +40,10 @@
                 </p>
               </div>
               <div class="column-one-third">
+                <p class="js-accordion__description">
+                  <span class="form-hint">Recall type</span>
+                  Safety recall
+                </p>
               </div>
             </div>
           </div>

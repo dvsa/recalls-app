@@ -8,6 +8,7 @@ class Recall {
   constructor(launchDate, recallNumber, make, concern, defect, remedy, vehicleNumber, model, vinStart, vinEnd, buildStart, buildEnd) {
     this.make_model_recall_number = make + '-' + model + '-' + recallNumber;
     this.type = mapRecallNumberToRecallType(recallNumber);
+    this.type_make_model = this.type + '-' + make + '-' + model;
     this.launch_date = launchDate;
     this.recall_number = recallNumber;
     if (make) {this.make = make};

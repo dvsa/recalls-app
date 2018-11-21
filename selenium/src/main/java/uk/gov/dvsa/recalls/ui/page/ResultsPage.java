@@ -8,6 +8,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import uk.gov.dvsa.recalls.navigation.GotoUrl;
 import uk.gov.dvsa.recalls.ui.base.Page;
 import uk.gov.dvsa.recalls.ui.base.PageIdentityVerificationException;
+import uk.gov.dvsa.recalls.ui.base.PageInstanceNotFoundException;
 
 import java.util.List;
 
@@ -20,6 +21,7 @@ public class ResultsPage extends Page {
     @FindBy(className = "how-to") private List<WebElement> howToCheckRecallType;
     @FindBy(className = "affected-number") private List<WebElement> affectedVehiclesSentences;
     @FindBy(className = "js-accordion__title-button") private List<WebElement> recallAccordions;
+    @FindBy(className = "link-back") private WebElement backButton;
 
     @Override protected void selfVerify() {
         if (getTitle().length() < 1) {
@@ -69,5 +71,14 @@ public class ResultsPage extends Page {
                 String.format("Number of affected %ss", recallType)
 
         );
+    }
+
+    public SelectModelPage clickBackButton(Class<? extends SelectModelPage> clazz) {
+        backButton.click();
+        try {
+            return clazz.newInstance();
+        } catch (InstantiationException | IllegalAccessException e) {
+            throw new PageInstanceNotFoundException(String.format("Could not create a Model Page: %s", clazz.getName()));
+        }
     }
 }

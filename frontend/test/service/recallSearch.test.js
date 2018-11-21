@@ -5,7 +5,9 @@ const request = require('request');
 const RecallDto = require('cvr-common/dto/recall');
 const recallSearch = require('../../service/recallSearch');
 
+const TYPE_VEHICLE = 'vehicle';
 const MAKE_LAND_ROVER = 'LAND ROVER';
+const MODEL_DISCOVERY = 'DISCOVERY';
 const API_ERROR_MESSAGE = 'An error has occurred during request';
 const FIRST_RESULT = 'result 1';
 const SECOND_RESULT = 'result 2';
@@ -63,7 +65,7 @@ describe('RecallSearch', () => {
     });
   });
 
-  describe('byMake()  ', () => {
+  describe('byMakeAndModel()', () => {
     before(() => {
       this.mapRecallsToDto = mapRecallsToDtoReturns(RESULTS);
     });
@@ -73,21 +75,23 @@ describe('RecallSearch', () => {
     it('Should parse a JSON response from the API', (done) => {
       this.get.yields(null, {}, JSON.stringify(RESULTS));
 
-      recallSearch.byMake(MAKE_LAND_ROVER, (err, recalls) => {
-        expect(recalls).to.be.an('array');
-        expect(recalls).to.include(FIRST_RESULT);
-        expect(recalls).to.include(SECOND_RESULT);
-        done();
-      });
+      recallSearch.byMakeAndModel(TYPE_VEHICLE, MAKE_LAND_ROVER, MODEL_DISCOVERY,
+        (err, recalls) => {
+          expect(recalls).to.be.an('array');
+          expect(recalls).to.include(FIRST_RESULT);
+          expect(recalls).to.include(SECOND_RESULT);
+          done();
+        });
     });
     it('Should report errors that occur during API requests', (done) => {
       this.get.yields(API_ERROR_MESSAGE, {}, JSON.stringify(RESULTS));
 
-      recallSearch.byMake(MAKE_LAND_ROVER, (err, recalls) => {
-        expect(err).to.include(API_ERROR_MESSAGE);
-        should.not.exist(recalls);
-        done();
-      });
+      recallSearch.byMakeAndModel(TYPE_VEHICLE, MAKE_LAND_ROVER, MODEL_DISCOVERY,
+        (err, recalls) => {
+          expect(err).to.include(API_ERROR_MESSAGE);
+          should.not.exist(recalls);
+          done();
+        });
     });
   });
 
