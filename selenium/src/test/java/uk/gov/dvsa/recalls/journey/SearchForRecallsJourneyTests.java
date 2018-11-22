@@ -3,8 +3,11 @@ package uk.gov.dvsa.recalls.journey;
 import org.testng.annotations.Test;
 
 import uk.gov.dvsa.recalls.base.BaseTest;
+import uk.gov.dvsa.recalls.ui.page.EnterYearPage;
 import uk.gov.dvsa.recalls.ui.page.RecallInformationSearchPage;
 import uk.gov.dvsa.recalls.ui.page.ResultsPage;
+import uk.gov.dvsa.recalls.ui.page.SelectEquipmentMakePage;
+import uk.gov.dvsa.recalls.ui.page.SelectEquipmentModelPage;
 import uk.gov.dvsa.recalls.ui.page.SelectMakePage;
 import uk.gov.dvsa.recalls.ui.page.SelectModelPage;
 import uk.gov.dvsa.recalls.ui.page.SelectVehicleMakePage;
@@ -14,7 +17,7 @@ import java.io.UnsupportedEncodingException;
 
 import static org.testng.Assert.assertTrue;
 
-public class SearchByMakeTests extends BaseTest {
+public class SearchForRecallsJourneyTests extends BaseTest {
 
     public static final String RESULTS_PAGE_PATH = "/results-page?recallType=%s&make=%s&model=%s";
     public final String RECALL_TYPE_VEHICLE = "vehicle";
@@ -22,10 +25,12 @@ public class SearchByMakeTests extends BaseTest {
 
     public final String make = "OUGHTRED & HARRISON";
     public final String model = "BERLINGO AMBULANCE";
+    public final String year = "2017";
 
     @Test(description = "User can check recalls for a vehicle of a particular make and model")
     public void searchVehicleByMakeTest() {
         String expectedRecallTitle = "REAR AXLE SECURING BOLTS LOOSE OR MISSING";
+        String expectedPageHeader = String.format("%s %s %s", make, model, year);
 
         //Given I am a user of the site and I want to check vehicle recalls
         //I go to cvr home page
@@ -37,24 +42,30 @@ public class SearchByMakeTests extends BaseTest {
 
         //And I select vehicle recalls option
         //Then I'm redirected to the SelectMake page
-        SelectMakePage selectMakePage = recallInformationSearchPage.selectVehicleRecallAndContinue();
+        SelectVehicleMakePage selectMakePage = recallInformationSearchPage.selectVehicleRecallAndContinue();
 
         //When I select no options and click continue, an error appears
         selectMakePage.clickContiniueWithNoOptionsSelected();
-        assertTrue(selectMakePage.formErrorMessageIsVisible(), "I can see the error message");
+        assertTrue(selectMakePage.formErrorMessageIsVisible(), "I can see the make error message");
 
         //Then I select valid make and continue, I get redirected to the Model Page
-        SelectModelPage selectModelPage = selectMakePage.selectMakeAndContinue(make);
+        SelectVehicleModelPage selectModelPage = selectMakePage.selectMakeAndContinue(make);
 
         //When I select no options and click continue, an error appears
         selectModelPage.clickContiniueWithNoOptionsSelected();
-        assertTrue(selectModelPage.formErrorMessageIsVisible(), "I can see the error message");
+        assertTrue(selectModelPage.formErrorMessageIsVisible(), "I can see the model error message");
 
         //When I select vehicle make from a dropdown and continue
-        ResultsPage resultsPage = selectModelPage.selectModelAndContinue(model);
+        EnterYearPage yearPage = selectModelPage.selectModelAndContinue(model);
+        assertTrue(yearPage.enterYearAndExpectError("", yearPage.EMPTY_YEAR_MSG), "I can see the manufacture year error message");
+        assertTrue(yearPage.enterYearAndExpectError("abc", yearPage.DIGITS_ONLY_MSG), "I can see the manufacture year error message");
+        assertTrue(yearPage.enterYearAndExpectError("123", yearPage.FOUR_DIGITS_MSG), "I can see the manufacture year error message");
+        assertTrue(yearPage.enterYearAndExpectError("3005", yearPage.IN_THE_FUTURE_MSG), "I can see the manufacture year error message");
+
+        ResultsPage resultsPage = yearPage.enterYearAndContinue(year);
 
         //Then I should be redirected to the Results page and the header should contain make of the vehicle
-        assertTrue(resultsPage.headerContainsCorrectVehicleMake(make), "Header contains correct vehicle make");
+        assertTrue(resultsPage.headerContains(expectedPageHeader), "Header contains correct text");
 
         //Recall title should be displayed
         assertTrue(resultsPage.recallTitleIsDisplayed(expectedRecallTitle), "Recall title is displayed");
@@ -72,6 +83,7 @@ public class SearchByMakeTests extends BaseTest {
         String make = "COOPER BUSSMANN (UK) LTD";
         String model = "1315-B";
         String expectedRecallTitle = "FIRE MAY OCCUR";
+        String expectedPageHeader = String.format("%s %s", make, model);
 
         //Given I am a user of the site and I want to check equipment recalls
         //I go to cvr home page
@@ -79,14 +91,14 @@ public class SearchByMakeTests extends BaseTest {
 
         //And I select equipment recalls option
         //Then I'm redirected to the SelectMake page
-        SelectMakePage selectMakePage = recallInformationSearchPage.selectEquipmentRecallAndContinue();
+        SelectEquipmentMakePage selectMakePage = recallInformationSearchPage.selectEquipmentRecallAndContinue();
 
         //When I select no options and click continue, an error appears
         selectMakePage.clickContiniueWithNoOptionsSelected();
         selectMakePage.formErrorMessageIsVisible();
 
         //Then I select valid make and continue, I get redirected to the Model Page
-        SelectModelPage selectModelPage = selectMakePage.selectMakeAndContinue(make);
+        SelectEquipmentModelPage selectModelPage = selectMakePage.selectMakeAndContinue(make);
 
         //When I select no options and click continue, an error appears
         selectModelPage.clickContiniueWithNoOptionsSelected();
@@ -96,7 +108,7 @@ public class SearchByMakeTests extends BaseTest {
         ResultsPage resultsPage = selectModelPage.selectModelAndContinue(model);
 
         //Then I should be redirected to the Results page and the header should contain make of the equipment
-        assertTrue(resultsPage.headerContainsCorrectVehicleMake(make), "Header contains correct equipment make");
+        assertTrue(resultsPage.headerContains(expectedPageHeader), "Header contains correct text");
 
         //Recall title should be displayed
         assertTrue(resultsPage.recallTitleIsDisplayed(expectedRecallTitle), "Recall title is displayed");
@@ -113,8 +125,10 @@ public class SearchByMakeTests extends BaseTest {
     public void backButtonsTest() throws UnsupportedEncodingException {
         // When I am on the results page
         ResultsPage resultsPage = recalls.goToResultsPage(RESULTS_PAGE_PATH, "vehicle", make, model);
-        // And I click the 'Back' button, I am redirected to the model page
-        SelectModelPage selectModelPage = resultsPage.clickBackButton(SelectVehicleModelPage.class);
+        // And I click the 'Back' button, I am redirected to the year selection page
+        EnterYearPage enterYearPage = (EnterYearPage) resultsPage.clickBackButton(EnterYearPage.class);
+        // I click the 'Back' button again, I am redirected to the make page
+        SelectModelPage selectModelPage = enterYearPage.clickBackButton(SelectVehicleModelPage.class);
         // I click the 'Back' button again, I am redirected to the make page
         SelectMakePage selectMakePage = selectModelPage.clickBackButton(SelectVehicleMakePage.class);
         // I click the 'Back' button again, I am redirected to the landing page

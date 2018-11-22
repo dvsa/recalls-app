@@ -6,6 +6,7 @@ class MakesResource {
   getAllMakes(type, callback) {
     this.recallsRepository.getAllMakes(type, (err, data) => {
       if (err) {
+        console.error(`An error occurred for type=${type}`);
         console.error(err);
         callback(err);
       } else {

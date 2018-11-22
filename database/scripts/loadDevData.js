@@ -1,14 +1,29 @@
 const AWS = require("aws-sdk");
 const CSV = require('fast-csv');
 const Recall = require('../model/recall');
+const DateParser = require('../helpers/DateParser');
 const ENVIRONMENT = process.env.ENVIRONMENT;
 const RECALLS_TABLE_NAME = `cvr-${ENVIRONMENT}-recalls`;
 const MAKES_TABLE_NAME = `cvr-${ENVIRONMENT}-makes`;
 const MODELS_TABLE_NAME = `cvr-${ENVIRONMENT}-models`;
 
+const LAUNCH_DATE_LINE_NO = 0
+const RECALL_NUMBER_LINE_NO = 1
+const MAKE_LINE_NO = 2
+const CONCERN_LINE_NO = 4
+const DEFECT_LINE_NO = 5
+const REMEDY_LINE_NO = 6
+const VEHICLE_NUMBER_LINE_NO = 7
+const MODEL_LINE_NO = 9
+const VIN_START_LINE_NO = 10
+const VIN_END_LINE_NO = 11
+const BUILD_START_LINE_NO = 12
+const BUILD_END_LINE_NO = 13
+
 AWS.config.update({ region: process.env.AWS_REGION });
 
 const documentClient = new AWS.DynamoDB.DocumentClient();
+const dateParser = new DateParser();
 const recallData = [];
 const vehicleMakes = [];
 const equipmentMakes = [];
@@ -118,8 +133,21 @@ function insertMakesToDb() {
 // Read csv file
 CSV.fromPath('../documents/RecallsFileSmall.csv')
 .on('data', function(line) {
-  if (line[0] !== 'Launch Date') {
-    const recall = new Recall(trimIfNotEmpty(line[0]), trimIfNotEmpty(line[1]), trimIfNotEmpty(line[2]), trimIfNotEmpty(line[4]), trimIfNotEmpty(line[5]), trimIfNotEmpty(line[6]), trimIfNotEmpty(line[7]), trimIfNotEmpty(line[9]), trimIfNotEmpty(line[10]), trimIfNotEmpty(line[11]), trimIfNotEmpty(line[12]), trimIfNotEmpty(line[13]));
+  if (line[LAUNCH_DATE_LINE_NO] !== 'Launch Date') {
+    const recall = new Recall(
+      trimIfNotEmpty(dateParser.slashFormatToISO(line[LAUNCH_DATE_LINE_NO])),
+      trimIfNotEmpty(line[RECALL_NUMBER_LINE_NO]), 
+      trimIfNotEmpty(line[MAKE_LINE_NO]), 
+      trimIfNotEmpty(line[CONCERN_LINE_NO]), 
+      trimIfNotEmpty(line[DEFECT_LINE_NO]), 
+      trimIfNotEmpty(line[REMEDY_LINE_NO]), 
+      trimIfNotEmpty(line[VEHICLE_NUMBER_LINE_NO]), 
+      trimIfNotEmpty(line[MODEL_LINE_NO]), 
+      trimIfNotEmpty(line[VIN_START_LINE_NO]), 
+      trimIfNotEmpty(line[VIN_END_LINE_NO]), 
+      trimIfNotEmpty(dateParser.slashFormatToISO(line[BUILD_START_LINE_NO])), 
+      trimIfNotEmpty(dateParser.slashFormatToISO(line[BUILD_END_LINE_NO]))
+    );
     recallData.push(recall);
     addToMakesAndModels(recall);
   }

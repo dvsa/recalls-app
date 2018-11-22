@@ -1,11 +1,12 @@
 {% extends 'layouts/mts-without-container.layout.njk' %}
-{% set pageTitle = make + ' ' + model %}
+
+{% set pageTitle = title %}
 
 {% block content %}
-  <a href="vehicle-model?recallType={{recallType}}&make={{make | urlencode}}" class="link-back">Back</a>
+  <a href="{{backLink}}" class="link-back">Back</a>
   <header class="content-header">
     <h1 id="vehicle-or-component-title" class="heading-large heading heading--page-heading heading--small-margin-bottom">
-      {{ make + ' ' + model | escape }}
+      {{title}}
     </h1>
   </header>
   <p class="lede">{{foundRecallsCountHeader | safe}}</p>

@@ -16,4 +16,10 @@ public class FormDataHelper {
         Select dropdown = new Select(element);
         dropdown.selectByVisibleText(value);
     }
+
+    public static void enterText(WebElement webElement, String value) {
+        webElement.click();
+        webElement.clear();
+        webElement.sendKeys(value);
+    }
 }
