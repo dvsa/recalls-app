@@ -1,6 +1,6 @@
 class VehicleMakeValidator {
-  static getErrorMessage() {
-    return 'Select the vehicle make';
+  static getErrorMessage(recallType) {
+    return `Select the ${recallType} make`;
   }
 
   /**

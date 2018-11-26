@@ -16,10 +16,12 @@ class ModelController {
       if (err) {
         console.error(err);
       } else {
+        const recallTypePlural = recallType === 'vehicle' ? `${recallType}s` : recallType;
         const smartSurveyFeedback = this.prepareSmartSurveyFeedback(recallType, make);
         response.render('vehicle-model.njk', {
           models,
           recallType,
+          recallTypePlural,
           smartSurveyFeedback,
           make,
           errorMessage,
@@ -35,7 +37,7 @@ class ModelController {
         query: { model, make, recallType },
       }));
     } else {
-      const errorMessage = modelValidator.getErrorMessage();
+      const errorMessage = modelValidator.getErrorMessage(recallType);
       this.modelsList(errorMessage, response, recallType, make);
     }
   }

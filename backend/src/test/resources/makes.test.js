@@ -1,5 +1,5 @@
 const sinon = require('sinon');
-const expect = require('chai').expect;
+const { expect } = require('chai');
 const RecallsRepository = require('../../repositories/recalls');
 const MakesResource = require('../../resources/makes');
 

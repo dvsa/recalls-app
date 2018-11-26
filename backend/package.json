@@ -11,7 +11,7 @@
     "debug": "nodemon --inspect-brk=9229 --nolazy ./src/scripts/local.js --watch ../common --watch ./",
     "test": "nyc mocha \"src/test/**/*.test.js\" --exit",
     "lint": "eslint .",
-    "build": "npm install && npm test && zip -r ../cvr-backend.zip * --exclude /src/test",
+    "build": "npm install && npm run lint && npm test && npm run prod",
     "prod": "npm prune --production && npm install --production && zip -r ../cvr-backend.zip * --exclude /src/test"
   },
   "repository": {
@@ -49,13 +49,16 @@
     "functions": 60,
     "branches": 60,
     "include": [
-      "/src/*/**/*.js"
+      "src/**/*.js"
     ],
     "exclude": [
-      "src/functions/*.js",
       "src/routes/*.js",
       "src/test/*.js",
-      "src/test/*/*.js"
+      "src/test/*/*.js",
+      "src/app.js",
+      "src/scripts/*.js",
+      "TODO: remove repositories exclude",
+      "src/repositories/*.js"
     ],
     "extension": [
       ".js"
@@ -65,7 +68,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-push": "npm run lint && npm test"
+      "pre-push": "../pre-push.sh"
     }
   }
 }

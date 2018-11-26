@@ -26,28 +26,60 @@ class ResultsController {
       const title = `${make} ${model}`;
 
       recallSearch.byMakeAndModel(recallType, make, model, (err, recalls) => {
-        this.renderOrFail(response, recallType, make, model, year, title, backLink, err, recalls);
+        this.renderOrFail(
+          response,
+          recallType,
+          make,
+          model,
+          year,
+          title,
+          backLink,
+          err,
+          recalls,
+        );
       });
     } else {
       const backLink = `vehicle-year?recallType=${recallType}&make=${encodeURIComponent(make)}&model=${encodeURIComponent(model)}`;
       const title = `${make} ${model} ${year}`;
 
       recallSearch.byMakeModelAndYear(recallType, make, model, year, (err, recalls) => {
-        this.renderOrFail(response, recallType, make, model, year, title, backLink, err, recalls);
+        this.renderOrFail(
+          response,
+          recallType,
+          make,
+          model,
+          year,
+          title,
+          backLink,
+          err,
+          recalls,
+        );
       });
     }
   }
 
-  renderOrFail(response, recallType, make, model, year, title, backLink, err, recalls) {
+  renderOrFail(
+    response,
+    recallType,
+    make,
+    model,
+    year,
+    title,
+    backLink,
+    err,
+    recalls,
+  ) {
     if (err) {
       console.error(err);
     } else {
+      const recallTypePlural = recallType === 'vehicle' ? `${recallType}s` : recallType;
       const params = {
         make,
         smartSurveyFeedback: this.prepareSmartSurveyFeedback(recallType, make, model, year),
         title,
         foundRecallsCountHeader: this.constructor.getRecallsCountHeader(recallType, recalls),
         recallType,
+        recallTypePlural,
         recalls,
         backLink,
       };

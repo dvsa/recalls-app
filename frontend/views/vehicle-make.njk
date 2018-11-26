@@ -21,7 +21,9 @@
         <div class="column-three-quarters">
           <form method="POST" action="vehicle-make?recallType={{recallType}}&make={{make | urlencode}}">
             <div class="form-group {% if errorMessage %}form-group-error{% endif %}">
-              <p class="">This service only includes {{recallType}}s that have been recalled.</p>
+              <p class="">
+                  {{recallsAvailabilityNotice}}
+              </p>
               {% if errorMessage %}
                 <span class="error-message">{{ errorMessage }}</span>
               {% endif %}

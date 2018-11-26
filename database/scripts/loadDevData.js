@@ -2,10 +2,16 @@ const AWS = require("aws-sdk");
 const CSV = require('fast-csv');
 const Recall = require('../model/recall');
 const DateParser = require('../helpers/DateParser');
+const delay = ms => new Promise(res => setTimeout(res, ms));
 const ENVIRONMENT = process.env.ENVIRONMENT;
 const RECALLS_TABLE_NAME = `cvr-${ENVIRONMENT}-recalls`;
 const MAKES_TABLE_NAME = `cvr-${ENVIRONMENT}-makes`;
 const MODELS_TABLE_NAME = `cvr-${ENVIRONMENT}-models`;
+const RECALLS_TABLE_SECONDARY_INDEX = 'type-make-model-gsi';
+const UPSACLED_THROUGHPUT = 500;
+const NORMAL_THROUGHPUT = 1;
+const MAX_CHECK_COUNT = 10;
+const CHECK_COUNT_DELAY_SECONDS = 10;
 
 const LAUNCH_DATE_LINE_NO = 0
 const RECALL_NUMBER_LINE_NO = 1
@@ -22,12 +28,41 @@ const BUILD_END_LINE_NO = 13
 
 AWS.config.update({ region: process.env.AWS_REGION });
 
+const dynamoDB = new AWS.DynamoDB();
 const documentClient = new AWS.DynamoDB.DocumentClient();
 const dateParser = new DateParser();
 const recallData = [];
+const uniqueRecallData = {};
 const vehicleMakes = [];
 const equipmentMakes = [];
 const models = new Map();
+
+let checkNumber = 1;
+let uniqueRowsRead = 0;
+
+function getTableThroughputParams(tableName, desiredThroughput, indexName) {
+  const output = {
+    TableName: tableName,
+    ProvisionedThroughput: {
+      ReadCapacityUnits: desiredThroughput,
+      WriteCapacityUnits: desiredThroughput
+    },
+  };
+
+  if (indexName) {
+    output.GlobalSecondaryIndexUpdates = [{
+      Update: {
+        IndexName: indexName,
+        ProvisionedThroughput: {
+          ReadCapacityUnits: desiredThroughput,
+          WriteCapacityUnits: desiredThroughput
+        }
+      }
+    }];
+  }
+
+  return output;
+}
 
 function trimIfNotEmpty(field) {
   return (!field || field.length === 0) ? field : field.trim();
@@ -55,6 +90,16 @@ function addToMakesAndModels(recall) {
     addToArrayIfNotYetExists(equipmentMakes, recall.make);
     addToMapIfNotYetExists(models, 'equipment-' + recall.make, recall.model);
   }
+}
+
+async function getRecallCount(callback) {
+  const params = {
+    TableName: RECALLS_TABLE_NAME,
+    IndexName: RECALLS_TABLE_SECONDARY_INDEX,
+    Select: 'COUNT'
+  };
+
+  documentClient.scan(params, callback);
 }
 
 async function insertRecallsToDb() {
@@ -130,33 +175,126 @@ function insertMakesToDb() {
   });
 }
 
-// Read csv file
-CSV.fromPath('../documents/RecallsFileSmall.csv')
-.on('data', function(line) {
-  if (line[LAUNCH_DATE_LINE_NO] !== 'Launch Date') {
-    const recall = new Recall(
-      trimIfNotEmpty(dateParser.slashFormatToISO(line[LAUNCH_DATE_LINE_NO])),
-      trimIfNotEmpty(line[RECALL_NUMBER_LINE_NO]), 
-      trimIfNotEmpty(line[MAKE_LINE_NO]), 
-      trimIfNotEmpty(line[CONCERN_LINE_NO]), 
-      trimIfNotEmpty(line[DEFECT_LINE_NO]), 
-      trimIfNotEmpty(line[REMEDY_LINE_NO]), 
-      trimIfNotEmpty(line[VEHICLE_NUMBER_LINE_NO]), 
-      trimIfNotEmpty(line[MODEL_LINE_NO]), 
-      trimIfNotEmpty(line[VIN_START_LINE_NO]), 
-      trimIfNotEmpty(line[VIN_END_LINE_NO]), 
-      trimIfNotEmpty(dateParser.slashFormatToISO(line[BUILD_START_LINE_NO])), 
-      trimIfNotEmpty(dateParser.slashFormatToISO(line[BUILD_END_LINE_NO]))
-    );
-    recallData.push(recall);
-    addToMakesAndModels(recall);
+async function checkThroughput(callback) {
+  var params = {
+    TableName: RECALLS_TABLE_NAME
+   };
+
+   dynamoDB.describeTable(params, callback);
+}
+
+// Callback function to await the proper amount of recalls in the recalls table before decreasing the throughput
+const countCallback = async function countCallback(err, data) {
+  if (err) {
+    console.error(err);
+    return process.exit(1);
+  } else {
+    console.log(`${data.Count} recalls found in iteration #${checkNumber}`);
+    if (data.Count != uniqueRowsRead) {
+      if (checkNumber <= MAX_CHECK_COUNT) {
+        await delay(CHECK_COUNT_DELAY_SECONDS * 1000);
+        checkNumber++;
+        getRecallCount(countCallback);
+      } else {
+        console.error(`Recall count is not equal to the expected value of ${uniqueRowsRead}`);
+        dynamoDB.updateTable(getTableThroughputParams(RECALLS_TABLE_NAME, NORMAL_THROUGHPUT, RECALLS_TABLE_SECONDARY_INDEX), function(err, data) {
+          if (err) {
+            console.error(`Table ${RECALLS_TABLE_NAME} throughput not reduced!! Rerun, reduce manually or destroy the env to avoid incurring raised dynamodb costs`);
+            console.error(err);
+            return process.exit(1);
+          } else {
+            console.log(`Table ${RECALLS_TABLE_NAME} updated with throughput ${NORMAL_THROUGHPUT}`);
+            return process.exit(1);
+          }
+        });
+      }
+    } else {
+      // At the end decrease dynamoDB throughput to normal values if item count matches
+      dynamoDB.updateTable(getTableThroughputParams(RECALLS_TABLE_NAME, NORMAL_THROUGHPUT, RECALLS_TABLE_SECONDARY_INDEX), function(err, data) {
+        if (err) {
+          console.error(`Table ${RECALLS_TABLE_NAME} throughput not reduced!! Rerun, reduce manually or destroy the env to avoid incurring raised dynamodb costs`);
+          console.error(err);
+          return process.exit(1);
+        } else {
+          console.log(`Table ${RECALLS_TABLE_NAME} updated with throughput ${NORMAL_THROUGHPUT}`);
+        }
+      });
+    }
   }
-})
-.on('error', function(error) {
-  console.error(error);
-})
-.on('end', function() {
-  insertMakesToDb();
-  insertRecallsToDb();
-  insertModelsToDb();
+};
+
+// callback function that checks if throughput is changed to the expected amount, if yes proceeds with data load.
+const throughputCallback = function throughputCallback(expectedThroughput, currentRetry, delaySeconds) {
+  return (err, data) => {
+    if (err) {
+      console.error(err);
+      return process.exit(1);
+    } else {
+      if (data.Table.ProvisionedThroughput.WriteCapacityUnits != expectedThroughput) {
+        console.log(`Table ${RECALLS_TABLE_NAME} real throughput is ${data.Table.ProvisionedThroughput.WriteCapacityUnits}; waiting...`);
+        if (currentRetry <= MAX_CHECK_COUNT) {
+          setTimeout(function() {
+            checkThroughput(throughputCallback(expectedThroughput, currentRetry + 1, delaySeconds));
+          }, delaySeconds * 1000);
+        } else {
+          console.error('DynamoDB table write capacity did not change in expected amount of time investigate and/or rerun the build');
+          return process.exit(1);
+        }
+      } else {
+        console.log(`Table ${RECALLS_TABLE_NAME} real throughput is ${data.Table.ProvisionedThroughput.WriteCapacityUnits}; Loading CSV data`);
+        // Read and load csv file
+        CSV.fromPath('../documents/RecallsFileSmall.csv')
+        .on('data', function(line) {
+          if (line[LAUNCH_DATE_LINE_NO] !== 'Launch Date') {
+            const recall = new Recall(
+              trimIfNotEmpty(dateParser.slashFormatToISO(line[LAUNCH_DATE_LINE_NO])),
+              trimIfNotEmpty(line[RECALL_NUMBER_LINE_NO]),
+              trimIfNotEmpty(line[MAKE_LINE_NO]),
+              trimIfNotEmpty(line[CONCERN_LINE_NO]),
+              trimIfNotEmpty(line[DEFECT_LINE_NO]),
+              trimIfNotEmpty(line[REMEDY_LINE_NO]),
+              trimIfNotEmpty(line[VEHICLE_NUMBER_LINE_NO]),
+              trimIfNotEmpty(line[MODEL_LINE_NO]),
+              trimIfNotEmpty(line[VIN_START_LINE_NO]),
+              trimIfNotEmpty(line[VIN_END_LINE_NO]),
+              trimIfNotEmpty(dateParser.slashFormatToISO(line[BUILD_START_LINE_NO])),
+              trimIfNotEmpty(dateParser.slashFormatToISO(line[BUILD_END_LINE_NO]))
+            );
+            recallData.push(recall);
+            uniqueRecallData[`${recall.recall_number}${recall.make}${recall.model}`] = recall;
+            addToMakesAndModels(recall);
+          }
+        })
+        .on('error', function(error) {
+          console.error(error);
+        })
+        .on('end', function() {
+          uniqueRowsRead = Object.keys(uniqueRecallData).length;
+          if (uniqueRowsRead < recallData.length) {
+            console.warn(`WARNING: CSV contains ${recallData.length} rows, but only ${uniqueRowsRead} are unique (recallNum/make/model) recalls!`)
+          }
+          insertMakesToDb();
+          insertRecallsToDb();
+          insertModelsToDb();
+          // Start waiting on expected ammount of recalls to be loaded, then decrease throughput via countCallback
+          console.log(`Expecting ${uniqueRowsRead} recalls`);
+          setTimeout(function(){
+            getRecallCount(countCallback);
+          }, 1000);
+        });
+      }
+    }
+  };
+};
+
+// Increase dynamoDB throughput to load data faster, and start the load via throughputCallback
+dynamoDB.updateTable(getTableThroughputParams(RECALLS_TABLE_NAME, UPSACLED_THROUGHPUT, RECALLS_TABLE_SECONDARY_INDEX), function(err, data) {
+  if (err) {
+    console.error(err);
+    return process.exit(1);
+  } else {
+    console.log(`Table ${RECALLS_TABLE_NAME} updated with throughput ${UPSACLED_THROUGHPUT}; Checking whether the change took effect... `);
+
+    checkThroughput(throughputCallback(UPSACLED_THROUGHPUT, 0, 5));
+  }
 });

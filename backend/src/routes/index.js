@@ -42,7 +42,7 @@ router.get('/recall-types/:type/makes/:make/models', (req, res) => {
   });
 });
 
-/** All recalls for a given type, make, and model */
+/** All recalls for a given type, make and model */
 router.get('/recall-types/:type/makes/:make/models/:model/recalls', (req, res) => {
   const { type } = req.params;
   const make = decodeURIComponent(req.params.make);

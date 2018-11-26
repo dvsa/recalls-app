@@ -1,5 +1,6 @@
+/* eslint no-unused-vars: 0 */
 const sinon = require('sinon');
-const expect = require('chai').expect;
+const { expect } = require('chai');
 const should = require('chai').should();
 const RecallsRepository = require('../../repositories/recalls');
 const RecallsResource = require('../../resources/recalls');
@@ -49,10 +50,6 @@ const recallItems = {
   ],
 };
 
-// function getByMakeAndModel(type, make, model, callback) {
-//   callback(null, recallItems);
-// }
-
 function getByMakeModelAndYear(type, make, model, year, callback) {
   callback(null, recallItems);
 }
@@ -97,8 +94,7 @@ describe('RecallsResource', () => {
 
   describe('mapToRecallList() method', () => {
     it('Should map to recall list', (done) => {
-      const recallsRepository = new RecallsResource();
-      const mappedRecalls = recallsRepository.constructor.mapToRecallList(recallItems.Items);
+      const mappedRecalls = RecallsResource.mapToRecallList(recallItems.Items);
 
       expect(mappedRecalls).to.be.an('array');
       expect(mappedRecalls).to.have.lengthOf(2);

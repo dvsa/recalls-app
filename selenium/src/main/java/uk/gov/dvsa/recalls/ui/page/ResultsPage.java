@@ -68,7 +68,7 @@ public class ResultsPage extends Page {
 
     public boolean isNumberOfAffectedVehiclesValid(String recallType) {
         return affectedVehiclesSentences.get(0).getText().contains(
-                String.format("Number of affected %ss", recallType)
+                String.format("Number of affected %s", recallType)
 
         );
     }

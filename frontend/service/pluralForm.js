@@ -15,7 +15,7 @@ class PluralForm {
     "There is 1 recall."
 */
   static getSingularOrPlural(text, number) {
-    const indx = number > 1 ? 0 : 1;
+    const indx = number !== 1 ? 0 : 1;
     const str = text
       .replace(REGEX_NUMBER, number)
       .replace(REGEX_TEXT, (wholematch, firstmatch) => firstmatch.split('|')[indx] || '');

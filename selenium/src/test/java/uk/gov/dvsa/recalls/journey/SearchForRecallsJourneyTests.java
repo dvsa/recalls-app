@@ -118,7 +118,7 @@ public class SearchForRecallsJourneyTests extends BaseTest {
         // The following sentence is visible: "How to check if the equipment is recalled"
         assertTrue(resultsPage.isHowToCheckSentenceValid(RECALL_TYPE_EQUIPMENT), "'How to check if the equipment is recalled' is visible");
         // The following sentence is visible: "Number of affected equipments"
-        assertTrue(resultsPage.isNumberOfAffectedVehiclesValid(RECALL_TYPE_EQUIPMENT), "'Number of affected equipments' is visible");
+        assertTrue(resultsPage.isNumberOfAffectedVehiclesValid(RECALL_TYPE_EQUIPMENT), "'Number of affected equipment' is visible");
     }
 
     @Test(description = "User can use the 'Back' buttons to get from the results page to the landing page")

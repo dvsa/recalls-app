@@ -1,0 +1,1 @@
+(cd ../frontend && npm install && npm run lint && npm test) && (cd ../backend && npm install && npm run lint && npm test)
