@@ -12,7 +12,6 @@ import uk.gov.dvsa.recalls.ui.base.PageInstanceNotFoundException;
 
 import java.util.List;
 
-@GotoUrl("/results-page")
 public class ResultsPage extends Page {
     WebDriverWait wait = new WebDriverWait(driver, 5);
 

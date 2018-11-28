@@ -19,7 +19,7 @@ import static org.testng.Assert.assertTrue;
 
 public class SearchForRecallsJourneyTests extends BaseTest {
 
-    public static final String RESULTS_PAGE_PATH = "/results-page?recallType=%s&make=%s&model=%s";
+    public static final String RESULTS_PAGE_PATH = "/recall-types/%s/makes/%s/models/%s/years/%s/recalls";
     public final String RECALL_TYPE_VEHICLE = "vehicle";
     public final String RECALL_TYPE_EQUIPMENT = "equipment";
 
@@ -124,7 +124,7 @@ public class SearchForRecallsJourneyTests extends BaseTest {
     @Test(description = "User can use the 'Back' buttons to get from the results page to the landing page")
     public void backButtonsTest() throws UnsupportedEncodingException {
         // When I am on the results page
-        ResultsPage resultsPage = recalls.goToResultsPage(RESULTS_PAGE_PATH, "vehicle", make, model);
+        ResultsPage resultsPage = recalls.goToResultsPage(RESULTS_PAGE_PATH, "vehicle", make, model, year);
         // And I click the 'Back' button, I am redirected to the year selection page
         EnterYearPage enterYearPage = (EnterYearPage) resultsPage.clickBackButton(EnterYearPage.class);
         // I click the 'Back' button again, I am redirected to the make page

@@ -1,4 +1,3 @@
-const url = require('url');
 const recallSearch = require('../service/recallSearch');
 const makeValidator = require('../validators/vehicleMake');
 const SmartSurveyFeedback = require('../helpers/SmartSurveyFeedback');
@@ -29,10 +28,7 @@ class MakeController {
 
   static submitMake(response, recallType, make) {
     if (makeValidator.isValid(make)) {
-      response.redirect(url.format({
-        pathname: 'vehicle-model',
-        query: { make, recallType },
-      }));
+      response.redirect(`makes/${make}/models`);
     } else {
       const errorMessage = makeValidator.getErrorMessage(recallType);
       this.makesList(errorMessage, response, recallType);

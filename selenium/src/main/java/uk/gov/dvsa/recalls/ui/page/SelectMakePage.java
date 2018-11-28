@@ -9,7 +9,6 @@ import uk.gov.dvsa.recalls.helper.FormDataHelper;
 import uk.gov.dvsa.recalls.navigation.GotoUrl;
 import uk.gov.dvsa.recalls.ui.base.Page;
 
-@GotoUrl("/vehicle-make")
 public abstract class SelectMakePage extends Page {
 
     private WebDriverWait wait = new WebDriverWait(driver, 5);

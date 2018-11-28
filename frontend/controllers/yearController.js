@@ -1,4 +1,3 @@
-const url = require('url');
 const ManufactureYear = require('../validators/manufactureYear');
 const SmartSurveyFeedback = require('../helpers/SmartSurveyFeedback');
 
@@ -28,12 +27,7 @@ class YearController {
   submitYear(response, recallType, make, model, year) {
     const trimmedYear = String.prototype.trim.call(year);
     if (this.yearValidator.isValid(trimmedYear)) {
-      response.redirect(url.format({
-        pathname: 'results-page',
-        query: {
-          model, make, recallType, year: trimmedYear,
-        },
-      }));
+      response.redirect(`years/${trimmedYear}/recalls`);
     } else {
       const errorMessage = this.yearValidator.getErrorMessage();
       this.enterYear(errorMessage, response, recallType, make, model);

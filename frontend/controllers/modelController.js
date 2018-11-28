@@ -1,4 +1,3 @@
-const url = require('url');
 const recallSearch = require('../service/recallSearch');
 const modelValidator = require('../validators/vehicleModel');
 const SmartSurveyFeedback = require('../helpers/SmartSurveyFeedback');
@@ -32,21 +31,18 @@ class ModelController {
 
   static submitModel(response, recallType, make, model) {
     if (modelValidator.isValid(model)) {
-      response.redirect(url.format({
-        pathname: this.redirectPathForRecallType(recallType),
-        query: { model, make, recallType },
-      }));
+      response.redirect(this.redirectPathForRecallType(response, recallType, model));
     } else {
       const errorMessage = modelValidator.getErrorMessage(recallType);
       this.modelsList(errorMessage, response, recallType, make);
     }
   }
 
-  static redirectPathForRecallType(recallType) {
+  static redirectPathForRecallType(response, recallType, model) {
     if (recallType === 'equipment') {
-      return 'results-page';
+      return `models/${model}/recalls`;
     }
-    return 'vehicle-year';
+    return `models/${model}/years`;
   }
 }
 

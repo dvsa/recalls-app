@@ -2,7 +2,7 @@
 {% set pageTitle = 'What year was the vehicle made?'  %}
 
 {% block content %}
-<a href="vehicle-model?recallType={{recallType}}&make={{make | urlencode}}" class="link-back">Back</a>
+<a href="../../models" class="link-back">Back</a>
 
 {% if errorMessage %}
   {% set elementId = 'Year-of-manufactuer' %}
@@ -19,14 +19,12 @@
   <div class="col-lg-12">
     <div class="grid-row">
       <div class="column-three-quarters">
-        <form method="POST" action="vehicle-year?recallType={{recallType}}&make={{make | urlencode}}&model={{model | urlencode}}&year={{year}}">
+        <form method="POST">
           <div class="form-group {% if errorMessage %}form-group-error{% endif %}">
-
             {% if errorMessage %}
               <span class="error-message">{{ errorMessage }}</span>
             {% endif %}
-
-            <label class="form-label" for="Year-of-manufactuer">
+            <label class="form-label" for="year">
                 <span class="form-hint">For example, 2004</span>
             </label>
             <input class="form-control" id="year" type="text" name="year" value="">

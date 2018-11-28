@@ -10,7 +10,6 @@ import uk.gov.dvsa.recalls.navigation.GotoUrl;
 import uk.gov.dvsa.recalls.ui.base.Page;
 import uk.gov.dvsa.recalls.ui.base.PageInstanceNotFoundException;
 
-@GotoUrl("/vehicle-model")
 public abstract class SelectModelPage extends Page {
 
     private WebDriverWait wait = new WebDriverWait(driver, 5);

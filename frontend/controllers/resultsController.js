@@ -22,7 +22,7 @@ class ResultsController {
 
   resultsPage(response, recallType, make, model, year) {
     if (recallType === RECALL_TYPE_EQUIPMENT) {
-      const backLink = `vehicle-model?recallType=${recallType}&make=${encodeURIComponent(make)}`;
+      const backLink = '../../models';
       const title = `${make} ${model}`;
 
       recallSearch.byMakeAndModel(recallType, make, model, (err, recalls) => {
@@ -39,7 +39,7 @@ class ResultsController {
         );
       });
     } else {
-      const backLink = `vehicle-year?recallType=${recallType}&make=${encodeURIComponent(make)}&model=${encodeURIComponent(model)}`;
+      const backLink = '../../years';
       const title = `${make} ${model} ${year}`;
 
       recallSearch.byMakeModelAndYear(recallType, make, model, year, (err, recalls) => {
@@ -77,9 +77,9 @@ class ResultsController {
         make,
         smartSurveyFeedback: this.prepareSmartSurveyFeedback(recallType, make, model, year),
         title,
+        recallTypePlural,
         foundRecallsCountHeader: this.constructor.getRecallsCountHeader(recallType, recalls),
         recallType,
-        recallTypePlural,
         recalls,
         backLink,
       };

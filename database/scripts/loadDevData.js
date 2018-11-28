@@ -13,18 +13,18 @@ const NORMAL_THROUGHPUT = 1;
 const MAX_CHECK_COUNT = 10;
 const CHECK_COUNT_DELAY_SECONDS = 10;
 
-const LAUNCH_DATE_LINE_NO = 0
-const RECALL_NUMBER_LINE_NO = 1
-const MAKE_LINE_NO = 2
-const CONCERN_LINE_NO = 4
-const DEFECT_LINE_NO = 5
-const REMEDY_LINE_NO = 6
-const VEHICLE_NUMBER_LINE_NO = 7
-const MODEL_LINE_NO = 9
-const VIN_START_LINE_NO = 10
-const VIN_END_LINE_NO = 11
-const BUILD_START_LINE_NO = 12
-const BUILD_END_LINE_NO = 13
+const LAUNCH_DATE_COL_NO = 0
+const RECALL_NUMBER_COL_NO = 1
+const MAKE_COL_NO = 2
+const CONCERN_COL_NO = 4
+const DEFECT_COL_NO = 5
+const REMEDY_COL_NO = 6
+const VEHICLE_NUMBER_COL_NO = 7
+const MODEL_COL_NO = 9
+const VIN_START_COL_NO = 10
+const VIN_END_COL_NO = 11
+const BUILD_START_COL_NO = 12
+const BUILD_END_COL_NO = 13
 
 AWS.config.update({ region: process.env.AWS_REGION });
 
@@ -245,20 +245,20 @@ const throughputCallback = function throughputCallback(expectedThroughput, curre
         // Read and load csv file
         CSV.fromPath('../documents/RecallsFileSmall.csv')
         .on('data', function(line) {
-          if (line[LAUNCH_DATE_LINE_NO] !== 'Launch Date') {
+          if (line[LAUNCH_DATE_COL_NO] !== 'Launch Date') {
             const recall = new Recall(
-              trimIfNotEmpty(dateParser.slashFormatToISO(line[LAUNCH_DATE_LINE_NO])),
-              trimIfNotEmpty(line[RECALL_NUMBER_LINE_NO]),
-              trimIfNotEmpty(line[MAKE_LINE_NO]),
-              trimIfNotEmpty(line[CONCERN_LINE_NO]),
-              trimIfNotEmpty(line[DEFECT_LINE_NO]),
-              trimIfNotEmpty(line[REMEDY_LINE_NO]),
-              trimIfNotEmpty(line[VEHICLE_NUMBER_LINE_NO]),
-              trimIfNotEmpty(line[MODEL_LINE_NO]),
-              trimIfNotEmpty(line[VIN_START_LINE_NO]),
-              trimIfNotEmpty(line[VIN_END_LINE_NO]),
-              trimIfNotEmpty(dateParser.slashFormatToISO(line[BUILD_START_LINE_NO])),
-              trimIfNotEmpty(dateParser.slashFormatToISO(line[BUILD_END_LINE_NO]))
+              trimIfNotEmpty(dateParser.slashFormatToISO(line[LAUNCH_DATE_COL_NO])),
+              trimIfNotEmpty(line[RECALL_NUMBER_COL_NO]),
+              trimIfNotEmpty(line[MAKE_COL_NO]),
+              trimIfNotEmpty(line[CONCERN_COL_NO]),
+              trimIfNotEmpty(line[DEFECT_COL_NO]),
+              trimIfNotEmpty(line[REMEDY_COL_NO]),
+              trimIfNotEmpty(line[VEHICLE_NUMBER_COL_NO]),
+              trimIfNotEmpty(line[MODEL_COL_NO]),
+              trimIfNotEmpty(line[VIN_START_COL_NO]),
+              trimIfNotEmpty(line[VIN_END_COL_NO]),
+              trimIfNotEmpty(dateParser.slashFormatToISO(line[BUILD_START_COL_NO])),
+              trimIfNotEmpty(dateParser.slashFormatToISO(line[BUILD_END_COL_NO]))
             );
             recallData.push(recall);
             uniqueRecallData[`${recall.recall_number}${recall.make}${recall.model}`] = recall;

@@ -1,6 +1,6 @@
 const express = require('express');
 
-const router = express.Router();
+const router = express.Router({ strict: true });
 const landingPageController = require('../controllers/landingPageController');
 const makeController = require('../controllers/makeController');
 const modelController = require('../controllers/modelController');
@@ -20,67 +20,70 @@ router.get('/terms-and-conditions', (req, response) => {
 });
 
 router.get('/', (req, response) => {
-  response.redirect(`${envVariables.baseUrl}/recalls`);
+  response.redirect(`${envVariables.baseUrl}/recall-types`);
 });
 
-router.get('/recalls', (req, response) => {
+router.get('/recall-types', (req, response) => {
   landingPageController.homePage(null, response);
 });
 
-router.post('/recalls', (req, response) => {
+router.post('/recall-types', (req, response) => {
   const recallType = req.body.recallType;
   landingPageController.submitRecallType(response, recallType);
 });
 
-router.get('/vehicle-make', (req, response) => {
-  const recallType = req.query.recallType;
+router.get('/recall-types/:recallType/makes', (req, response) => {
+  const recallType = req.params.recallType;
   makeController.makesList(null, response, recallType);
 });
 
-router.post('/vehicle-make', (req, response) => {
-  const recallType = req.query.recallType;
+router.post('/recall-types/:recallType/makes', (req, response) => {
+  const recallType = req.params.recallType;
   const make = req.body.make;
 
   makeController.submitMake(response, recallType, make);
 });
 
-router.get('/vehicle-model', (req, response) => {
-  const recallType = req.query.recallType;
-  const make = req.query.make;
+router.get('/recall-types/:recallType/makes/:make/models', (req, response) => {
+  const recallType = req.params.recallType;
+  const make = req.params.make;
 
   modelController.modelsList(null, response, recallType, make);
 });
 
-router.post('/vehicle-model', (req, response) => {
-  const recallType = req.query.recallType;
-  const make = req.query.make;
+router.post('/recall-types/:recallType/makes/:make/models', (req, response) => {
+  const recallType = req.params.recallType;
+  const make = req.params.make;
   const model = req.body.model;
 
   modelController.submitModel(response, recallType, make, model);
 });
 
-router.get('/vehicle-year', (req, response) => {
-  const recallType = req.query.recallType;
-  const make = req.query.make;
-  const model = req.query.model;
+router.get('/recall-types/:recallType/makes/:make/models/:model/years', (req, response) => {
+  const recallType = req.params.recallType;
+  const make = req.params.make;
+  const model = req.params.model;
 
   yearController.enterYear(null, response, recallType, make, model);
 });
 
-router.post('/vehicle-year', (req, response) => {
-  const recallType = req.query.recallType;
-  const make = req.query.make;
-  const model = req.query.model;
+router.post('/recall-types/:recallType/makes/:make/models/:model/years', (req, response) => {
+  const recallType = req.params.recallType;
+  const make = req.params.make;
+  const model = req.params.model;
   const year = req.body.year;
 
   yearController.submitYear(response, recallType, make, model, year);
 });
 
-router.get('/results-page', (req, response) => {
-  const make = req.query.make;
-  const model = req.query.model;
-  const year = req.query.year;
-  const recallType = req.query.recallType;
+router.get([
+  '/recall-types/:recallType/makes/:make/models/:model/recalls',
+  '/recall-types/:recallType/makes/:make/models/:model/years/:year/recalls',
+], (req, response) => {
+  const make = req.params.make;
+  const model = req.params.model;
+  const year = req.params.year;
+  const recallType = req.params.recallType;
 
   resultsController.resultsPage(response, recallType, make, model, year);
 });

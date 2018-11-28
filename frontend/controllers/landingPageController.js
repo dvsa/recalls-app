@@ -1,4 +1,3 @@
-const url = require('url');
 const typeValidator = require('../validators/recallType');
 const SmartSurveyFeedback = require('../helpers/SmartSurveyFeedback');
 
@@ -12,10 +11,7 @@ class FrontendController {
 
   static submitRecallType(response, recallType) {
     if (typeValidator.isValid(recallType)) {
-      response.redirect(url.format({
-        pathname: 'vehicle-make',
-        query: { recallType },
-      }));
+      response.redirect(`recall-types/${recallType}/makes`);
     } else {
       const errorMessage = typeValidator.getErrorMessage();
       this.homePage(errorMessage, response);

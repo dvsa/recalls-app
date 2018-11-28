@@ -52,14 +52,13 @@
     "functions": 60,
     "branches": 60,
     "include": [
-      "*/**/*.js",
-      "app.js"
+      "*/**/*.js"
     ],
     "exclude": [
+      "app.js",
       "scripts/*.js",
       "config/*.js",
       "routes/*.js",
-      "service/*.js",
       "controllers/*.js",
       "test/*.js",
       "test/*/*.js"
