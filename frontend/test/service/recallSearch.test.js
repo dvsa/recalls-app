@@ -8,6 +8,7 @@ const recallSearch = require('../../service/recallSearch');
 const TYPE_VEHICLE = 'vehicle';
 const MAKE_LAND_ROVER = 'LAND ROVER';
 const MODEL_DISCOVERY = 'DISCOVERY';
+const YEAR = '2018';
 const API_ERROR_MESSAGE = 'An error has occurred during request';
 const FIRST_RESULT = 'result 1';
 const SECOND_RESULT = 'result 2';
@@ -27,6 +28,8 @@ function createRecallDto(make) {
   recallDto.concern = 'Concern';
   recallDto.remedy = 'Remedy';
   recallDto.affectedVehiclesNumber = 'Affected number';
+  recallDto.buildStart = '19-04-2010';
+  recallDto.buildEnd = '20-05-2018';
   return recallDto;
 }
 
@@ -75,7 +78,7 @@ describe('RecallSearch', () => {
     it('Should parse a JSON response from the API', (done) => {
       this.get.yields(null, {}, JSON.stringify(RESULTS));
 
-      recallSearch.byMakeAndModel(TYPE_VEHICLE, MAKE_LAND_ROVER, MODEL_DISCOVERY,
+      recallSearch.byMakeModelAndYear(TYPE_VEHICLE, MAKE_LAND_ROVER, MODEL_DISCOVERY, YEAR,
         (err, recalls) => {
           expect(recalls).to.be.an('array');
           expect(recalls).to.include(FIRST_RESULT);
@@ -86,7 +89,7 @@ describe('RecallSearch', () => {
     it('Should report errors that occur during API requests', (done) => {
       this.get.yields(API_ERROR_MESSAGE, {}, JSON.stringify(RESULTS));
 
-      recallSearch.byMakeAndModel(TYPE_VEHICLE, MAKE_LAND_ROVER, MODEL_DISCOVERY,
+      recallSearch.byMakeModelAndYear(TYPE_VEHICLE, MAKE_LAND_ROVER, MODEL_DISCOVERY, YEAR,
         (err, recalls) => {
           expect(err).to.include(API_ERROR_MESSAGE);
           should.not.exist(recalls);

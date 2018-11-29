@@ -20,6 +20,24 @@ class RecallsRepository {
     this.dbClient.database.query(params, callback);
   }
 
+  getByMakeModelAndYear(recallType, make, model, year, callback) {
+    const params = {
+      TableName: this.dbClient.recallsTable,
+      IndexName: this.dbClient.recallsSecondaryIndexName,
+      KeyConditionExpression: 'type_make_model = :typeMakeModel',
+      FilterExpression: 'build_start <= :yearEnd AND build_end >= :yearStart',
+      ExpressionAttributeValues: {
+        ':typeMakeModel': `${recallType}-${make}-${model}`,
+        ':yearStart': `${year}-01-01`,
+        ':yearEnd': `${year}-12-31`,
+      },
+    };
+
+    console.log(`DB request params: ${JSON.stringify(params)}`);
+
+    this.dbClient.database.query(params, callback);
+  }
+
   getAllMakes(type, callback) {
     const params = {
       TableName: this.dbClient.makesTable,

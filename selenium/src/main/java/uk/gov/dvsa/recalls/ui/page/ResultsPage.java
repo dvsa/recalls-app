@@ -37,8 +37,8 @@ public class ResultsPage extends Page {
         return ""; // Page title has no static text - it is completely dynamic
     }
 
-    public boolean headerContainsCorrectVehicleMake(String make) {
-        return header.isDisplayed() && header.getText().toLowerCase().contains(make.toLowerCase());
+    public boolean headerContains(String text) {
+        return header.isDisplayed() && header.getText().toLowerCase().contains(text.toLowerCase());
     }
 
     public boolean recallTitleIsDisplayed(String recallTitle) {
@@ -73,7 +73,7 @@ public class ResultsPage extends Page {
         );
     }
 
-    public SelectModelPage clickBackButton(Class<? extends SelectModelPage> clazz) {
+    public Page clickBackButton(Class<? extends Page> clazz) {
         backButton.click();
         try {
             return clazz.newInstance();

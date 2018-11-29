@@ -22,7 +22,7 @@ class MakeController {
     });
   }
 
-  static submitMake(make, recallType, response) {
+  static submitMake(response, recallType, make) {
     if (makeValidator.isValid(make)) {
       response.redirect(url.format({
         pathname: 'vehicle-model',

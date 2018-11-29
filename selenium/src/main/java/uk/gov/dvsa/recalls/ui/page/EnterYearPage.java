@@ -10,40 +10,42 @@ import uk.gov.dvsa.recalls.navigation.GotoUrl;
 import uk.gov.dvsa.recalls.ui.base.Page;
 import uk.gov.dvsa.recalls.ui.base.PageInstanceNotFoundException;
 
-@GotoUrl("/vehicle-model")
-public abstract class SelectModelPage extends Page {
-
+@GotoUrl("/vehicle-year")
+public class EnterYearPage extends Page {
     private WebDriverWait wait = new WebDriverWait(driver, 5);
     @FindBy(id = "continue-button") private WebElement continueButton;
-    @FindBy(id = "model") WebElement vehicleModelDropdown;
+    @FindBy(id = "year") private WebElement manufactureYearField;
     @FindBy(className = "error-message") private WebElement errorMessage;
     @FindBy(className = "link-back") private WebElement backButton;
 
+    public final String EMPTY_YEAR_MSG = "Enter the year the vehicle was made";
+    public final String DIGITS_ONLY_MSG = "Enter a year using numbers 0 to 9";
+    public final String FOUR_DIGITS_MSG = "Enter a real year";
+    public final String IN_THE_FUTURE_MSG = "Year must not be in the future";
+
     @Override
-    protected abstract String getExpectedPageTitle();
-
-    public abstract Page selectModelAndContinue(String model);
-
-    void selectModelAndContinueCommon(String model) {
-        FormDataHelper.selectFromDropDownByVisibleText(vehicleModelDropdown, model);
-        clickContinueButtonWhenReady();
+    protected String getExpectedPageTitle() {
+        return "What year was the vehicle made?";
     }
 
-    void clickContinueButtonWhenReady() {
+    public ResultsPage enterYearAndContinue(String year) {
+        FormDataHelper.enterText(manufactureYearField, year);
+        clickContinueButtonWhenReady();
+        return new ResultsPage();
+    }
+
+    public boolean enterYearAndExpectError(String year, String error) {
+        FormDataHelper.enterText(manufactureYearField, year);
+        clickContinueButtonWhenReady();
+        return errorMessage.getText().contains(error);
+    }
+
+    private void clickContinueButtonWhenReady() {
         title.click(); // Click some text to close a dropdown which might be obscuring the button
         wait.until(ExpectedConditions.elementToBeClickable(continueButton)).click();
     }
 
-    public void clickContiniueWithNoOptionsSelected() {
-        FormDataHelper.selectFromDropDownByVisibleText(vehicleModelDropdown, "Choose a model");
-        continueButton.click();
-    }
-
-    public boolean formErrorMessageIsVisible() {
-        return errorMessage.getText().contains("Select the vehicle model");
-    }
-
-    public SelectMakePage clickBackButton(Class<? extends SelectMakePage> clazz) {
+    public SelectModelPage clickBackButton(Class<? extends SelectModelPage> clazz) {
         backButton.click();
         try {
             return clazz.newInstance();

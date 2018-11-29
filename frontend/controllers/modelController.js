@@ -28,16 +28,23 @@ class ModelController {
     });
   }
 
-  static submitModel(make, model, recallType, response) {
+  static submitModel(response, recallType, make, model) {
     if (modelValidator.isValid(model)) {
       response.redirect(url.format({
-        pathname: 'results-page',
+        pathname: this.redirectPathForRecallType(recallType),
         query: { model, make, recallType },
       }));
     } else {
       const errorMessage = modelValidator.getErrorMessage();
       this.modelsList(errorMessage, response, recallType, make);
     }
+  }
+
+  static redirectPathForRecallType(recallType) {
+    if (recallType === 'equipment') {
+      return 'results-page';
+    }
+    return 'vehicle-year';
   }
 }
 

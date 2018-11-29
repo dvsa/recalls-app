@@ -38,11 +38,22 @@ class RecallSearch {
     const encodedMake = encodeURIComponent(make);
     const encodedModel = encodeURIComponent(model);
     const path = `${RECALLS_BACKEND_URL}/recall-types/${type}/makes/${encodedMake}/models/${encodedModel}/recalls`;
+    this.fetchRecalls(path, type, make, model, null, callback);
+  }
+
+  static byMakeModelAndYear(type, make, model, year, callback) {
+    const encodedMake = encodeURIComponent(make);
+    const encodedModel = encodeURIComponent(model);
+    const path = `${RECALLS_BACKEND_URL}/recall-types/${type}/makes/${encodedMake}/models/${encodedModel}/year/${year}/recalls`;
+    this.fetchRecalls(path, type, make, model, year, callback);
+  }
+
+  static fetchRecalls(path, type, make, model, year, callback) {
     request.get(encodeURI(path), (err, res, body) => {
-      console.info(`RecallSearch.byMakeAndModel(${type}, ${make}, ${model}) - HTTP response code`, res && res.statusCode);
+      console.info(`RecallSearch for (${type}, ${make}, ${model}, ${year}) - HTTP response code`, res && res.statusCode);
 
       if (err != null) {
-        console.error('RecallSearch.byMakeAndModel() - Error while calling API: ', err);
+        console.error('RecallSearch - Error while calling API: ', err);
         callback(err);
       } else {
         const recalls = this.mapRecallsToDto(body);
@@ -63,6 +74,8 @@ class RecallSearch {
       recallDto.concern = recall.concern;
       recallDto.remedy = recall.remedy;
       recallDto.affectedVehiclesNumber = recall.affectedVehiclesNumber;
+      recallDto.buildStart = recall.buildStart;
+      recallDto.buildEnd = recall.buildEnd;
       return recallDto;
     });
   }

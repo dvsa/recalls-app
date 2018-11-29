@@ -10,7 +10,7 @@ class FrontendController {
     });
   }
 
-  static submitRecallType(req, response, recallType) {
+  static submitRecallType(response, recallType) {
     if (typeValidator.isValid(recallType)) {
       response.redirect(url.format({
         pathname: 'vehicle-make',

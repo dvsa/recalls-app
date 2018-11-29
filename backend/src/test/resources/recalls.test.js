@@ -5,12 +5,10 @@ const RecallsRepository = require('../../repositories/recalls');
 const RecallsResource = require('../../resources/recalls');
 
 const TYPE_VEHICLE = 'vehicle';
-
 const MAKE_LAND_ROVER = 'LAND ROVER';
-
 const FIRST_MODEL = 'DISCOVERY SPORT';
 const SECOND_MODEL = 'DEFENDER';
-
+const YEAR = '2017';
 const FIRST_RECALL_NUMBER = 'R/2017/153';
 const SECOND_RECALL_NUMBER = 'R/2009/091';
 
@@ -18,9 +16,9 @@ const recallItems = {
   Items: [
     {
       model: FIRST_MODEL,
-      build_end: '07/03/2017',
-      build_start: '02/03/2017',
-      launch_date: '23/05/2017',
+      build_end: '2017-03-07',
+      build_start: '2017-03-02',
+      launch_date: '2017-05-23',
       recall_number: FIRST_RECALL_NUMBER,
       make: 'LAND ROVER',
       concern: 'LOCKING RING MAY BE INCORRECTLY ASSEMBLED',
@@ -34,9 +32,9 @@ const recallItems = {
     },
     {
       model: SECOND_MODEL,
-      build_end: '13/02/2008',
-      build_start: '07/06/2007',
-      launch_date: '04/12/2009',
+      build_end: '2008-02-13',
+      build_start: '2007-06-07',
+      launch_date: '2009-12-04',
       recall_number: SECOND_RECALL_NUMBER,
       make: 'LAND ROVER',
       concern: 'PARKING BRAKE MAY BECOME INEFFECTIVE',
@@ -51,48 +49,56 @@ const recallItems = {
   ],
 };
 
-function getByMakeAndModel(type, make, model, callback) {
+// function getByMakeAndModel(type, make, model, callback) {
+//   callback(null, recallItems);
+// }
+
+function getByMakeModelAndYear(type, make, model, year, callback) {
   callback(null, recallItems);
 }
 
-function getByMakeAndModelWithError(type, make, model, callback) {
+function getByMakeModelAndYearWithError(type, make, model, year, callback) {
   callback(new Error('Error'), null);
 }
 
 describe('RecallsResource', () => {
-  describe('getByMakeAndModel() method', () => {
+  describe('getByMakeModelAndYear() method', () => {
     it('Should return data from database mapped to list of Recall objects', (done) => {
       const recallsRepository = new RecallsRepository();
-      sinon.stub(recallsRepository, 'getByMakeAndModel').callsFake(getByMakeAndModel);
+      sinon.stub(recallsRepository, 'getByMakeModelAndYear').callsFake(getByMakeModelAndYear);
 
       const recallsResource = new RecallsResource(recallsRepository);
-      recallsResource.getByMakeAndModel(TYPE_VEHICLE, MAKE_LAND_ROVER, FIRST_MODEL, (err, data) => {
-        expect(data).to.be.an('array');
-        expect(data).to.have.lengthOf(2);
-        expect(data[0].recallNumber).to.equal('R/2017/153');
-        expect(data[1].recallNumber).to.equal('R/2009/091');
-        done();
-      });
+      recallsResource.getByMakeModelAndYear(
+        TYPE_VEHICLE, MAKE_LAND_ROVER, FIRST_MODEL, YEAR, (err, data) => {
+          expect(data).to.be.an('array');
+          expect(data).to.have.lengthOf(2);
+          expect(data[0].recallNumber).to.equal(FIRST_RECALL_NUMBER);
+          expect(data[1].recallNumber).to.equal(SECOND_RECALL_NUMBER);
+          done();
+        },
+      );
     });
 
     it('Should return error when RecallsRepository returns an error', (done) => {
       const recallsRepository = new RecallsRepository();
-      sinon.stub(recallsRepository, 'getByMakeAndModel').callsFake(getByMakeAndModelWithError);
+      sinon.stub(recallsRepository, 'getByMakeModelAndYear').callsFake(getByMakeModelAndYearWithError);
 
       const recallsResource = new RecallsResource(recallsRepository);
-      recallsResource.getByMakeAndModel(TYPE_VEHICLE, MAKE_LAND_ROVER, FIRST_MODEL, (err, data) => {
-        expect(data).to.be.an('undefined');
-        expect(err.message).to.equal('Error');
-        expect(getByMakeAndModelWithError).to.throw(Error);
-        done();
-      });
+      recallsResource.getByMakeModelAndYear(
+        TYPE_VEHICLE, MAKE_LAND_ROVER, FIRST_MODEL, YEAR, (err, data) => {
+          expect(data).to.be.an('undefined');
+          expect(err.message).to.equal('Error');
+          expect(getByMakeModelAndYearWithError).to.throw(Error);
+          done();
+        },
+      );
     });
   });
 
   describe('mapToRecallList() method', () => {
     it('Should map to recall list', (done) => {
       const recallsRepository = new RecallsResource();
-      const mappedRecalls = recallsRepository.mapToRecallList(recallItems.Items);
+      const mappedRecalls = recallsRepository.constructor.mapToRecallList(recallItems.Items);
 
       expect(mappedRecalls).to.be.an('array');
       expect(mappedRecalls).to.have.lengthOf(2);
