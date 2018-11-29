@@ -15,7 +15,7 @@ class RecallsRepository {
       },
     };
 
-    console.log(`DB request params: ${JSON.stringify(params)}`);
+    console.info(`DB request params: ${JSON.stringify(params)}`);
 
     this.dbClient.database.query(params, callback);
   }
@@ -33,7 +33,7 @@ class RecallsRepository {
       },
     };
 
-    console.log(`DB request params: ${JSON.stringify(params)}`);
+    console.info(`DB request params: ${JSON.stringify(params)}`);
 
     this.dbClient.database.query(params, callback);
   }
