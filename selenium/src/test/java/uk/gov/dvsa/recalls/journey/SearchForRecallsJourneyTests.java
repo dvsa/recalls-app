@@ -84,9 +84,9 @@ public class SearchForRecallsJourneyTests extends BaseTest {
 
     @Test(description = "User can check recalls for an equpment of a particular make and model")
     public void searchEquipmentByMakeTest() {
-        String make = "COOPER BUSSMANN (UK) LTD";
-        String model = "1315-B";
-        String expectedRecallTitle = "FIRE MAY OCCUR";
+        String make = "COOPER";
+        String model = "LT285/75R16";
+        String expectedRecallTitle = "TYRE TREAD MAY SEPARATE";
         String expectedPageHeader = String.format("%s %s", make, model);
 
         //Given I am a user of the site and I want to check equipment recalls
