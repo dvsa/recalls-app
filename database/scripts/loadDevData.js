@@ -75,8 +75,10 @@ function addToArrayIfNotYetExists(array, element) {
 }
 
 function addToMapIfNotYetExists(map, key, value) {
-  if(key in map) {
-    map.get(key).push(value); 
+  if(map.has(key)) {
+    if(map.get(key).indexOf(value) === -1) {
+      map.get(key).push(value);
+    }
   } else {
     map.set(key, [value]);
   }
@@ -85,11 +87,11 @@ function addToMapIfNotYetExists(map, key, value) {
 function addToMakesAndModels(recall) {
   if (recall.type == 'vehicle') {
     addToArrayIfNotYetExists(vehicleMakes, recall.make);
-    addToMapIfNotYetExists(models, 'vehicle-' + recall.make, recall.model);
   } else {
     addToArrayIfNotYetExists(equipmentMakes, recall.make);
-    addToMapIfNotYetExists(models, 'equipment-' + recall.make, recall.model);
   }
+
+  addToMapIfNotYetExists(models, `${recall.type}-${recall.make}`, recall.model);
 }
 
 async function getRecallCount(callback) {
@@ -120,25 +122,25 @@ async function insertRecallsToDb() {
   }
 }
 
-async function insertModelsToDb() {
-  for (const model of models) {
+function insertModelsToDb() {
+  models.forEach((values, key, map) => {
     const modelsParams = {
       TableName: MODELS_TABLE_NAME,
       Item: {
-        'type_make': model[0],
-        'models': model[1].sort(),
+        'type_make': key,
+        'models': values.sort(),
       }
     };
 
-    await documentClient.put(modelsParams, (err, data) => {
+    documentClient.put(modelsParams, (err, data) => {
       if (err) {
-        console.error('Unable to add model ', model[0], '. Error JSON:', JSON.stringify(err, null, 2));
+        console.error('Unable to add model ', key, '. Error JSON:', JSON.stringify(err, null, 2));
         return process.exit(1);
       } else {
         console.log('Models uploaded successfully to the recalls table');
       }
     });
-  }
+  });
 }
 
 function insertMakesToDb() {
