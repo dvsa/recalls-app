@@ -2,6 +2,9 @@ const recallSearch = require('../service/recallSearch');
 const modelValidator = require('../validators/vehicleModel');
 const SmartSurveyFeedback = require('../helpers/SmartSurveyFeedback');
 
+const NOTICE_VEHICLE = 'This service only includes vehicles that have been recalled.';
+const NOTICE_EQUIPMENT = 'This service only includes equipment that has been recalled.';
+
 class ModelController {
   static prepareSmartSurveyFeedback(recallType, make) {
     const smartSurveyFeedback = SmartSurveyFeedback.getInstance();
@@ -15,12 +18,12 @@ class ModelController {
       if (err) {
         console.error(err);
       } else {
-        const recallTypePlural = recallType === 'vehicle' ? `${recallType}s` : recallType;
+        const recallsAvailabilityNotice = recallType === 'vehicle' ? NOTICE_VEHICLE : NOTICE_EQUIPMENT;
         const smartSurveyFeedback = this.prepareSmartSurveyFeedback(recallType, make);
         response.render('vehicle-model.njk', {
           models,
           recallType,
-          recallTypePlural,
+          recallsAvailabilityNotice,
           smartSurveyFeedback,
           make,
           errorMessage,
