@@ -10,7 +10,7 @@
     </h1>
   </header>
   <p class="lede">{{foundRecallsCountHeader | safe}}</p>
-  <div class="js-accordion js-accordion--up-down-arrows" role="presentation">
+  <div class="js-accordion js-accordion--up-down-arrows">
     <div class="js-accordion__top-section">
       <button class="js-accordion__expand-button">
         Open All
@@ -18,9 +18,9 @@
     </div>
     {% for recall in recalls %}
     <div class="js-accordion__wrapper">
-      <div class="js-accordion__section" data-section-category="category-{{loop.index}}" data-section-state-index-id="{{loop.index0}}">
+      <div class="js-accordion__section" data-section-category="category-{{loop.index}}">
 
-        <div class="js-accordion__header" role="region" aria-controls="id{{loop.index0}}" aria-expanded="false">
+        <div class="js-accordion__header">
           <div class="js-accordion__header-left">
             <h2 class="js-accordion__title recall-title">
               <button class="js-accordion__title-button">
