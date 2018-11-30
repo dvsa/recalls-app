@@ -10,7 +10,7 @@
     </h1>
   </header>
   <p class="lede">{{foundRecallsCountHeader | safe}}</p>
-  <div class="js-accordion js-accordion--up-down-arrows js-accordion--js-enabled" role="presentation">
+  <div class="js-accordion js-accordion--up-down-arrows" role="presentation">
     <div class="js-accordion__top-section">
       <button class="js-accordion__expand-button">
         Open All
@@ -82,6 +82,6 @@
   </div>
   <br>
   <div>
-    <a class="button" id="search-again" href="recalls" style="margin-bottom:30px">Search again</a>
+    <a class="button" id="search-again" href="{{BASE_URL}}/recall-types" style="margin-bottom:30px">Search again</a>
   </div>
 {% endblock %}

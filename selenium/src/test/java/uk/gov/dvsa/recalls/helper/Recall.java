@@ -17,4 +17,9 @@ public class Recall {
 
         return PageNavigator.goToResultsPage(path, recallType, make, model, year);
     }
+
+    public ResultsPage goToResultsPage(String path, String recallType, String make, String model) throws UnsupportedEncodingException {
+
+        return PageNavigator.goToResultsPage(path, recallType, make, model);
+    }
 }
