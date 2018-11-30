@@ -28,7 +28,7 @@ class MakeController {
 
   static submitMake(response, recallType, make) {
     if (makeValidator.isValid(make)) {
-      response.redirect(`makes/${make}/models`);
+      response.redirect(`makes/${encodeURIComponent(make)}/models`);
     } else {
       const errorMessage = makeValidator.getErrorMessage(recallType);
       this.makesList(errorMessage, response, recallType);

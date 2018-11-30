@@ -40,9 +40,9 @@ class ModelController {
 
   static redirectPathForRecallType(response, recallType, model) {
     if (recallType === 'equipment') {
-      return `models/${model}/recalls`;
+      return `models/${encodeURIComponent(model)}/recalls`;
     }
-    return `models/${model}/years`;
+    return `models/${encodeURIComponent(model)}/years`;
   }
 }
 
