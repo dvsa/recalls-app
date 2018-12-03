@@ -8,7 +8,8 @@ const RECALLS_TABLE_NAME = `cvr-${ENVIRONMENT}-recalls`;
 const MAKES_TABLE_NAME = `cvr-${ENVIRONMENT}-makes`;
 const MODELS_TABLE_NAME = `cvr-${ENVIRONMENT}-models`;
 const RECALLS_TABLE_SECONDARY_INDEX = 'type-make-model-gsi';
-const UPSACLED_THROUGHPUT = 500;
+const UPSCALED_WRITE_THROUGHPUT = 500;
+const UPSCALED_READ_THROUGHPUT = 65;
 const NORMAL_THROUGHPUT = 1;
 const MAX_CHECK_COUNT = 10;
 const CHECK_COUNT_DELAY_SECONDS = 10;
@@ -40,12 +41,12 @@ const models = new Map();
 let checkNumber = 1;
 let uniqueRowsRead = 0;
 
-function getTableThroughputParams(tableName, desiredThroughput, indexName) {
+function getTableThroughputParams(tableName, desiredWriteThroughput, desiredReadThroughput, indexName) {
   const output = {
     TableName: tableName,
     ProvisionedThroughput: {
-      ReadCapacityUnits: desiredThroughput,
-      WriteCapacityUnits: desiredThroughput
+      ReadCapacityUnits: desiredReadThroughput,
+      WriteCapacityUnits: desiredWriteThroughput
     },
   };
 
@@ -54,8 +55,8 @@ function getTableThroughputParams(tableName, desiredThroughput, indexName) {
       Update: {
         IndexName: indexName,
         ProvisionedThroughput: {
-          ReadCapacityUnits: desiredThroughput,
-          WriteCapacityUnits: desiredThroughput
+          ReadCapacityUnits: desiredReadThroughput,
+          WriteCapacityUnits: desiredWriteThroughput
         }
       }
     }];
@@ -199,7 +200,7 @@ const countCallback = async function countCallback(err, data) {
         getRecallCount(countCallback);
       } else {
         console.error(`Recall count is not equal to the expected value of ${uniqueRowsRead}`);
-        dynamoDB.updateTable(getTableThroughputParams(RECALLS_TABLE_NAME, NORMAL_THROUGHPUT, RECALLS_TABLE_SECONDARY_INDEX), function(err, data) {
+        dynamoDB.updateTable(getTableThroughputParams(RECALLS_TABLE_NAME, NORMAL_THROUGHPUT, NORMAL_THROUGHPUT, RECALLS_TABLE_SECONDARY_INDEX), function(err, data) {
           if (err) {
             console.error(`Table ${RECALLS_TABLE_NAME} throughput not reduced!! Rerun, reduce manually or destroy the env to avoid incurring raised dynamodb costs`);
             console.error(err);
@@ -212,7 +213,7 @@ const countCallback = async function countCallback(err, data) {
       }
     } else {
       // At the end decrease dynamoDB throughput to normal values if item count matches
-      dynamoDB.updateTable(getTableThroughputParams(RECALLS_TABLE_NAME, NORMAL_THROUGHPUT, RECALLS_TABLE_SECONDARY_INDEX), function(err, data) {
+      dynamoDB.updateTable(getTableThroughputParams(RECALLS_TABLE_NAME, NORMAL_THROUGHPUT, NORMAL_THROUGHPUT, RECALLS_TABLE_SECONDARY_INDEX), function(err, data) {
         if (err) {
           console.error(`Table ${RECALLS_TABLE_NAME} throughput not reduced!! Rerun, reduce manually or destroy the env to avoid incurring raised dynamodb costs`);
           console.error(err);
@@ -226,24 +227,24 @@ const countCallback = async function countCallback(err, data) {
 };
 
 // callback function that checks if throughput is changed to the expected amount, if yes proceeds with data load.
-const throughputCallback = function throughputCallback(expectedThroughput, currentRetry, delaySeconds) {
+const throughputCallback = function throughputCallback(expectedWriteThroughput, expectedReadThroughput, currentRetry, delaySeconds) {
   return (err, data) => {
     if (err) {
       console.error(err);
       return process.exit(1);
     } else {
-      if (data.Table.ProvisionedThroughput.WriteCapacityUnits != expectedThroughput) {
-        console.log(`Table ${RECALLS_TABLE_NAME} real throughput is ${data.Table.ProvisionedThroughput.WriteCapacityUnits}; waiting...`);
+      if (data.Table.ProvisionedThroughput.WriteCapacityUnits != expectedWriteThroughput && data.Table.ProvisionedThroughput.ReadCapacityUnits != expectedReadThroughput) {
+        console.log(`Table ${RECALLS_TABLE_NAME} real  throughput is ${data.Table.ProvisionedThroughput.WriteCapacityUnits}/${data.Table.ProvisionedThroughput.ReadCapacityUnits}; waiting...`);
         if (currentRetry <= MAX_CHECK_COUNT) {
           setTimeout(function() {
-            checkThroughput(throughputCallback(expectedThroughput, currentRetry + 1, delaySeconds));
+            checkThroughput(throughputCallback(expectedWriteThroughput, expectedReadThroughput, currentRetry + 1, delaySeconds));
           }, delaySeconds * 1000);
         } else {
           console.error('DynamoDB table write capacity did not change in expected amount of time investigate and/or rerun the build');
           return process.exit(1);
         }
       } else {
-        console.log(`Table ${RECALLS_TABLE_NAME} real throughput is ${data.Table.ProvisionedThroughput.WriteCapacityUnits}; Loading CSV data`);
+        console.log(`Table ${RECALLS_TABLE_NAME} real throughput is ${data.Table.ProvisionedThroughput.WriteCapacityUnits}/${data.Table.ProvisionedThroughput.ReadCapacityUnits}; Loading CSV data`);
         // Read and load csv file
         CSV.fromPath('../documents/RecallsFileSmall.csv')
         .on('data', function(line) {
@@ -290,13 +291,15 @@ const throughputCallback = function throughputCallback(expectedThroughput, curre
 };
 
 // Increase dynamoDB throughput to load data faster, and start the load via throughputCallback
-dynamoDB.updateTable(getTableThroughputParams(RECALLS_TABLE_NAME, UPSACLED_THROUGHPUT, RECALLS_TABLE_SECONDARY_INDEX), function(err, data) {
+dynamoDB.updateTable(getTableThroughputParams(RECALLS_TABLE_NAME, UPSCALED_WRITE_THROUGHPUT, UPSCALED_READ_THROUGHPUT, RECALLS_TABLE_SECONDARY_INDEX), function(err, data) {
   if (err) {
     console.error(err);
     return process.exit(1);
   } else {
-    console.log(`Table ${RECALLS_TABLE_NAME} updated with throughput ${UPSACLED_THROUGHPUT}; Checking whether the change took effect... `);
+    console.log(
+      `Table ${RECALLS_TABLE_NAME} updated with write throughput ${UPSCALED_WRITE_THROUGHPUT}, read throughput ${UPSCALED_READ_THROUGHPUT}; Checking whether the change took effect... `
+      );
 
-    checkThroughput(throughputCallback(UPSACLED_THROUGHPUT, 0, 5));
+    checkThroughput(throughputCallback(UPSCALED_WRITE_THROUGHPUT, UPSCALED_READ_THROUGHPUT, 0, 5));
   }
 });

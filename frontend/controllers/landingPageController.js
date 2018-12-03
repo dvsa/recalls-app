@@ -11,7 +11,7 @@ class FrontendController {
 
   static submitRecallType(response, recallType) {
     if (typeValidator.isValid(recallType)) {
-      response.redirect(`recall-types/${recallType}/makes`);
+      response.redirect(`recall-type/${recallType}/make`);
     } else {
       const errorMessage = typeValidator.getErrorMessage();
       this.homePage(errorMessage, response);

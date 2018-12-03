@@ -1,9 +1,10 @@
 const sinon = require('sinon');
 const { expect } = require('chai');
+const RecallType = require('cvr-common/model/recallTypeEnum');
 const RecallsRepository = require('../../repositories/recalls');
 const MakesResource = require('../../resources/makes');
 
-const TYPE = 'vehicle';
+const TYPE = RecallType.vehicle;
 
 function getAllMakes(type, callback) {
   callback(null, {

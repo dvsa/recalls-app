@@ -1,9 +1,8 @@
+const RecallType = require('cvr-common/model/recallTypeEnum');
 const recallSearch = require('../service/recallSearch');
 const makeValidator = require('../validators/vehicleMake');
+const messages = require('../messages/messages.en');
 const SmartSurveyFeedback = require('../helpers/SmartSurveyFeedback');
-
-const NOTICE_VEHICLE = 'This service only includes vehicles that have been recalled.';
-const NOTICE_EQUIPMENT = 'This service only includes equipment that has been recalled.';
 
 class MakeController {
   static makesList(errorMessage, response, recallType) {
@@ -11,7 +10,10 @@ class MakeController {
       if (err) {
         console.error(err);
       } else {
-        const recallsAvailabilityNotice = recallType === 'vehicle' ? NOTICE_VEHICLE : NOTICE_EQUIPMENT;
+        const recallsAvailabilityNotice = recallType === RecallType.vehicle
+          ? messages.AVAILABILITY_NOTICE.VEHICLE
+          : messages.AVAILABILITY_NOTICE.EQUIPMENT;
+
         const smartSurveyFeedback = SmartSurveyFeedback.getInstance();
         smartSurveyFeedback.type = recallType;
 
@@ -28,7 +30,7 @@ class MakeController {
 
   static submitMake(response, recallType, make) {
     if (makeValidator.isValid(make)) {
-      response.redirect(`makes/${encodeURIComponent(make)}/models`);
+      response.redirect(`make/${encodeURIComponent(make)}/model`);
     } else {
       const errorMessage = makeValidator.getErrorMessage(recallType);
       this.makesList(errorMessage, response, recallType);

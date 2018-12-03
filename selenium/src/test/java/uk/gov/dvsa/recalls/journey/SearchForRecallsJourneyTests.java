@@ -19,9 +19,10 @@ import static org.testng.Assert.assertTrue;
 
 public class SearchForRecallsJourneyTests extends BaseTest {
 
-    public static final String RESULTS_PAGE_PATH_VEHICLE = "/recall-types/%s/makes/%s/models/%s/years/%s/recalls";
-    public static final String RESULTS_PAGE_PATH_EQUIPMENT = "/recall-types/%s/makes/%s/models/%s/recalls";
+    public static final String RESULTS_PAGE_PATH_VEHICLE = "/recall-type/%s/make/%s/model/%s/year/%s/recalls";
+    public static final String RESULTS_PAGE_PATH_EQUIPMENT = "/recall-type/%s/make/%s/model/%s/recalls";
     public final String RECALL_TYPE_VEHICLE = "vehicle";
+    public final String RECALL_TYPE_VEHICLE_PLURAL = "vehicles";
     public final String RECALL_TYPE_EQUIPMENT = "equipment";
 
     public final String make = "OUGHTRED & HARRISON";
@@ -76,7 +77,7 @@ public class SearchForRecallsJourneyTests extends BaseTest {
         // The following sentence is visible: "How to check if the vehicle is recalled"
         assertTrue(resultsPage.isHowToCheckSentenceValid(RECALL_TYPE_VEHICLE), "'How to check if the vehicle is recalled' is visible");
         // The following sentence is visible: "Number of affected vehicles"
-        assertTrue(resultsPage.isNumberOfAffectedVehiclesValid(RECALL_TYPE_VEHICLE), "'Number of affected vehicles' is visible");
+        assertTrue(resultsPage.isNumberOfAffectedRecallTypesHeaderValid(RECALL_TYPE_VEHICLE_PLURAL), "'Number of affected vehicles' is visible");
 
         //When I click the "Search again" button, I am redirected to the landing page
         resultsPage.clickSearchAgainButton();
@@ -122,7 +123,7 @@ public class SearchForRecallsJourneyTests extends BaseTest {
         // The following sentence is visible: "How to check if the equipment is recalled"
         assertTrue(resultsPage.isHowToCheckSentenceValid(RECALL_TYPE_EQUIPMENT), "'How to check if the equipment is recalled' is visible");
         // The following sentence is visible: "Number of affected equipments"
-        assertTrue(resultsPage.isNumberOfAffectedVehiclesValid(RECALL_TYPE_EQUIPMENT), "'Number of affected equipment' is visible");
+        assertTrue(resultsPage.isNumberOfAffectedRecallTypesHeaderValid(RECALL_TYPE_EQUIPMENT), "'Number of affected equipment' is visible");
 
         //When I click the "Search again" button, I am redirected to the landing page
         resultsPage.clickSearchAgainButton();

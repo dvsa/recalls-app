@@ -4,14 +4,14 @@ const REGEX_TEXT = /{(.[^}]*)}/g;
 class PluralForm {
   /*
   Create singlular or plural sentence based on number given
-    (all numbers bigger than 1 return plural sentence)
+    (all zero and numbers bigger than 1 return plural sentence)
 
   var text = "There {are|is} [num] recall{s}."
 
-  var number = 2 // or 3, 4, ...
+  var number = 2 // or 0, 3, 4, ...
     "There are 2 recalls."
 
-  var number = 1 // or 0
+  var number = 1
     "There is 1 recall."
 */
   static getSingularOrPlural(text, number) {

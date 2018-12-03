@@ -2,7 +2,7 @@
 {% set pageTitle = 'What make is the ' + recallType + '?' %}
 
 {% block content %}
-  <a href="../../recall-types" class="link-back">Back</a>
+  <a href="{{ BASE_URL }}/recall-type" class="link-back">Back</a>
 
   {% if errorMessage %}
     {% set elementId = 'make' %}

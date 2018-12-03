@@ -27,7 +27,7 @@ class YearController {
   submitYear(response, recallType, make, model, year) {
     const trimmedYear = String.prototype.trim.call(year);
     if (this.yearValidator.isValid(trimmedYear)) {
-      response.redirect(`years/${trimmedYear}/recalls`);
+      response.redirect(`year/${trimmedYear}/recalls`);
     } else {
       const errorMessage = this.yearValidator.getErrorMessage();
       this.enterYear(errorMessage, response, recallType, make, model);

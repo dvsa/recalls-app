@@ -2,10 +2,11 @@
 const sinon = require('sinon');
 const { expect } = require('chai');
 const should = require('chai').should();
+const RecallType = require('cvr-common/model/recallTypeEnum');
 const RecallsRepository = require('../../repositories/recalls');
 const RecallsResource = require('../../resources/recalls');
 
-const TYPE_VEHICLE = 'vehicle';
+const TYPE_VEHICLE = RecallType.vehicle;
 const MAKE_LAND_ROVER = 'LAND ROVER';
 const FIRST_MODEL = 'DISCOVERY SPORT';
 const SECOND_MODEL = 'DEFENDER';
@@ -29,7 +30,7 @@ const recallItems = {
       vehicle_number: '479',
       vin_start: 'SALCA2BN8HH690357',
       vin_end: 'SALCA2AN6HH691251',
-      type: 'vehicle',
+      type: TYPE_VEHICLE,
     },
     {
       model: SECOND_MODEL,
@@ -45,7 +46,7 @@ const recallItems = {
       vehicle_number: '5003',
       vin_start: 'SALLDHMS87A740136',
       vin_end: 'SALLDVBS88A757662',
-      type: 'vehicle',
+      type: TYPE_VEHICLE,
     },
   ],
 };
