@@ -6,7 +6,7 @@ const RECALLS_BACKEND_URL = envVariables.recallsBackendUrl;
 
 class RecallSearch {
   static fetchAllMakes(type, callback) {
-    const path = `${RECALLS_BACKEND_URL}/recall-types/${type}/makes`;
+    const path = `${RECALLS_BACKEND_URL}/recall-type/${type}/make`;
     request.get(path, (err, res, body) => {
       console.info(`RecallSearch.fetchAllMakes(${type}) - HTTP response code: `, res && res.statusCode);
 
@@ -21,7 +21,7 @@ class RecallSearch {
 
   static fetchAllModels(type, make, callback) {
     const encodedMake = encodeURIComponent(make);
-    const path = `${RECALLS_BACKEND_URL}/recall-types/${type}/makes/${encodedMake}/models`;
+    const path = `${RECALLS_BACKEND_URL}/recall-type/${type}/make/${encodedMake}/model`;
     request.get(path, (err, res, body) => {
       console.info(`RecallSearch.fetchAllModels(${type}, ${make}) - HTTP response code `, res && res.statusCode);
 
@@ -37,14 +37,14 @@ class RecallSearch {
   static byMakeAndModel(type, make, model, callback) {
     const encodedMake = encodeURIComponent(make);
     const encodedModel = encodeURIComponent(model);
-    const path = `${RECALLS_BACKEND_URL}/recall-types/${type}/makes/${encodedMake}/models/${encodedModel}/recalls`;
+    const path = `${RECALLS_BACKEND_URL}/recall-type/${type}/make/${encodedMake}/model/${encodedModel}/recalls`;
     this.fetchRecalls(path, type, make, model, null, callback);
   }
 
   static byMakeModelAndYear(type, make, model, year, callback) {
     const encodedMake = encodeURIComponent(make);
     const encodedModel = encodeURIComponent(model);
-    const path = `${RECALLS_BACKEND_URL}/recall-types/${type}/makes/${encodedMake}/models/${encodedModel}/year/${year}/recalls`;
+    const path = `${RECALLS_BACKEND_URL}/recall-type/${type}/make/${encodedMake}/model/${encodedModel}/year/${year}/recalls`;
     this.fetchRecalls(path, type, make, model, year, callback);
   }
 

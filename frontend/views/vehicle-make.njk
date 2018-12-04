@@ -2,7 +2,7 @@
 {% set pageTitle = 'What make is the ' + recallType + '?' %}
 
 {% block content %}
-  <a href="recalls" class="link-back">Back</a>
+  <a href="{{ BASE_URL }}/recall-type" class="link-back">Back</a>
 
   {% if errorMessage %}
     {% set elementId = 'make' %}
@@ -19,9 +19,11 @@
     <div class="col-lg-12">
       <div class="grid-row">
         <div class="column-three-quarters">
-          <form method="POST" action="vehicle-make?recallType={{recallType}}&make={{make | urlencode}}">
+          <form method="POST">
             <div class="form-group {% if errorMessage %}form-group-error{% endif %}">
-              <p class="">This service only includes {{recallType}}s that have been recalled.</p>
+              <p class="">
+                  {{recallsAvailabilityNotice}}
+              </p>
               {% if errorMessage %}
                 <span class="error-message">{{ errorMessage }}</span>
               {% endif %}

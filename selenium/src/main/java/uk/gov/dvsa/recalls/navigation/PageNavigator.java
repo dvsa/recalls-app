@@ -28,6 +28,14 @@ public class PageNavigator {
         }
     }
 
+    public static ResultsPage goToResultsPage(String path, String recallType, String make, String model, String year) throws UnsupportedEncodingException {
+        make = URLEncoder.encode(make, "UTF-8");
+        model = URLEncoder.encode(model, "UTF-8");
+        String fullPath = String.format(path, recallType, make, model, year);
+        navigateToPath(fullPath);
+        return new ResultsPage();
+    }
+
     public static ResultsPage goToResultsPage(String path, String recallType, String make, String model) throws UnsupportedEncodingException {
         make = URLEncoder.encode(make, "UTF-8");
         model = URLEncoder.encode(model, "UTF-8");

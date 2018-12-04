@@ -19,8 +19,10 @@ import static org.testng.Assert.assertTrue;
 
 public class SearchForRecallsJourneyTests extends BaseTest {
 
-    public static final String RESULTS_PAGE_PATH = "/results-page?recallType=%s&make=%s&model=%s";
+    public static final String RESULTS_PAGE_PATH_VEHICLE = "/recall-type/%s/make/%s/model/%s/year/%s/recalls";
+    public static final String RESULTS_PAGE_PATH_EQUIPMENT = "/recall-type/%s/make/%s/model/%s/recalls";
     public final String RECALL_TYPE_VEHICLE = "vehicle";
+    public final String RECALL_TYPE_VEHICLE_PLURAL = "vehicles";
     public final String RECALL_TYPE_EQUIPMENT = "equipment";
 
     public final String make = "OUGHTRED & HARRISON";
@@ -75,14 +77,17 @@ public class SearchForRecallsJourneyTests extends BaseTest {
         // The following sentence is visible: "How to check if the vehicle is recalled"
         assertTrue(resultsPage.isHowToCheckSentenceValid(RECALL_TYPE_VEHICLE), "'How to check if the vehicle is recalled' is visible");
         // The following sentence is visible: "Number of affected vehicles"
-        assertTrue(resultsPage.isNumberOfAffectedVehiclesValid(RECALL_TYPE_VEHICLE), "'Number of affected vehicles' is visible");
+        assertTrue(resultsPage.isNumberOfAffectedRecallTypesHeaderValid(RECALL_TYPE_VEHICLE_PLURAL), "'Number of affected vehicles' is visible");
+
+        //When I click the "Search again" button, I am redirected to the landing page
+        resultsPage.clickSearchAgainButton();
     }
 
     @Test(description = "User can check recalls for an equpment of a particular make and model")
     public void searchEquipmentByMakeTest() {
-        String make = "COOPER BUSSMANN (UK) LTD";
-        String model = "1315-B";
-        String expectedRecallTitle = "FIRE MAY OCCUR";
+        String make = "COOPER";
+        String model = "LT285/75R16";
+        String expectedRecallTitle = "TYRE TREAD MAY SEPARATE";
         String expectedPageHeader = String.format("%s %s", make, model);
 
         //Given I am a user of the site and I want to check equipment recalls
@@ -118,19 +123,34 @@ public class SearchForRecallsJourneyTests extends BaseTest {
         // The following sentence is visible: "How to check if the equipment is recalled"
         assertTrue(resultsPage.isHowToCheckSentenceValid(RECALL_TYPE_EQUIPMENT), "'How to check if the equipment is recalled' is visible");
         // The following sentence is visible: "Number of affected equipments"
-        assertTrue(resultsPage.isNumberOfAffectedVehiclesValid(RECALL_TYPE_EQUIPMENT), "'Number of affected equipments' is visible");
+        assertTrue(resultsPage.isNumberOfAffectedRecallTypesHeaderValid(RECALL_TYPE_EQUIPMENT), "'Number of affected equipment' is visible");
+
+        //When I click the "Search again" button, I am redirected to the landing page
+        resultsPage.clickSearchAgainButton();
     }
 
-    @Test(description = "User can use the 'Back' buttons to get from the results page to the landing page")
-    public void backButtonsTest() throws UnsupportedEncodingException {
+    @Test(description = "User can use the 'Back' buttons to get from the vehicle results page to the landing page")
+    public void vehicleBackButtonsTest() throws UnsupportedEncodingException {
         // When I am on the results page
-        ResultsPage resultsPage = recalls.goToResultsPage(RESULTS_PAGE_PATH, "vehicle", make, model);
+        ResultsPage resultsPage = recalls.goToResultsPage(RESULTS_PAGE_PATH_VEHICLE, "vehicle", make, model, year);
         // And I click the 'Back' button, I am redirected to the year selection page
         EnterYearPage enterYearPage = (EnterYearPage) resultsPage.clickBackButton(EnterYearPage.class);
         // I click the 'Back' button again, I am redirected to the make page
         SelectModelPage selectModelPage = enterYearPage.clickBackButton(SelectVehicleModelPage.class);
         // I click the 'Back' button again, I am redirected to the make page
         SelectMakePage selectMakePage = selectModelPage.clickBackButton(SelectVehicleMakePage.class);
+        // I click the 'Back' button again, I am redirected to the landing page
+        selectMakePage.clickBackButton();
+    }
+
+    @Test(description = "User can use the 'Back' buttons to get from the equipment results page to the landing page")
+    public void equipmentBackButtonsTest() throws UnsupportedEncodingException {
+        // When I am on the results page
+        ResultsPage resultsPage = recalls.goToResultsPage(RESULTS_PAGE_PATH_EQUIPMENT, "equipment", make, model);
+        // I click the 'Back' button again, I am redirected to the make page
+        SelectEquipmentModelPage selectModelPage = (SelectEquipmentModelPage) resultsPage.clickBackButton(SelectEquipmentModelPage.class);
+        // I click the 'Back' button again, I am redirected to the make page
+        SelectMakePage selectMakePage = selectModelPage.clickBackButton(SelectEquipmentMakePage.class);
         // I click the 'Back' button again, I am redirected to the landing page
         selectMakePage.clickBackButton();
     }

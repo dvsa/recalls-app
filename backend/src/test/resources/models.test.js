@@ -1,9 +1,10 @@
 const sinon = require('sinon');
-const expect = require('chai').expect;
+const { expect } = require('chai');
+const RecallType = require('cvr-common/model/recallTypeEnum');
 const RecallsRepository = require('../../repositories/recalls');
 const ModelsResource = require('../../resources/models');
 
-const TYPE = 'vehicle';
+const TYPE = RecallType.vehicle;
 const MAKE = 'Toyota';
 
 const MODEL_YARIS = 'Yaris';

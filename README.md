@@ -4,7 +4,9 @@
 
 1. Clone this repo
 
-2. Go to *frontend* directory and install dependencies using NPM
+2. Ensure you have node v8.12 installed (currently used on jenkinsnode builder)
+
+3. Go to *frontend* and/or *backend* directory and install dependencies using NPM
 
 ```javascript
 npm install
@@ -14,7 +16,7 @@ npm install
 ```javascript
 npm start
 ```
-Application will be avaliable under http://localhost:3000/
+Frontend app will be avaliable under http://localhost:3000/, backend under http://localhost:4000/
 
 ## Running unit tests
 
@@ -42,8 +44,12 @@ npm run build
 
 ## Creating application zip for production
 
-Install dependencies (without dev-dependencies) and create cvr-frontend.zip archive with *frontend* contents (without *test* catalog)
+Install dependencies (without dev-dependencies) and create cvr-frontend.zip archive with lambda contents (without *test* catalog)
 
 ```javascript
-npm run prod 
+npm run build 
 ```
+
+## Development notes
+
+Assets are deployed based on [assets.verison file](./frontend/assets.version). More on recalls can be found in *Recalls home* internal wiki

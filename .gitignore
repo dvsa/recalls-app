@@ -70,3 +70,6 @@ selenium/out
 
 #InitelliJ Idea
 .idea
+
+#Nodenv local version definition
+.node-version

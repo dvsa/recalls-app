@@ -1,10 +1,12 @@
+/* eslint no-unused-vars: 0 */
 const sinon = require('sinon');
-const expect = require('chai').expect;
+const { expect } = require('chai');
 const should = require('chai').should();
+const RecallType = require('cvr-common/model/recallTypeEnum');
 const RecallsRepository = require('../../repositories/recalls');
 const RecallsResource = require('../../resources/recalls');
 
-const TYPE_VEHICLE = 'vehicle';
+const TYPE_VEHICLE = RecallType.vehicle;
 const MAKE_LAND_ROVER = 'LAND ROVER';
 const FIRST_MODEL = 'DISCOVERY SPORT';
 const SECOND_MODEL = 'DEFENDER';
@@ -28,7 +30,7 @@ const recallItems = {
       vehicle_number: '479',
       vin_start: 'SALCA2BN8HH690357',
       vin_end: 'SALCA2AN6HH691251',
-      type: 'vehicle',
+      type: TYPE_VEHICLE,
     },
     {
       model: SECOND_MODEL,
@@ -44,14 +46,10 @@ const recallItems = {
       vehicle_number: '5003',
       vin_start: 'SALLDHMS87A740136',
       vin_end: 'SALLDVBS88A757662',
-      type: 'vehicle',
+      type: TYPE_VEHICLE,
     },
   ],
 };
-
-// function getByMakeAndModel(type, make, model, callback) {
-//   callback(null, recallItems);
-// }
 
 function getByMakeModelAndYear(type, make, model, year, callback) {
   callback(null, recallItems);
@@ -97,8 +95,7 @@ describe('RecallsResource', () => {
 
   describe('mapToRecallList() method', () => {
     it('Should map to recall list', (done) => {
-      const recallsRepository = new RecallsResource();
-      const mappedRecalls = recallsRepository.constructor.mapToRecallList(recallItems.Items);
+      const mappedRecalls = RecallsResource.mapToRecallList(recallItems.Items);
 
       expect(mappedRecalls).to.be.an('array');
       expect(mappedRecalls).to.have.lengthOf(2);

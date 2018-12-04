@@ -8,7 +8,7 @@ import uk.gov.dvsa.recalls.ui.base.Page;
 
 import static org.testng.Assert.assertFalse;
 
-@GotoUrl("/recalls")
+@GotoUrl("/recall-type")
 public class RecallInformationSearchPage extends Page {
 
     @FindBy(id = "csv-data-link") private WebElement csvDataLink;

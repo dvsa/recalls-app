@@ -7,6 +7,7 @@ const helmet = require('helmet');
 const hsts = require('hsts');
 const indexRouter = require('./routes');
 const envVariables = require('./config/environmentVariables');
+const packagesJson = require('./package.json');
 
 const app = express();
 
@@ -29,6 +30,7 @@ const env = nunjucks.configure(TEMPLATES_PATH, {
 
 env.addGlobal('ASSETS_BASE_URL', envVariables.assetsBaseUrl);
 env.addGlobal('BASE_URL', envVariables.baseUrl);
+env.addGlobal('VERSION', packagesJson.version);
 
 app.set('view engine', 'nunjucks');
 app.use('/', indexRouter);

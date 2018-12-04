@@ -1,4 +1,6 @@
-const validTypes = ['vehicle', 'equipment'];
+const RecallType = require('cvr-common/model/recallTypeEnum');
+
+const validTypes = Object.values(RecallType);
 
 class RecallTypeValidator {
   static getErrorMessage() {

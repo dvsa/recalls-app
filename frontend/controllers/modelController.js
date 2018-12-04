@@ -1,5 +1,6 @@
-const url = require('url');
+const RecallType = require('cvr-common/model/recallTypeEnum');
 const recallSearch = require('../service/recallSearch');
+const messages = require('../messages/messages.en');
 const modelValidator = require('../validators/vehicleModel');
 const SmartSurveyFeedback = require('../helpers/SmartSurveyFeedback');
 
@@ -16,10 +17,15 @@ class ModelController {
       if (err) {
         console.error(err);
       } else {
+        const recallsAvailabilityNotice = recallType === RecallType.vehicle
+          ? messages.AVAILABILITY_NOTICE.VEHICLE
+          : messages.AVAILABILITY_NOTICE.EQUIPMENT;
+
         const smartSurveyFeedback = this.prepareSmartSurveyFeedback(recallType, make);
         response.render('vehicle-model.njk', {
           models,
           recallType,
+          recallsAvailabilityNotice,
           smartSurveyFeedback,
           make,
           errorMessage,
@@ -30,21 +36,18 @@ class ModelController {
 
   static submitModel(response, recallType, make, model) {
     if (modelValidator.isValid(model)) {
-      response.redirect(url.format({
-        pathname: this.redirectPathForRecallType(recallType),
-        query: { model, make, recallType },
-      }));
+      response.redirect(this.redirectPathForRecallType(response, recallType, model));
     } else {
-      const errorMessage = modelValidator.getErrorMessage();
+      const errorMessage = modelValidator.getErrorMessage(recallType);
       this.modelsList(errorMessage, response, recallType, make);
     }
   }
 
-  static redirectPathForRecallType(recallType) {
-    if (recallType === 'equipment') {
-      return 'results-page';
+  static redirectPathForRecallType(response, recallType, model) {
+    if (recallType === RecallType.equipment) {
+      return `model/${encodeURIComponent(model)}/recalls`;
     }
-    return 'vehicle-year';
+    return `model/${encodeURIComponent(model)}/year`;
   }
 }
 

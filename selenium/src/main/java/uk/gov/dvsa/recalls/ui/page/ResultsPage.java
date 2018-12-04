@@ -12,11 +12,11 @@ import uk.gov.dvsa.recalls.ui.base.PageInstanceNotFoundException;
 
 import java.util.List;
 
-@GotoUrl("/results-page")
 public class ResultsPage extends Page {
     WebDriverWait wait = new WebDriverWait(driver, 5);
 
     @FindBy(id = "vehicle-or-component-title") private WebElement header;
+    @FindBy(id = "search-again") private WebElement searchAgainButton;
     @FindBy(className = "recall-title") private List<WebElement> recallTitleHeaderList;
     @FindBy(className = "how-to") private List<WebElement> howToCheckRecallType;
     @FindBy(className = "affected-number") private List<WebElement> affectedVehiclesSentences;
@@ -66,9 +66,9 @@ public class ResultsPage extends Page {
         );
     }
 
-    public boolean isNumberOfAffectedVehiclesValid(String recallType) {
+    public boolean isNumberOfAffectedRecallTypesHeaderValid(String recallType) {
         return affectedVehiclesSentences.get(0).getText().contains(
-                String.format("Number of affected %ss", recallType)
+                String.format("Number of affected %s", recallType)
 
         );
     }
@@ -80,5 +80,10 @@ public class ResultsPage extends Page {
         } catch (InstantiationException | IllegalAccessException e) {
             throw new PageInstanceNotFoundException(String.format("Could not create a Model Page: %s", clazz.getName()));
         }
+    }
+
+    public RecallInformationSearchPage clickSearchAgainButton() {
+        searchAgainButton.click();
+        return new RecallInformationSearchPage();
     }
 }

@@ -1,6 +1,7 @@
-const url = require('url');
+const RecallType = require('cvr-common/model/recallTypeEnum');
 const recallSearch = require('../service/recallSearch');
 const makeValidator = require('../validators/vehicleMake');
+const messages = require('../messages/messages.en');
 const SmartSurveyFeedback = require('../helpers/SmartSurveyFeedback');
 
 class MakeController {
@@ -9,12 +10,17 @@ class MakeController {
       if (err) {
         console.error(err);
       } else {
+        const recallsAvailabilityNotice = recallType === RecallType.vehicle
+          ? messages.AVAILABILITY_NOTICE.VEHICLE
+          : messages.AVAILABILITY_NOTICE.EQUIPMENT;
+
         const smartSurveyFeedback = SmartSurveyFeedback.getInstance();
         smartSurveyFeedback.type = recallType;
 
         response.render('vehicle-make.njk', {
           makes,
           recallType,
+          recallsAvailabilityNotice,
           smartSurveyFeedback,
           errorMessage,
         });
@@ -24,12 +30,9 @@ class MakeController {
 
   static submitMake(response, recallType, make) {
     if (makeValidator.isValid(make)) {
-      response.redirect(url.format({
-        pathname: 'vehicle-model',
-        query: { make, recallType },
-      }));
+      response.redirect(`make/${encodeURIComponent(make)}/model`);
     } else {
-      const errorMessage = makeValidator.getErrorMessage();
+      const errorMessage = makeValidator.getErrorMessage(recallType);
       this.makesList(errorMessage, response, recallType);
     }
   }

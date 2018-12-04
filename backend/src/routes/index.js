@@ -23,7 +23,7 @@ router.get('/*', (req, res, next) => {
 });
 
 /** All makes of a given type */
-router.get('/recall-types/:type/makes', (req, res) => {
+router.get('/recall-type/:type/make', (req, res) => {
   const makesResource = new MakesResource(recallsRepository);
   const { type } = req.params;
   makesResource.getAllMakes(type, (err, data) => {
@@ -32,7 +32,7 @@ router.get('/recall-types/:type/makes', (req, res) => {
 });
 
 /** All models of a given type and make */
-router.get('/recall-types/:type/makes/:make/models', (req, res) => {
+router.get('/recall-type/:type/make/:make/model', (req, res) => {
   const { type } = req.params;
   const make = decodeURIComponent(req.params.make);
 
@@ -42,8 +42,8 @@ router.get('/recall-types/:type/makes/:make/models', (req, res) => {
   });
 });
 
-/** All recalls for a given type, make, and model */
-router.get('/recall-types/:type/makes/:make/models/:model/recalls', (req, res) => {
+/** All recalls for a given type, make and model */
+router.get('/recall-type/:type/make/:make/model/:model/recalls', (req, res) => {
   const { type } = req.params;
   const make = decodeURIComponent(req.params.make);
   const model = decodeURIComponent(req.params.model);
@@ -54,7 +54,7 @@ router.get('/recall-types/:type/makes/:make/models/:model/recalls', (req, res) =
 });
 
 /** All recalls for a given type, make, model and year */
-router.get('/recall-types/:type/makes/:make/models/:model/year/:year/recalls', (req, res) => {
+router.get('/recall-type/:type/make/:make/model/:model/year/:year/recalls', (req, res) => {
   const { type, year } = req.params;
   const make = decodeURIComponent(req.params.make);
   const model = decodeURIComponent(req.params.model);
