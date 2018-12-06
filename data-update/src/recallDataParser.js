@@ -1,53 +1,39 @@
-const S3Client = require('./s3/s3Client');
-
 class RecallDataParser {
-  constructor() {
-    this.s3 = new S3Client();
-  }
-
-  dowload(bukcetData, next) {
+  static download(s3, srcBucket, srcKey, next) {
     // Download the csv file from S3
-    console.log('Downloading csv data from S3');
-    this.s3.getObject({
-      Bucket: bukcetData.bucket,
-      Key: bukcetData.key,
+    console.info('Downloading csv data from S3');
+    s3.getObject({
+      Bucket: srcBucket,
+      Key: srcKey,
     },
     (err, data) => {
       if (err) {
-        console.error('Error when dowloading csv file from S3 bucket');
-        next('error');
+        console.error('Error when dowloading csv file from S3 bucket:', err);
+        next(err);
+      } else {
+        const csvBuffer = data.Body;
+        if (csvBuffer == null) {
+          console.error('File is empty');
+          next(new Error('Downloaded CSV file is empty'));
+        } else {
+          console.info(`File length: ${data.ContentLength}, last modified: ${data.LastModified}`);
+          next(null, csvBuffer);
+        }
       }
-      const csvBuffer = data.Body;
-      if (csvBuffer == null) {
-        console.error('File is empty');
-        next('error');
-      }
-      console.log(`File length: ${data.ContentLength}, last modified: ${data.LastModified}`);
-      next(null, csvBuffer);
     });
   }
 
-  parse(data, next) {
+  static parse(data, next) {
     // TODO: Parse csv data
-    console.log('Here data would be parsed');
+    console.info('Here data would be parsed');
     const csv = data;
-    this.csv = '';
     next(null, csv);
   }
 
-  insert(data, next) {
+  static insert(data, next) {
     // TODO: Insert the parsed data to database
-    console.log('Here data would be inserted into the db');
-    this.csv = '';
+    console.info('Here data would be inserted into the db');
     next(null, data);
-  }
-
-  getParserHandlers() {
-    return [
-      this.download,
-      this.parse,
-      this.insert,
-    ];
   }
 }
 

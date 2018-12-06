@@ -1,8 +1,8 @@
 const AWS = require('aws-sdk');
 
 class S3Client {
-  static createS3Client() {
-    return new AWS.S3();
+  constructor() {
+    this.s3 = new AWS.S3();
   }
 }
 
