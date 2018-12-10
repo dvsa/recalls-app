@@ -1,18 +1,16 @@
 const S3Client = require('./s3/s3Client');
 
 class RecallDataParser {
-  constructor(srcBucket, srcKey) {
+  constructor() {
     this.s3 = new S3Client();
-    this.srcBucket = srcBucket;
-    this.srcKey = srcKey;
   }
 
-  dowload(next) {
+  dowload(bukcetData, next) {
     // Download the csv file from S3
     console.log('Downloading csv data from S3');
     this.s3.getObject({
-      Bucket: this.srcBucket,
-      Key: this.srcKey,
+      Bucket: bukcetData.bucket,
+      Key: bukcetData.key,
     },
     (err, data) => {
       if (err) {
@@ -29,16 +27,18 @@ class RecallDataParser {
     });
   }
 
-  static parse(data, next) {
+  parse(data, next) {
     // TODO: Parse csv data
     console.log('Here data would be parsed');
     const csv = data;
+    this.csv = '';
     next(null, csv);
   }
 
-  static insert(data, next) {
+  insert(data, next) {
     // TODO: Insert the parsed data to database
     console.log('Here data would be inserted into the db');
+    this.csv = '';
     next(null, data);
   }
 
