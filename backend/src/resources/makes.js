@@ -1,3 +1,5 @@
+const { logger } = require('cvr-common/src/logger/loggerFactory');
+
 class MakesResource {
   constructor(recallsRepository) {
     this.recallsRepository = recallsRepository;
@@ -6,12 +8,12 @@ class MakesResource {
   getAllMakes(type, callback) {
     this.recallsRepository.getAllMakes(type, (err, data) => {
       if (err) {
-        console.error(`An error occurred for type=${type}`);
-        console.error(err);
+        logger.error(`An error occurred for type=${type}`, err);
         callback(err);
       } else {
         const retrievedItem = data.Item;
         const retrievedMakes = (retrievedItem || {}).makes;
+        logger.info(`Makes retrieved for type=${type}`);
         callback(null, retrievedMakes || []);
       }
     });

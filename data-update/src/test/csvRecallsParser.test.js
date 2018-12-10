@@ -1,4 +1,4 @@
-const RecallDbRecordDto = require('cvr-common/dto/recallDbRecord');
+const RecallDbRecordDto = require('cvr-common/src/dto/recallDbRecord');
 const { expect } = require('chai');
 const Parser = require('../csvRecallsParser');
 

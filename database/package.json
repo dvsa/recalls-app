@@ -10,12 +10,13 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "cvr-common": "file:../common",
     "aws-sdk": "^2.338.0",
-    "fast-csv": "^2.4.1",
-    "cvr-common": "file:../common"
+    "fast-csv": "^2.4.1"
   },
   "devDependencies": {
     "chai": "^4.2.0",
-    "nyc": "^13.1.0"
+    "nyc": "^13.1.0",
+    "mocha": "^5.2.0"
   }
 }

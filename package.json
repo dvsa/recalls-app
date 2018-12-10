@@ -1,0 +1,64 @@
+{
+  "name": "recalls-app",
+  "engines": {
+    "node": "=8.10.0"
+  },
+  "description": "CVR app, used to publish recalls information",
+  "scripts": {
+    "install:main": "npm-run-all -p -l install:module:frontend install:module:backend",
+    "install:all": "npm-run-all install:package:* -p -l --max-parallel 3 install:module:*",
+    "install:package:common": "(cd common && npm install)",
+    "install:module:frontend": "(cd frontend && npm install)",
+    "install:module:backend": "(cd backend && npm install)",
+    "install:module:data-update": "(cd data-update && npm install)",
+    "install:module:database": "(cd database && npm install)",
+    "start": "npm-run-all -p -l start:*",
+    "start:frontend": "(cd frontend && npm start)",
+    "start:backend": "(cd backend && npm start)",
+    "test": "export FORCE_COLOR=1 && npm-run-all -p -l -c test:*",
+    "test:common": "(cd common && npm test)",
+    "test:frontend": "(cd frontend && npm test)",
+    "test:backend": "(cd backend && npm test)",
+    "test:data-update": "(cd data-update && npm test)",
+    "lint": "export FORCE_COLOR=1 && npm-run-all -l -p -c lint:*",
+    "lint:frontend": "(cd frontend && npm run lint)",
+    "lint:backend": "(cd backend && npm run lint)",
+    "lint:data-update": "(cd data-update && npm run lint)",
+    "lint:common": "(cd common && npm run lint)",
+    "build:common": "(cd common && npm run build)",
+    "build:frontend": "npm run build:common && (cd frontend && npm run build)",
+    "build:backend": "npm run build:common && (cd backend && npm run build)",
+    "build:data-update": "npm run build:common && (cd data-update && npm run build)",
+    "validate": "export FORCE_COLOR=1 && npm-run-all -l install:all -p -c lint test",
+    "clean": "npm-run-all -p -l clean:*",
+    "clean:common": "rm -rf common/node_modules",
+    "clean:frontend": "rm -rf frontend/node_modules",
+    "clean:backend": "rm -rf backend/node_modules",
+    "clean:database": "rm -rf database/node_modules",
+    "clean:data-update": "rm -rf data-update/node_modules",
+    "update-package-lock": "npm-run-all clean update-package-lock:package:* -p -l -c --max-parallel 2 update-package-lock:module:*",
+    "update-package-lock:package:common": "rm -rf common/package-lock.json && npm run install:package:common",
+    "update-package-lock:module:frontend": "rm -rf frontend/package-lock.json && npm run install:module:frontend",
+    "update-package-lock:module:backend": "rm -rf backend/package-lock.json && npm run install:module:backend",
+    "update-package-lock:module:database": "rm -rf database/package-lock.json && npm run install:module:database",
+    "update-package-lock:module:data-update": "rm -rf data-update/package-lock.json && npm run install:module:data-update"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dvsa/recalls-app.git"
+  },
+  "keywords": [
+    "recalls"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/dvsa/recalls-app#readme",
+  "devDependencies": {
+    "husky": "^1.1.2",
+    "npm-run-all": "^4.1.5"
+  },
+  "husky": {
+    "hooks": {
+      "pre-push": "npm install && npm run validate"
+    }
+  }
+}

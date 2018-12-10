@@ -1,8 +1,11 @@
 const sinon = require('sinon');
 const expect = require('chai').expect;
 const should = require('chai').should();
+const httpContext = require('express-http-context');
 const request = require('request');
-const RecallDto = require('cvr-common/dto/recall');
+const RecallDto = require('cvr-common/src/dto/recall');
+const requestHeaders = require('cvr-common/src/constants/requestHeaders');
+const sessionStorageConstants = require('cvr-common/src/constants/sessionStorageKeys');
 const recallSearch = require('../../service/recallSearch');
 
 const TYPE_VEHICLE = 'vehicle';
@@ -13,6 +16,8 @@ const API_ERROR_MESSAGE = 'An error has occurred during request';
 const FIRST_RESULT = 'result 1';
 const SECOND_RESULT = 'result 2';
 const RESULTS = [FIRST_RESULT, SECOND_RESULT];
+const FAKE_HEADER_REQUEST_ID_KEY = 'fake request id key header';
+const FAKE_HEADER_FUNCTION_NAME = 'fake function name header';
 
 function mapRecallsToDtoReturns(mappedRecalls) {
   return sinon.stub(recallSearch, 'mapRecallsToDto').returns(mappedRecalls);
@@ -31,6 +36,16 @@ function createRecallDto(make) {
   recallDto.buildStart = '19-04-2010';
   recallDto.buildEnd = '20-05-2018';
   return recallDto;
+}
+
+function fakeGet(key) {
+  if (key === sessionStorageConstants.REQUEST_ID_KEY) {
+    return FAKE_HEADER_REQUEST_ID_KEY;
+  }
+  if (key === sessionStorageConstants.FUNCTION_NAME) {
+    return FAKE_HEADER_FUNCTION_NAME;
+  }
+  return null;
 }
 
 describe('RecallSearch', () => {
@@ -111,6 +126,24 @@ describe('RecallSearch', () => {
       expect(mappedRecalls).to.have.lengthOf(2);
       expect(mappedRecalls).to.deep.include(citroenRecall);
       expect(mappedRecalls).to.deep.include(landRoverRecall);
+      done();
+    });
+  });
+
+  describe('getRequestHeaders()  ', () => {
+    before(() => {
+      this.httpContext = sinon.stub(httpContext, 'get').callsFake(fakeGet);
+    });
+    after(() => {
+      this.httpContext.restore();
+    });
+
+    it('Should return correct request headers object', (done) => {
+      const headers = recallSearch.getRequestHeaders();
+
+      expect(headers).to.be.an('object');
+      expect(headers[requestHeaders.PARENT_REQUEST_ID]).to.equal(FAKE_HEADER_REQUEST_ID_KEY);
+      expect(headers[requestHeaders.CALLER_NAME]).to.equal(FAKE_HEADER_FUNCTION_NAME);
       done();
     });
   });

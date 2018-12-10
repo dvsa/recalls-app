@@ -1,6 +1,9 @@
+const { logger } = require('cvr-common/src/logger/loggerFactory');
+
 class SmartSurveyFeedback {
   constructor() {
     this.args = {};
+    this.count = 1;
   }
 
   set type(value) {
@@ -19,7 +22,7 @@ class SmartSurveyFeedback {
     this.args.year = value;
   }
 
-  get formUrl() {
+  formUrl() {
     const baseUrl = 'https://www.smartsurvey.co.uk/s/VCM6G';
 
     return `${baseUrl}${this.getQueryString()}`;
@@ -43,6 +46,7 @@ class SmartSurveyFeedback {
       .map(key => `${encodeURIComponent(key)}=${encodeURIComponent(this.args[key])}`)
       .join('&');
 
+    logger.debug('SmartSurvey query stream constructed:', queryString);
     return queryString ? `?${queryString}` : '';
   }
 

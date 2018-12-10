@@ -1,4 +1,5 @@
 const express = require('express');
+const { logger } = require('cvr-common/src/logger/loggerFactory');
 const RecallsRepository = require('../repositories/recalls');
 const RecallsResource = require('../resources/recalls');
 const MakesResource = require('../resources/makes');
@@ -10,9 +11,10 @@ const recallsResource = new RecallsResource(recallsRepository);
 
 function returnApiResponse(err, res, data) {
   if (err) {
-    console.error(err);
+    logger.error('Error while retrieving resource:', err);
     res.status(500).json(err).end();
   } else {
+    logger.debug('Returning response:', data);
     res.status(200).json(data).end();
   }
 }
@@ -26,6 +28,7 @@ router.get('/*', (req, res, next) => {
 router.get('/recall-type/:type/make', (req, res) => {
   const makesResource = new MakesResource(recallsRepository);
   const { type } = req.params;
+  logger.info(`Requesting makes by type ${type}`);
   makesResource.getAllMakes(type, (err, data) => {
     returnApiResponse(err, res, data);
   });
@@ -36,6 +39,7 @@ router.get('/recall-type/:type/make/:make/model', (req, res) => {
   const { type } = req.params;
   const make = decodeURIComponent(req.params.make);
 
+  logger.info(`Requesting models by type ${type} and make ${make}`);
   const modelsResource = new ModelsResource(recallsRepository);
   modelsResource.getAllModels(type, make, (err, data) => {
     returnApiResponse(err, res, data);
@@ -48,6 +52,7 @@ router.get('/recall-type/:type/make/:make/model/:model/recalls', (req, res) => {
   const make = decodeURIComponent(req.params.make);
   const model = decodeURIComponent(req.params.model);
 
+  logger.info(`Requesting recalls for type ${type}, make ${make} and model ${model}`);
   recallsResource.getByMakeAndModel(type, make, model, (err, data) => {
     returnApiResponse(err, res, data);
   });
@@ -59,6 +64,7 @@ router.get('/recall-type/:type/make/:make/model/:model/year/:year/recalls', (req
   const make = decodeURIComponent(req.params.make);
   const model = decodeURIComponent(req.params.model);
 
+  logger.info(`Requesting recalls for type ${type}, make ${make}, model ${model} and year ${year}`);
   recallsResource.getByMakeModelAndYear(type, make, model, year, (err, data) => {
     returnApiResponse(err, res, data);
   });

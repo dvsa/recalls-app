@@ -1,4 +1,5 @@
-const RecallDto = require('cvr-common/dto/recall');
+const RecallDto = require('cvr-common/src/dto/recall');
+const { logger } = require('cvr-common/src/logger/loggerFactory');
 
 class RecallsResource {
   constructor(recallsRepository) {
@@ -34,10 +35,10 @@ class RecallsResource {
 
   mapRepoDataOrFail(err, data, type, make, model, year, callback) {
     if (err) {
-      console.error(`An error occurred for type=${type}, make=${make}, model=${model}, year=${year}`);
-      console.error(err);
+      logger.error(`An error occurred while fetching recalls for type=${type}, make=${make}, model=${model}, year=${year}`, err);
       callback(err);
     } else {
+      logger.info(`Recalls retrieved for type=${type}, make=${make}, model=${model}, year=${year}`, err);
       const recalls = this.constructor.mapToRecallList(data.Items);
       callback(null, recalls);
     }

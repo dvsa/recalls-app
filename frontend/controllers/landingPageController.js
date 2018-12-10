@@ -1,3 +1,5 @@
+const { logger } = require('cvr-common/src/logger/loggerFactory');
+const envVariables = require('../config/environmentVariables');
 const typeValidator = require('../validators/recallType');
 const SmartSurveyFeedback = require('../helpers/SmartSurveyFeedback');
 
@@ -6,6 +8,7 @@ class FrontendController {
     response.render('type-of-recall.njk', {
       smartSurveyFeedback: SmartSurveyFeedback.getInstance(),
       errorMessage,
+      documentsBaseUrl: envVariables.documentsBaseUrl,
     });
   }
 
@@ -14,6 +17,7 @@ class FrontendController {
       response.redirect(`recall-type/${recallType}/make`);
     } else {
       const errorMessage = typeValidator.getErrorMessage();
+      logger.info('Recall type is not valid: ', errorMessage);
       this.homePage(errorMessage, response);
     }
   }

@@ -1,5 +1,16 @@
 class RecallDto {
-  constructor(make, model, recallNumber, defectDescription, launchDate, concern, remedy, affectedVehiclesNumber, buildStart, buildEnd) {
+  constructor(
+    make,
+    model,
+    recallNumber,
+    defectDescription,
+    launchDate,
+    concern,
+    remedy,
+    affectedVehiclesNumber,
+    buildStart,
+    buildEnd,
+  ) {
     this.make = make;
     this.model = model;
     this.recallNumber = recallNumber;

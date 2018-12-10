@@ -2,7 +2,7 @@
 const sinon = require('sinon');
 const { expect } = require('chai');
 const should = require('chai').should();
-const RecallType = require('cvr-common/model/recallTypeEnum');
+const RecallType = require('cvr-common/src/model/recallTypeEnum');
 const RecallsRepository = require('../../repositories/recalls');
 const RecallsResource = require('../../resources/recalls');
 
