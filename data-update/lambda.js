@@ -25,6 +25,7 @@ module.exports = {
         },
         function parse(response, next) {
           const csv = response.Body;
+          console.log(csv);
           if (csv !== null) {
             // TODO: Parse csv data
             console.log('Here data would be parsed');
