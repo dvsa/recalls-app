@@ -7,7 +7,7 @@ class RecallDataParser {
     this.srcKey = srcKey;
   }
 
-  static dowload(next) {
+  dowload(next) {
     // Download the csv file from S3
     console.log('Downloading csv data from S3');
     this.s3.getObject({
