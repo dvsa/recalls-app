@@ -1,7 +1,7 @@
 const async = require('async');
 const util = require('util');
 const S3Client = require('./src/s3/s3Client');
-const RecallDataParser = require('./src/recallDataParser');
+const RecallDataProcessor = require('./src/recallDataProcessor');
 
 const EXPECTED_CSV_FILE_NAME = 'RecallsFile.csv';
 
@@ -17,9 +17,9 @@ module.exports = {
     if (srcKey === EXPECTED_CSV_FILE_NAME) {
       async.waterfall(
         [
-          async.apply(RecallDataParser.download, s3Client.s3, srcBucket, srcKey),
-          RecallDataParser.parse,
-          RecallDataParser.insert,
+          async.apply(RecallDataProcessor.download, s3Client.s3, srcBucket, srcKey),
+          RecallDataProcessor.parse,
+          RecallDataProcessor.insert,
         ],
         (err) => {
           if (err) {

@@ -16,7 +16,10 @@
   "license": "MIT",
   "dependencies": {
     "async": "^2.6.1",
-    "aws-sdk": "^2.338.0"
+    "aws-sdk": "^2.338.0",
+    "cvr-common": "file:../common",
+    "iconv-lite": "^0.4.24",
+    "json-2-csv": "^2.4.0"
   },
   "devDependencies": {
     "mocha": "^5.2.0",
