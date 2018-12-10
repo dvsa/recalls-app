@@ -2,6 +2,7 @@ const TEMPLATES_PATH = './views';
 
 const bodyParser = require('body-parser');
 const express = require('express');
+const httpContext = require('express-http-context');
 const nunjucks = require('nunjucks');
 const helmet = require('helmet');
 const hsts = require('hsts');
@@ -16,12 +17,24 @@ const HSTS_MAX_AGE = 15768000;
 app.use(bodyParser.urlencoded({
   extended: true,
 }));
+app.use(httpContext.middleware);
 app.use(helmet());
 app.use(hsts({
   maxAge: HSTS_MAX_AGE,
   preload: true,
   includeSubDomains: true,
 }));
+app.use((req, res, next) => {
+  console.info(req.headers);
+  console.info(req.context);
+  console.info(req.url);
+  console.info(req.query);
+  console.info(req);
+  httpContext.set('requestId', `asdfasdf-${Date.now}`);
+  httpContext.set('requestPath', req.url);
+  httpContext.set('queryParameters', req.query);
+  next();
+});
 
 const env = nunjucks.configure(TEMPLATES_PATH, {
   autoescape: true,

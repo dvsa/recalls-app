@@ -11,7 +11,12 @@
 ```javascript
 npm install
 ```
-3. Start application
+
+4. Set additional env vars:
+    * ASSETS_BASE_URL for frontend app. Set it to an assets url of an existing env or to your local running dev server of https://github.com/dvsa/front-end assets repo (http://localhost:3002 by default)
+    * ENVIRONMENT for the backend app. Set it to the name of a existing, deployed environment that you have access to via aws cli, for example `int`. Note that you must have your aws cli set up to use the account that has this environment deployed.
+
+5. Start application
 
 ```javascript
 npm start
