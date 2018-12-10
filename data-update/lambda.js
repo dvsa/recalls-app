@@ -21,19 +21,25 @@ module.exports = {
             Bucket: srcBucket,
             Key: srcKey,
           },
-          next);
+          (err, data) => {
+            if (err) {
+              console.error('Error when dowloading csv file from S3 bucket');
+              next('error');
+            }
+            const csvBuffer = data.Body;
+            if (csvBuffer == null) {
+              console.error('File is empty');
+              next('error');
+            }
+            console.log(util.inspect(data, { depth: 5 })); // log metadanych (timestamp i rozmiar)
+            next(null, csvBuffer);
+          });
         },
-        function parse(response, next) {
-          const csv = response.Body;
-          console.log(csv);
-          if (csv !== null) {
-            // TODO: Parse csv data
-            console.log('Here data would be parsed');
-            next(null, csv);
-          } else {
-            console.error('csv file is null');
-            next('error');
-          }
+        function parse(csvBuffer, next) {
+          // TODO: Parse csv data
+          console.log('Here data would be parsed');
+          const csv = csvBuffer;
+          next(null, csv);
         },
         function insert(data, next) {
           // TODO: Insert the parsed data to database
