@@ -9,8 +9,8 @@
   "scripts": {
     "test": "mocha",
     "lint": "eslint .",
-    "build": "npm install && npm test && zip -r ../cvr-data-update.zip * --exclude /test",
-    "prod": "npm prune --production && npm install --production && zip -r ../cvr-data-update.zip *"
+    "build": "npm install && npm run lint && npm test && npm run prod",
+    "prod": "npm prune --production && npm install --production && zip -r ../cvr-data-update.zip * --exclude /src/test"
   },
   "author": "",
   "license": "MIT",
@@ -22,7 +22,8 @@
     "mocha": "^5.2.0",
     "eslint": "^5.7.0",
     "eslint-config-airbnb-base": "^13.1.0",
-    "eslint-plugin-import": "^2.14.0"
+    "eslint-plugin-import": "^2.14.0",
+    "sinon": "^7.1.1"
   },
   "husky": {
     "hooks": {

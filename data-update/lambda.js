@@ -1,8 +1,6 @@
 const async = require('async');
-const AWS = require('aws-sdk');
 const util = require('util');
-
-const s3 = new AWS.S3();
+const RecallDataParser = require('./src/recallDataParser');
 
 module.exports = {
   handler: (lambdaEvent) => {
@@ -12,41 +10,10 @@ module.exports = {
     const srcKey = decodeURIComponent(lambdaEvent.Records[0].s3.object.key.replace(/\+/g, ' '));
     console.log('Source bucket', srcBucket);
 
+    const recallDataParser = new RecallDataParser(srcBucket, srcKey);
+
     async.waterfall(
-      [
-        function download(next) {
-          // Download the csv file from S3
-          console.log('Downloading csv data from S3');
-          s3.getObject({
-            Bucket: srcBucket,
-            Key: srcKey,
-          },
-          (err, data) => {
-            if (err) {
-              console.error('Error when dowloading csv file from S3 bucket');
-              next('error');
-            }
-            const csvBuffer = data.Body;
-            if (csvBuffer == null) {
-              console.error('File is empty');
-              next('error');
-            }
-            console.log(util.inspect(data, { depth: 5 })); // log metadanych (timestamp i rozmiar)
-            next(null, csvBuffer);
-          });
-        },
-        function parse(csvBuffer, next) {
-          // TODO: Parse csv data
-          console.log('Here data would be parsed');
-          const csv = csvBuffer;
-          next(null, csv);
-        },
-        function insert(data, next) {
-          // TODO: Insert the parsed data to database
-          console.log('Here data would be inserted into the db');
-          next(null, data);
-        },
-      ],
+      recallDataParser.getParserHandlers(),
       (err) => {
         if (err) {
           console.error(`Error: ${err}`);
