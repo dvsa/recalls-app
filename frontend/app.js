@@ -1,12 +1,11 @@
 const TEMPLATES_PATH = './views';
 
+const loggerFactory = require('cvr-common/logger/loggerFactory');
 const bodyParser = require('body-parser');
 const express = require('express');
-const httpContext = require('express-http-context');
 const nunjucks = require('nunjucks');
 const helmet = require('helmet');
 const hsts = require('hsts');
-const indexRouter = require('./routes');
 const envVariables = require('./config/environmentVariables');
 const packagesJson = require('./package.json');
 
@@ -17,33 +16,30 @@ const HSTS_MAX_AGE = 15768000;
 app.use(bodyParser.urlencoded({
   extended: true,
 }));
-app.use(httpContext.middleware);
+loggerFactory.initialize(app, {
+  logLevel: envVariables.logLevel,
+  functionName: envVariables.functionName,
+  appName: packagesJson.name,
+});
 app.use(helmet());
 app.use(hsts({
   maxAge: HSTS_MAX_AGE,
   preload: true,
   includeSubDomains: true,
 }));
-app.use((req, res, next) => {
-  console.info(req.headers);
-  console.info(req.context);
-  console.info(req.url);
-  console.info(req.query);
-  console.info(req);
-  httpContext.set('requestId', `asdfasdf-${Date.now}`);
-  httpContext.set('requestPath', req.url);
-  httpContext.set('queryParameters', req.query);
-  next();
-});
 
 const env = nunjucks.configure(TEMPLATES_PATH, {
   autoescape: true,
   express: app,
 });
+const logger = loggerFactory.create();
+logger.info(`Init ver ${packagesJson.version}`);
 
 env.addGlobal('ASSETS_BASE_URL', envVariables.assetsBaseUrl);
 env.addGlobal('BASE_URL', envVariables.baseUrl);
 env.addGlobal('VERSION', packagesJson.version);
+
+const indexRouter = require('./routes');
 
 app.set('view engine', 'nunjucks');
 app.use('/', indexRouter);

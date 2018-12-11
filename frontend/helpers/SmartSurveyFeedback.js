@@ -1,3 +1,5 @@
+const logger = require('cvr-common/logger/loggerFactory').create();
+
 class SmartSurveyFeedback {
   constructor() {
     this.args = {};
@@ -43,6 +45,7 @@ class SmartSurveyFeedback {
       .map(key => `${encodeURIComponent(key)}=${encodeURIComponent(this.args[key])}`)
       .join('&');
 
+    logger.debug('SmartSurvey query stream constructed: ', queryString);
     return queryString ? `?${queryString}` : '';
   }
 

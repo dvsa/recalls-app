@@ -1,9 +1,10 @@
 {
   "name": "cvr-common",
   "version": "1.0.0",
-  "description": "",
+  "description": "Common components for other recall modules",
   "scripts": {
-    "test": "test"
+    "test": "test",
+    "build": "npm install"
   },
   "author": "",
   "license": "MIT",

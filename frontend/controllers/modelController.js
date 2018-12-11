@@ -1,4 +1,5 @@
 const RecallType = require('cvr-common/model/recallTypeEnum');
+const logger = require('cvr-common/logger/loggerFactory').create();
 const recallSearch = require('../service/recallSearch');
 const messages = require('../messages/messages.en');
 const modelValidator = require('../validators/vehicleModel');
@@ -15,7 +16,7 @@ class ModelController {
   static modelsList(errorMessage, response, recallType, make) {
     recallSearch.fetchAllModels(recallType, make, (err, models) => {
       if (err) {
-        console.error(err);
+        logger.error('Error while fetching models:', err);
       } else {
         const recallsAvailabilityNotice = recallType === RecallType.vehicle
           ? messages.AVAILABILITY_NOTICE.VEHICLE
@@ -36,9 +37,11 @@ class ModelController {
 
   static submitModel(response, recallType, make, model) {
     if (modelValidator.isValid(model)) {
+      logger.debug(`Model ${model} is valid`);
       response.redirect(this.redirectPathForRecallType(response, recallType, model));
     } else {
       const errorMessage = modelValidator.getErrorMessage(recallType);
+      logger.info(`Model invalid: ${errorMessage}`);
       this.modelsList(errorMessage, response, recallType, make);
     }
   }

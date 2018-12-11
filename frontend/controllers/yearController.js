@@ -1,3 +1,4 @@
+const logger = require('cvr-common/logger/loggerFactory').create();
 const ManufactureYear = require('../validators/manufactureYear');
 const SmartSurveyFeedback = require('../helpers/SmartSurveyFeedback');
 
@@ -27,9 +28,11 @@ class YearController {
   submitYear(response, recallType, make, model, year) {
     const trimmedYear = String.prototype.trim.call(year);
     if (this.yearValidator.isValid(trimmedYear)) {
+      logger.debug(`Year ${trimmedYear} is valid`);
       response.redirect(`year/${trimmedYear}/recalls`);
     } else {
       const errorMessage = this.yearValidator.getErrorMessage();
+      logger.info('Year is not valid: ', errorMessage);
       this.enterYear(errorMessage, response, recallType, make, model);
     }
   }

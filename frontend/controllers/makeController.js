@@ -1,4 +1,5 @@
 const RecallType = require('cvr-common/model/recallTypeEnum');
+const logger = require('cvr-common/logger/loggerFactory').create();
 const recallSearch = require('../service/recallSearch');
 const makeValidator = require('../validators/vehicleMake');
 const messages = require('../messages/messages.en');
@@ -8,7 +9,7 @@ class MakeController {
   static makesList(errorMessage, response, recallType) {
     recallSearch.fetchAllMakes(recallType, (err, makes) => {
       if (err) {
-        console.error(err);
+        logger.error('Error while fetching makes:', err);
       } else {
         const recallsAvailabilityNotice = recallType === RecallType.vehicle
           ? messages.AVAILABILITY_NOTICE.VEHICLE
@@ -30,9 +31,11 @@ class MakeController {
 
   static submitMake(response, recallType, make) {
     if (makeValidator.isValid(make)) {
+      logger.debug(`Make ${make} is valid`);
       response.redirect(`make/${encodeURIComponent(make)}/model`);
     } else {
       const errorMessage = makeValidator.getErrorMessage(recallType);
+      logger.info(`Make invalid: ${errorMessage}`);
       this.makesList(errorMessage, response, recallType);
     }
   }

@@ -1,5 +1,5 @@
 {
-  "name": "recalls-app",
+  "name": "recalls-app-frontend",
   "engines": {
     "node": "=8.10.0"
   },
@@ -9,9 +9,10 @@
   "scripts": {
     "start": "nodemon ./scripts/local.js --watch ../common --watch ./",
     "debug": "nodemon --nolazy --inspect-brk=8228 ./scripts/local.js --ext js,njk --watch ../common --watch ./",
-    "test": "nyc mocha \"test/**/*.test.js\" --exit",
+    "test": "npm run build-common && export APP_NAME=test && nyc mocha \"test/**/*.test.js\" --exit",
     "lint": "eslint .",
-    "build": "npm install && npm run lint && npm test && npm run prod",
+    "build-common": "(cd ../common && npm run build)",
+    "build": "npm run build-common && npm install && npm run lint && npm test && npm run prod",
     "prod": "npm prune --production && npm install --production && zip -r ../cvr-frontend.zip * ../common --exclude /test"
   },
   "repository": {
@@ -28,7 +29,6 @@
     "body-parser": "^1.18.3",
     "cvr-common": "file:../common",
     "express": "^4.16.4",
-    "express-http-context": "^1.2.0",
     "helmet": "^3.14.0",
     "hsts": "^2.1.0",
     "nunjucks": "^3.1.3",

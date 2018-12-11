@@ -1,4 +1,5 @@
 const RecallType = require('cvr-common/model/recallTypeEnum');
+const logger = require('cvr-common/logger/loggerFactory').create();
 const recallSearch = require('../service/recallSearch');
 const pluralForm = require('../service/pluralForm');
 const SmartSurveyFeedback = require('../helpers/SmartSurveyFeedback');
@@ -69,7 +70,7 @@ class ResultsController {
     recalls,
   ) {
     if (err) {
-      console.error(err);
+      logger.error(err);
     } else {
       const recallTypePlural = recallType === RecallType.vehicle ? `${recallType}s` : recallType;
       const params = {

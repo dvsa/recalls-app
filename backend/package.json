@@ -9,9 +9,10 @@
   "scripts": {
     "start": "nodemon ./src/scripts/local.js --watch ../common --watch ./",
     "debug": "nodemon --inspect-brk=9229 --nolazy ./src/scripts/local.js --watch ../common --watch ./",
-    "test": "nyc mocha \"src/test/**/*.test.js\" --exit",
+    "test": "npm run build-common && export APP_NAME=test && nyc mocha \"src/test/**/*.test.js\" --exit",
     "lint": "eslint .",
-    "build": "npm install && npm run lint && npm test && npm run prod",
+    "build-common": "(cd ../common && npm run build)",
+    "build": "npm run build-common && npm install && npm run lint && npm test && npm run prod",
     "prod": "npm prune --production && npm install --production && zip -r ../cvr-backend.zip * --exclude /src/test"
   },
   "repository": {

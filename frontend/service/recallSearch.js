@@ -1,5 +1,6 @@
 const request = require('request');
 const RecallDto = require('cvr-common/dto/recall');
+const logger = require('cvr-common/logger/loggerFactory').create();
 const envVariables = require('../config/environmentVariables');
 
 const RECALLS_BACKEND_URL = envVariables.recallsBackendUrl;
@@ -8,12 +9,13 @@ class RecallSearch {
   static fetchAllMakes(type, callback) {
     const path = `${RECALLS_BACKEND_URL}/recall-type/${type}/make`;
     request.get(path, (err, res, body) => {
-      console.info(`RecallSearch.fetchAllMakes(${type}) - HTTP response code: `, res && res.statusCode);
+      logger.info(`RecallSearch.fetchAllMakes(${type}) - HTTP response code: `, res && res.statusCode);
 
       if (err != null) {
-        console.error('RecallSearch.fetchAllMakes() - Error while calling API: ', err);
+        logger.error('RecallSearch.fetchAllMakes() - Error while calling API: ', err);
         callback(err);
       } else {
+        logger.debug('RecallSearch.fetchAllMakes() - returning: ', body);
         callback(null, JSON.parse(body));
       }
     });
@@ -23,12 +25,13 @@ class RecallSearch {
     const encodedMake = encodeURIComponent(make);
     const path = `${RECALLS_BACKEND_URL}/recall-type/${type}/make/${encodedMake}/model`;
     request.get(path, (err, res, body) => {
-      console.info(`RecallSearch.fetchAllModels(${type}, ${make}) - HTTP response code `, res && res.statusCode);
+      logger.info(`RecallSearch.fetchAllModels(${type}, ${make}) - HTTP response code `, res && res.statusCode);
 
       if (err != null) {
-        console.error('RecallSearch.fetchAllModels() - Error while calling API: ', err);
+        logger.error('RecallSearch.fetchAllModels() - Error while calling API: ', err);
         callback(err);
       } else {
+        logger.debug('RecallSearch.fetchAllModels() - returning: ', body);
         callback(null, JSON.parse(body));
       }
     });
@@ -50,12 +53,13 @@ class RecallSearch {
 
   static fetchRecalls(path, type, make, model, year, callback) {
     request.get(encodeURI(path), (err, res, body) => {
-      console.info(`RecallSearch for (${type}, ${make}, ${model}, ${year}) - HTTP response code`, res && res.statusCode);
+      logger.info(`RecallSearch for (${type}, ${make}, ${model}, ${year}) - HTTP response code`, res && res.statusCode);
 
       if (err != null) {
-        console.error('RecallSearch - Error while calling API: ', err);
+        logger.error('RecallSearch.fetchRecalls() - Error while calling API: ', err);
         callback(err);
       } else {
+        logger.debug('RecallSearch.fetchRecalls() - returning: ', body);
         const recalls = this.mapRecallsToDto(body);
         callback(null, recalls);
       }
@@ -63,6 +67,7 @@ class RecallSearch {
   }
 
   static mapRecallsToDto(body) {
+    logger.debug('Entering RecallSearch.mapRecallsToDto()');
     const parsedRecalls = JSON.parse(body);
     return parsedRecalls.map((recall) => {
       const recallDto = new RecallDto();
