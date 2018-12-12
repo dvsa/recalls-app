@@ -82,7 +82,7 @@ describe('SmartSurveyFeedback', () => {
           smartSurveyFeedback.setPageParams(data.params);
         }
 
-        assert.equal(smartSurveyFeedback.formUrl, data.expectedFormUrl);
+        assert.equal(smartSurveyFeedback.formUrl(), data.expectedFormUrl);
       });
     });
   });

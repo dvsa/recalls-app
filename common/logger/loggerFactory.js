@@ -1,12 +1,12 @@
+const httpContext = require('express-http-context');
 const bunyan = require('bunyan');
 const safeJsonStringify = require('safe-json-stringify');
-const httpContext = require('express-http-context');
 
 const AMAZON_LB_TRACE_HEADER = 'x-amzn-trace-id';
 
 let logConfig;
 
-function stderrReformat() {
+function stdoutReformat() {
   return {
     write: (entry) => {
       const log = entry;
@@ -18,8 +18,12 @@ function stderrReformat() {
       delete log.time;
       delete log.v;
       delete log.msg;
+      
+      log.requestPath = httpContext.get('requestPath'),
+      log.requestId = httpContext.get('requestId'),
+      log.queryParameters = httpContext.get('queryParameters'),
 
-      process.stderr.write(`${safeJsonStringify(Object.assign(log, {
+      process.stdout.write(`${safeJsonStringify(Object.assign(log, {
         level: bunyan.nameFromLevel[log.level]
       }))}\n`);
     },
@@ -56,12 +60,9 @@ module.exports.create = () => {
     name: conf.appName,
     level: conf.logLevel,
     functionName: conf.functionName,
-    requestPath: httpContext.get('requestPath'),
-    requestId: httpContext.get('requestId'),
-    queryParameters: httpContext.get('queryParameters'),
     streams: [{
       type: 'raw',
-      stream: stderrReformat(),
+      stream: stdoutReformat(),
     }],
   })
 };
