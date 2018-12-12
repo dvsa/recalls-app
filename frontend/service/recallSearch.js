@@ -1,4 +1,7 @@
+const httpContext = require('express-http-context');
 const request = require('request');
+const sessionStorageConstants = require('cvr-common/constants/sessionStorageKeys');
+const requestHeaders = require('cvr-common/constants/requestHeaders');
 const RecallDto = require('cvr-common/dto/recall');
 const logger = require('cvr-common/logger/loggerFactory').create();
 const envVariables = require('../config/environmentVariables');
@@ -8,7 +11,7 @@ const RECALLS_BACKEND_URL = envVariables.recallsBackendUrl;
 class RecallSearch {
   static fetchAllMakes(type, callback) {
     const path = `${RECALLS_BACKEND_URL}/recall-type/${type}/make`;
-    request.get(path, (err, res, body) => {
+    request.get({ url: path, headers: this.getRequestHeaders() }, (err, res, body) => {
       logger.info(`RecallSearch.fetchAllMakes(${type}) - HTTP response code: `, res && res.statusCode);
 
       if (err != null) {
@@ -24,7 +27,7 @@ class RecallSearch {
   static fetchAllModels(type, make, callback) {
     const encodedMake = encodeURIComponent(make);
     const path = `${RECALLS_BACKEND_URL}/recall-type/${type}/make/${encodedMake}/model`;
-    request.get(path, (err, res, body) => {
+    request.get({ url: path, headers: this.getRequestHeaders() }, (err, res, body) => {
       logger.info(`RecallSearch.fetchAllModels(${type}, ${make}) - HTTP response code `, res && res.statusCode);
 
       if (err != null) {
@@ -52,7 +55,7 @@ class RecallSearch {
   }
 
   static fetchRecalls(path, type, make, model, year, callback) {
-    request.get(encodeURI(path), (err, res, body) => {
+    request.get({ url: encodeURI(path), headers: this.getRequestHeaders() }, (err, res, body) => {
       logger.info(`RecallSearch for (${type}, ${make}, ${model}, ${year}) - HTTP response code`, res && res.statusCode);
 
       if (err != null) {
@@ -83,6 +86,18 @@ class RecallSearch {
       recallDto.buildEnd = recall.buildEnd;
       return recallDto;
     });
+  }
+
+  static getRequestHeaders() {
+    const headers = {};
+    headers[requestHeaders.PARENT_REQUEST_ID] = httpContext.get(
+      sessionStorageConstants.REQUEST_ID_KEY,
+    );
+    headers[requestHeaders.CALLER_NAME] = httpContext.get(
+      envVariables.functionName,
+    );
+
+    return headers;
   }
 }
 

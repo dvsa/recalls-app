@@ -6,6 +6,9 @@ const server = awsServerlessExpress.createServer(app);
 
 module.exports = {
   handler: (lambdaEvent, context) => {
+    console.info('lambdaEvent');
+    console.info(lambdaEvent);
+    console.info(lambdaEvent.requestContext);
     envVariables.functionName = context.functionName;
     return awsServerlessExpress.proxy(server, lambdaEvent, context);
   },

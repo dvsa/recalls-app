@@ -10,7 +10,6 @@
   "license": "MIT",
   "dependencies": {
     "bunyan": "^1.8.12",
-    "express-http-context": "^1.2.0",
     "safe-json-stringify": "^1.2.0"
   }
 }

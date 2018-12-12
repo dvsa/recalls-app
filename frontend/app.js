@@ -3,6 +3,7 @@ const TEMPLATES_PATH = './views';
 const loggerFactory = require('cvr-common/logger/loggerFactory');
 const bodyParser = require('body-parser');
 const express = require('express');
+const httpContext = require('express-http-context');
 const nunjucks = require('nunjucks');
 const helmet = require('helmet');
 const hsts = require('hsts');
@@ -16,7 +17,7 @@ const HSTS_MAX_AGE = 15768000;
 app.use(bodyParser.urlencoded({
   extended: true,
 }));
-loggerFactory.initialize(app, {
+loggerFactory.initialize(app, httpContext, {
   logLevel: envVariables.logLevel,
   functionName: envVariables.functionName,
   appName: packagesJson.name,
