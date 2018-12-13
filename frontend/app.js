@@ -19,7 +19,6 @@ app.use(bodyParser.urlencoded({
 }));
 loggerFactory.initialize(app, httpContext, {
   logLevel: envVariables.logLevel,
-  functionName: envVariables.functionName,
   appName: packagesJson.name,
 });
 app.use(helmet());
