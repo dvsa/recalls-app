@@ -1,0 +1,33 @@
+{
+  "name": "cvr-data-update",
+  "engines": {
+    "node": "=8.10.0"
+  },
+  "version": "0.1.0",
+  "description": "CVR lambda triggered by upload to S3 bucket. Used to download csv file from S3 bucket, parse downloaded data and insert it into the database",
+  "main": "src/lambda.js",
+  "scripts": {
+    "test": "mocha \"src/test/**/*.test.js\" --exit",
+    "lint": "eslint .",
+    "build": "npm install && npm run lint && npm test && npm run prod",
+    "prod": "npm prune --production && npm install --production && zip -r ../cvr-data-update.zip * --exclude /src/test"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "async": "^2.6.1",
+    "aws-sdk": "^2.338.0"
+  },
+  "devDependencies": {
+    "mocha": "^5.2.0",
+    "eslint": "^5.7.0",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-plugin-import": "^2.14.0",
+    "sinon": "^7.1.1"
+  },
+  "husky": {
+    "hooks": {
+      "pre-push": "../pre-push.sh"
+    }
+  }
+}
