@@ -4,6 +4,7 @@ process.env.RECALLS_BACKEND_URL = process.env.RECALLS_BACKEND_URL || 'http://loc
 // It is recommended to use an existing built env as assets base to get the file download working.
 // TODO: set it to integration env domain name once its available.
 process.env.ASSETS_BASE_URL = process.env.ASSETS_BASE_URL || 'https://dvsa-front-end.herokuapp.com';
+process.env.FUNCTION_NAME = 'N/A-localhost-fe';
 
 const app = require('../app');
 

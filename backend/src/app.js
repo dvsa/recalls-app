@@ -22,7 +22,7 @@ app.use('/', indexRouter);
 
 const logger = loggerFactory.create();
 logger.info(`Init ver ${packagesJson.version}`);
-// TODO: requestId pass via headers
+// TODO: callerName not showing
 // TODO: better common compilation solution, this takes long? (Locally, on build is okay-ish)
 
 module.exports = app;

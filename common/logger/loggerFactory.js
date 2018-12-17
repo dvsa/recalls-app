@@ -78,6 +78,8 @@ module.exports.initialize = (app, loggerContext, loggerConfig) => {
   // Set logger request-wide properties by adding a middlewere
   app.use(logContext.middleware);
   app.use((req, res, next) => {
+    console.info('req');
+    console.info(req);
     // Extract APIGW request id from the lambda event
     let lambdaEvent = getLambdaEvent(req);
     const awsRequestId = lambdaEvent.requestContext ? lambdaEvent.requestContext.requestId : 'N/A';
