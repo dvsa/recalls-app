@@ -1,7 +1,7 @@
 const AWS = require("aws-sdk");
 const CSV = require('fast-csv');
 const Recall = require('../model/recall');
-const DateParser = require('../helpers/DateParser');
+const DateParser = require('cvr-common/helpers/DateParser');
 const delay = ms => new Promise(res => setTimeout(res, ms));
 const ENVIRONMENT = process.env.ENVIRONMENT;
 const RECALLS_TABLE_NAME = `cvr-${ENVIRONMENT}-recalls`;
@@ -115,6 +115,7 @@ async function insertRecallsToDb() {
     await documentClient.put(recallsParams, function(err, data) {
       if (err) {
         console.error('Unable to add recall ', recall.make_model_recall_number, '. Error JSON:', JSON.stringify(err, null, 2));
+        console.error(`Recall body: ${JSON.stringify(recall)}`);
         return process.exit(1);
       } else {
         console.log('Recall ', recall.make_model_recall_number, ' uploaded successfully to the recalls table');

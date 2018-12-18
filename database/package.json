@@ -11,7 +11,8 @@
   "license": "MIT",
   "dependencies": {
     "aws-sdk": "^2.338.0",
-    "fast-csv": "^2.4.1"
+    "fast-csv": "^2.4.1",
+    "cvr-common": "file:../common"
   },
   "devDependencies": {
     "chai": "^4.2.0",
