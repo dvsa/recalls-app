@@ -1,5 +1,5 @@
-const RecallType = require('cvr-common/model/recallTypeEnum');
-const logger = require('cvr-common/logger/loggerFactory').create();
+const RecallType = require('cvr-common/src/model/recallTypeEnum');
+const logger = require('cvr-common/src/logger/loggerFactory').create();
 const recallSearch = require('../service/recallSearch');
 const makeValidator = require('../validators/vehicleMake');
 const messages = require('../messages/messages.en');

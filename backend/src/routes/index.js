@@ -1,5 +1,5 @@
 const express = require('express');
-const logger = require('cvr-common/logger/loggerFactory').create();
+const logger = require('cvr-common/src/logger/loggerFactory').create();
 const RecallsRepository = require('../repositories/recalls');
 const RecallsResource = require('../resources/recalls');
 const MakesResource = require('../resources/makes');

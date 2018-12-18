@@ -1,5 +1,5 @@
-const RecallDto = require('cvr-common/dto/recall');
-const logger = require('cvr-common/logger/loggerFactory').create();
+const RecallDto = require('cvr-common/src/dto/recall');
+const logger = require('cvr-common/src/logger/loggerFactory').create();
 
 class RecallsResource {
   constructor(recallsRepository) {

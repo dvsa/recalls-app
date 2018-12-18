@@ -3,13 +3,22 @@
   "version": "1.0.0",
   "description": "Common components for other recall modules",
   "scripts": {
-    "test": "test",
-    "build": "npm install"
+    "test": "mocha \"test/**/*.test.js\" --exit",
+    "build": "npm install",
+    "lint": "eslint ."
   },
   "author": "",
   "license": "MIT",
   "dependencies": {
     "bunyan": "^1.8.12",
     "safe-json-stringify": "^1.2.0"
+  },
+  "devDependencies": {
+    "mocha": "^5.2.0",
+    "chai": "^4.2.0",
+    "sinon": "^7.1.1",
+    "eslint": "^5.7.0",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-plugin-import": "^2.14.0"
   }
 }

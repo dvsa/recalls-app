@@ -1,4 +1,4 @@
-const logger = require('cvr-common/logger/loggerFactory').create();
+const logger = require('cvr-common/src/logger/loggerFactory').create();
 const DbClient = require('../db/dbClient');
 
 class RecallsRepository {

@@ -1,8 +1,8 @@
 const TEMPLATES_PATH = './views';
 
 const awsServerlessExpressMiddleware = require('aws-serverless-express/middleware');
-const sessionStorageConstants = require('cvr-common/constants/sessionStorageKeys');
-const loggerFactory = require('cvr-common/logger/loggerFactory');
+const sessionStorageConstants = require('cvr-common/src/constants/sessionStorageKeys');
+const loggerFactory = require('cvr-common/src/logger/loggerFactory');
 const bodyParser = require('body-parser');
 const express = require('express');
 const httpContext = require('express-http-context');

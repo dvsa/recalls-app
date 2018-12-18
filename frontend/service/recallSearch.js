@@ -1,9 +1,9 @@
 const httpContext = require('express-http-context');
 const request = require('request');
-const sessionStorageConstants = require('cvr-common/constants/sessionStorageKeys');
-const requestHeaders = require('cvr-common/constants/requestHeaders');
-const RecallDto = require('cvr-common/dto/recall');
-const logger = require('cvr-common/logger/loggerFactory').create();
+const sessionStorageConstants = require('cvr-common/src/constants/sessionStorageKeys');
+const requestHeaders = require('cvr-common/src/constants/requestHeaders');
+const RecallDto = require('cvr-common/src/dto/recall');
+const logger = require('cvr-common/src/logger/loggerFactory').create();
 const envVariables = require('../config/environmentVariables');
 
 const RECALLS_BACKEND_URL = envVariables.recallsBackendUrl;
