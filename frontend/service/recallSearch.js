@@ -94,7 +94,7 @@ class RecallSearch {
       sessionStorageConstants.REQUEST_ID_KEY,
     );
     headers[requestHeaders.CALLER_NAME] = httpContext.get(
-      sessionStorageConstants.CALLER_NAME,
+      sessionStorageConstants.FUNCTION_NAME,
     );
     logger.debug('Setting request headers:', headers);
 
