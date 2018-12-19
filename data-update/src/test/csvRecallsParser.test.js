@@ -15,16 +15,6 @@ const firstVinEnd = '111##1111';
 const secondVinStart = '222##22222';
 const secondVinEnd = '33##3333333';
 
-const makeToyota = 'TOYOTA';
-const makeHonda = 'HONDA';
-
-const modelCorolla = 'COROLLA';
-const modelAccord = 'ACCORD';
-const modelCivic = 'CIVIC';
-
-const typeVehicle = 'vehicle';
-const typeEquipment = 'equipment';
-
 function createRecallWithRanges(recallNumber, vinStart, vinEnd, buildStart, buildEnd) {
   return new RecallDbRecordDto(
     '2015-05-29',
@@ -40,21 +30,6 @@ function createRecallWithRanges(recallNumber, vinStart, vinEnd, buildStart, buil
     buildStart,
     buildEnd,
   );
-}
-
-function createRecallWithTypeMakeModel(type, make, model, recallNumber = firstRecallNumber) {
-  const recall = new RecallDbRecordDto(
-    '2015-05-29',
-    recallNumber,
-    make,
-    'Concern',
-    'Defect',
-    'Remedy',
-    '999',
-    model,
-  );
-  recall.type = type;
-  return recall;
 }
 
 describe('CsvRecallsParser', () => {
@@ -113,62 +88,6 @@ describe('CsvRecallsParser', () => {
 
       expect(firstProcessedRecall).to.have.property('recall_number').that.equals(firstRecallNumber);
       expect(secondProcessedRecall).to.have.property('recall_number').that.equals(secondRecallNumber);
-    });
-
-    it('Extracts a unique set of makes', () => {
-      const firstRecall = createRecallWithTypeMakeModel(typeVehicle, makeToyota, null, 'R/1');
-      const secondRecall = createRecallWithTypeMakeModel(typeVehicle, makeHonda, null, 'R/2');
-      const thirdRecall = createRecallWithTypeMakeModel(typeVehicle, makeHonda, null, 'R/3');
-      const fourthRecall = createRecallWithTypeMakeModel(typeEquipment, makeHonda, null, 'EQ/4');
-
-      const parser = new Parser('dummy data', 'CP1252');
-
-      let recalls = new Map();
-      recalls = parser.addRecallOrMergeIfExists(firstRecall, recalls);
-      recalls = parser.addRecallOrMergeIfExists(secondRecall, recalls);
-      recalls = parser.addRecallOrMergeIfExists(thirdRecall, recalls);
-      recalls = parser.addRecallOrMergeIfExists(fourthRecall, recalls);
-
-      const makes = parser.constructor.extractMakes(recalls);
-
-      expect(makes.vehicle).to.have.lengthOf(2);
-      expect(makes.equipment).to.have.lengthOf(1);
-      expect(makes.vehicle).to.contain(makeToyota);
-      expect(makes.vehicle).to.contain(makeHonda);
-      expect(makes.equipment).to.contain(makeHonda);
-    });
-
-    it('Extracts unique models grouped by make', () => {
-      const corollaRecall = createRecallWithTypeMakeModel(
-        typeVehicle, makeToyota, modelCorolla,
-      );
-      const accordRecall = createRecallWithTypeMakeModel(
-        typeVehicle, makeHonda, modelAccord,
-      );
-      const firstCivicRecall = createRecallWithTypeMakeModel(
-        typeVehicle, makeHonda, modelCivic,
-      );
-      const secondCivicRecall = createRecallWithTypeMakeModel(
-        typeVehicle, makeHonda, modelCivic,
-      );
-
-      const parser = new Parser('dummy data', 'CP1252');
-
-      let recalls = new Map();
-      recalls = parser.addRecallOrMergeIfExists(corollaRecall, recalls);
-      recalls = parser.addRecallOrMergeIfExists(accordRecall, recalls);
-      recalls = parser.addRecallOrMergeIfExists(firstCivicRecall, recalls);
-      recalls = parser.addRecallOrMergeIfExists(secondCivicRecall, recalls);
-
-      const models = parser.constructor.extractModels(recalls);
-      const toyotaModels = models['vehicle-TOYOTA'];
-      const hondaModels = models['vehicle-HONDA'];
-
-      expect(toyotaModels).to.have.lengthOf(1);
-      expect(hondaModels).to.have.lengthOf(2);
-      expect(toyotaModels).to.contain(modelCorolla);
-      expect(hondaModels).to.contain(modelAccord);
-      expect(hondaModels).to.contain(modelCivic);
     });
   });
 });

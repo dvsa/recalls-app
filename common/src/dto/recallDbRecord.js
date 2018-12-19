@@ -18,6 +18,9 @@ class RecallDbRecordDto {
     this.type_make_model = `${this.type}-${make}-${model}`;
     this.launch_date = launchDate;
     this.recall_number = recallNumber;
+    this.vin_range = [];
+    this.build_range = [];
+
     if (make) { this.make = make; }
     if (concern) { this.concern = concern; }
     if (defect) { this.defect = defect; }
@@ -58,6 +61,22 @@ class RecallDbRecordDto {
     const type = recallNumber.split('/')[0];
     const vehicleTypes = ['R', 'RM', 'RCT', 'RPT', 'RSPV', 'RPC'];
     return vehicleTypes.includes(type) ? 'vehicle' : 'equipment';
+  }
+
+  static mapFromObject(object) {
+    const mappedRecall = new RecallDbRecordDto(
+      object.launch_date,
+      object.recall_number,
+      object.make,
+      object.concern,
+      object.defect,
+      object.remedy,
+      object.vehicle_number,
+      object.model,
+    );
+    mappedRecall.vin_range = object.vin_range;
+    mappedRecall.build_range = object.build_range;
+    return mappedRecall;
   }
 }
 

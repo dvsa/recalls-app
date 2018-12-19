@@ -19,6 +19,7 @@ module.exports = {
         [
           async.apply(RecallDataProcessor.download, s3Client.s3, srcBucket, srcKey),
           RecallDataProcessor.parse,
+          RecallDataProcessor.compare,
           RecallDataProcessor.insert,
         ],
         (err) => {

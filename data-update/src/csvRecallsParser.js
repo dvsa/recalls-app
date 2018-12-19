@@ -30,6 +30,13 @@ class CsvRecallsParser {
     );
   }
 
+  isAnyRequiredFieldMissing(line) {
+    const trim = this.constructor.trimIfNotEmpty;
+    return (!line.Make || trim(line.Make).length === 0)
+      || (!line.Model || trim(line.Model).length === 0)
+      || (!line['Recalls Number'] || trim(line['Recalls Number']).length === 0);
+  }
+
   static trimIfNotEmpty(field) {
     return (!field || field.length === 0) ? field : field.trim();
   }
@@ -68,46 +75,8 @@ class CsvRecallsParser {
   }
 
   /**
-   * Returns an object containing 2 sets - vehicle and equipment makes
-   * { vehicle: Set<String>, equipment: Set<String> }
-   * @param {Map<RecallDbRecordDto>} recalls
-   */
-  static extractMakes(recalls) {
-    const makes = { vehicle: new Set(), equipment: new Set() };
-
-    for (const keyValuePair of recalls) {
-      const recall = keyValuePair[1];
-
-      if (recall.type === 'equipment') {
-        makes.equipment.add(recall.make);
-      } else {
-        makes.vehicle.add(recall.make);
-      }
-    }
-
-    return makes;
-  }
-
-  /**
-   * Returns a map of unique models, each key consists of recall type and make,
-   * each element is a set of models
-   * @param {Map<RecallDbRecordDto>} recalls
-   */
-  static extractModels(recalls) {
-    const models = new Map();
-
-    for (const keyValuePair of recalls) {
-      const recall = keyValuePair[1];
-      const modelKey = `${recall.type}-${recall.make}`;
-
-      models[modelKey] = (models[modelKey] || new Set()).add(recall.model);
-    }
-
-    return models;
-  }
-
-  /**
    * Parses the CSV file, returns a collection of recalls
+   * Recalls are mapped by make_model_recall_number key
    * @returns { recalls: Map<String, RecallDbRecordDto> }
    */
   parse() {
@@ -119,8 +88,12 @@ class CsvRecallsParser {
         console.info(`Number of CSV records: ${json.length}`);
 
         for (const line of json) {
-          const recall = this.csvLineToRecall(line);
-          recalls = this.addRecallOrMergeIfExists(recall, recalls);
+          if (this.isAnyRequiredFieldMissing(line)) {
+            console.warn(`The following CSV line cannot be processed as it is missing one of the required fields (Make, Model, Recalls Number): \r${JSON.stringify(line)}`);
+          } else {
+            const recall = this.csvLineToRecall(line);
+            recalls = this.addRecallOrMergeIfExists(recall, recalls);
+          }
         }
       }
     }, { delimiter: { array: '\n', field: ',' } });

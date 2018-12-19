@@ -15,11 +15,13 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "cvr-common": "file:../common",
     "async": "^2.6.1",
     "aws-sdk": "^2.338.0",
+    "cvr-common": "file:../common",
     "iconv-lite": "^0.4.24",
-    "json-2-csv": "^2.4.0"
+    "json-2-csv": "^2.4.0",
+    "lodash": "^4.17.11",
+    "request": "^2.88.0"
   },
   "devDependencies": {
     "mocha": "^5.2.0",
