@@ -1,4 +1,4 @@
-const RecallType = require('cvr-common/model/recallTypeEnum');
+const RecallType = require('cvr-common/src/model/recallTypeEnum');
 
 const validTypes = Object.values(RecallType);
 

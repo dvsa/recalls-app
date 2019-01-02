@@ -1,4 +1,5 @@
 const express = require('express');
+const { logger } = require('cvr-common/src/logger/loggerFactory');
 
 const router = express.Router({ strict: true });
 const landingPageController = require('../controllers/landingPageController');
@@ -12,10 +13,12 @@ const yearController = new YearController();
 const resultsController = new ResultsController();
 
 router.get('/cookies', (req, response) => {
+  logger.info('Request to render cookies received');
   landingPageController.cookies(response);
 });
 
 router.get('/terms-and-conditions', (req, response) => {
+  logger.info('Request to render TOS received');
   landingPageController.termsAndConditions(response);
 });
 
@@ -24,22 +27,26 @@ router.get('/', (req, response) => {
 });
 
 router.get('/recall-type', (req, response) => {
+  logger.info('Request to render home page received');
   landingPageController.homePage(null, response);
 });
 
 router.post('/recall-type', (req, response) => {
   const recallType = req.body.recallType;
+  logger.info(`User submitted type=${recallType}`);
   landingPageController.submitRecallType(response, recallType);
 });
 
 router.get('/recall-type/:recallType/make', (req, response) => {
   const recallType = req.params.recallType;
+  logger.info(`Request to render make page received for type=${recallType}`);
   makeController.makesList(null, response, recallType);
 });
 
 router.post('/recall-type/:recallType/make', (req, response) => {
   const recallType = req.params.recallType;
   const make = req.body.make;
+  logger.info(`User submitted make=${make}`);
 
   makeController.submitMake(response, recallType, make);
 });
@@ -47,6 +54,7 @@ router.post('/recall-type/:recallType/make', (req, response) => {
 router.get('/recall-type/:recallType/make/:make/model', (req, response) => {
   const recallType = req.params.recallType;
   const make = req.params.make;
+  logger.info(`Request to render model page received for type=${recallType}, make=${make}`);
 
   modelController.modelsList(null, response, recallType, make);
 });
@@ -55,6 +63,7 @@ router.post('/recall-type/:recallType/make/:make/model', (req, response) => {
   const recallType = req.params.recallType;
   const make = req.params.make;
   const model = req.body.model;
+  logger.info(`User submitted model=${model}`);
 
   modelController.submitModel(response, recallType, make, model);
 });
@@ -63,6 +72,7 @@ router.get('/recall-type/:recallType/make/:make/model/:model/year', (req, respon
   const recallType = req.params.recallType;
   const make = req.params.make;
   const model = req.params.model;
+  logger.info(`Request to render year page received for type=${recallType}, make=${make}, model=${model}`);
 
   yearController.enterYear(null, response, recallType, make, model);
 });
@@ -72,6 +82,7 @@ router.post('/recall-type/:recallType/make/:make/model/:model/year', (req, respo
   const make = req.params.make;
   const model = req.params.model;
   const year = req.body.year;
+  logger.info(`User submitted year=${year}`);
 
   yearController.submitYear(response, recallType, make, model, year);
 });
@@ -84,6 +95,7 @@ router.get([
   const model = req.params.model;
   const year = req.params.year;
   const recallType = req.params.recallType;
+  logger.info(`Request to render recalls page received for type=${recallType}, make=${make}, model=${model}, year=${year}`);
 
   resultsController.resultsPage(response, recallType, make, model, year);
 });

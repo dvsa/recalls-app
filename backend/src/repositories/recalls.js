@@ -1,3 +1,4 @@
+const { logger } = require('cvr-common/src/logger/loggerFactory');
 const DbClient = require('../db/dbClient');
 
 class RecallsRepository {
@@ -15,7 +16,7 @@ class RecallsRepository {
       },
     };
 
-    console.info(`DB request params: ${JSON.stringify(params)}`);
+    logger.debug(`DB request params: ${JSON.stringify(params)}`);
 
     this.dbClient.database.query(params, callback);
   }
@@ -33,7 +34,7 @@ class RecallsRepository {
       },
     };
 
-    console.info(`DB request params: ${JSON.stringify(params)}`);
+    logger.debug(`DB request params: ${JSON.stringify(params)}`);
 
     this.dbClient.database.query(params, callback);
   }

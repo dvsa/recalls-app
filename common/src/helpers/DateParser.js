@@ -1,3 +1,5 @@
+const { logger } = require('../logger/loggerFactory');
+
 class DateParser {
   /**
    * Accepts dates in the following format: dd/mm/yyyy
@@ -5,15 +7,15 @@ class DateParser {
    * @param {String} date
    * @returns {Date|null}
    */
-  parseSlashFormatDate(date) {
-    if (date == null || date.length == 0) {
+  static parseSlashFormatDate(date) {
+    if (date == null || date.length === 0) {
       return null;
     }
 
     const dateSegments = date.match(new RegExp(/(\d+)\/(\d+)\/(\d+)/));
 
-    if(dateSegments == null || dateSegments.length != 4) {
-      console.warn(`Unable to parse the following date: ${date}. Please use the following format: dd/mm/yyyy`);
+    if (dateSegments == null || dateSegments.length !== 4) {
+      logger.warn(`Unable to parse the following date: ${date}. Please use the following format: dd/mm/yyyy`);
       return null;
     }
 
@@ -24,18 +26,18 @@ class DateParser {
     const isoDateString = `${year}-${month}-${day}`;
     const parsedDate = new Date(isoDateString);
 
-    if (isNaN(parsedDate)) {
-      console.warn(`Unable to parse the following date: ${date}. Please use the following format: dd/mm/yyyy`);
+    if (Number.isNaN(Number(parsedDate))) {
+      logger.warn(`Unable to parse the following date: ${date}. Please use the following format: dd/mm/yyyy`);
       return null;
     }
     return parsedDate;
   }
- 
+
   /**
    * Converts dates in the following format: dd/mm/yyyy to YYYY-mm-dd
    */
-  slashFormatToISO(date) {
-    const parsedDate = this.parseSlashFormatDate(date);
+  static slashFormatToISO(date) {
+    const parsedDate = DateParser.parseSlashFormatDate(date);
     if (parsedDate == null) {
       return null;
     }

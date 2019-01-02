@@ -1,5 +1,5 @@
 {
-  "name": "recalls-app",
+  "name": "recalls-app-frontend",
   "engines": {
     "node": "=8.10.0"
   },
@@ -9,10 +9,10 @@
   "scripts": {
     "start": "nodemon ./scripts/local.js --watch ../common --watch ./",
     "debug": "nodemon --nolazy --inspect-brk=8228 ./scripts/local.js --ext js,njk --watch ../common --watch ./",
-    "test": "nyc mocha \"test/**/*.test.js\" --exit",
+    "test": "export APP_NAME=test && nyc mocha \"test/**/*.test.js\" --exit",
     "lint": "eslint .",
     "build": "npm install && npm run lint && npm test && npm run prod",
-    "prod": "npm prune --production && npm install --production && zip -r ../cvr-frontend.zip * ../common --exclude /test"
+    "prod": "npm prune --production && npm install --production && zip -r ../cvr-frontend.zip * --exclude /test"
   },
   "repository": {
     "type": "git",
@@ -24,21 +24,21 @@
   "license": "MIT",
   "homepage": "https://github.com/dvsa/recalls-app#readme",
   "dependencies": {
+    "cvr-common": "file:../common",
     "aws-serverless-express": "^3.3.5",
     "body-parser": "^1.18.3",
-    "cvr-common": "file:../common",
     "express": "^4.16.4",
-    "nunjucks": "^3.1.3",
-    "request": "^2.88.0",
+    "express-http-context": "^1.2.0",
     "helmet": "^3.14.0",
-    "hsts": "^2.1.0"
+    "hsts": "^2.1.0",
+    "nunjucks": "^3.1.3",
+    "request": "^2.88.0"
   },
   "devDependencies": {
     "chai": "^4.2.0",
     "eslint": "^5.7.0",
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-plugin-import": "^2.14.0",
-    "husky": "^1.1.2",
     "mocha": "^5.2.0",
     "nodemon": "^1.18.7",
     "nyc": "^13.1.0",
@@ -68,10 +68,5 @@
     ],
     "cache": true,
     "all": true
-  },
-  "husky": {
-    "hooks": {
-      "pre-push": "../pre-push.sh"
-    }
   }
 }

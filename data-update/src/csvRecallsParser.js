@@ -1,10 +1,8 @@
-const DateParser = require('cvr-common/helpers/DateParser');
-const RecallDbRecordDto = require('cvr-common/dto/recallDbRecord');
+const DateParser = require('cvr-common/src/helpers/DateParser');
+const RecallDbRecordDto = require('cvr-common/src/dto/recallDbRecord');
 
 const iconv = require('iconv-lite');
 const csvConverter = require('json-2-csv');
-
-const dateParser = new DateParser();
 
 class CsvRecallsParser {
   constructor(bufferedData, sourceEncoding) {
@@ -17,7 +15,7 @@ class CsvRecallsParser {
   csvLineToRecall(line) {
     const trim = this.constructor.trimIfNotEmpty;
     return new RecallDbRecordDto(
-      trim(dateParser.slashFormatToISO(line['Launch Date'])),
+      trim(DateParser.slashFormatToISO(line['Launch Date'])),
       trim(line['Recalls Number']),
       trim(line.Make),
       trim(line.Concern),
@@ -27,8 +25,8 @@ class CsvRecallsParser {
       trim(line.Model),
       trim(line['VIN Start']),
       trim(line['VIN End']),
-      trim(dateParser.slashFormatToISO(line['Build Start'])),
-      trim(dateParser.slashFormatToISO(line['Build End'])),
+      trim(DateParser.slashFormatToISO(line['Build Start'])),
+      trim(DateParser.slashFormatToISO(line['Build End'])),
     );
   }
 

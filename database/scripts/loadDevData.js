@@ -1,7 +1,7 @@
 const AWS = require("aws-sdk");
 const CSV = require('fast-csv');
 const Recall = require('../model/recall');
-const DateParser = require('cvr-common/helpers/DateParser');
+const DateParser = require('cvr-common/src/helpers/DateParser');
 const delay = ms => new Promise(res => setTimeout(res, ms));
 const ENVIRONMENT = process.env.ENVIRONMENT;
 const RECALLS_TABLE_NAME = `cvr-${ENVIRONMENT}-recalls`;
@@ -31,7 +31,6 @@ AWS.config.update({ region: process.env.AWS_REGION });
 
 const dynamoDB = new AWS.DynamoDB();
 const documentClient = new AWS.DynamoDB.DocumentClient();
-const dateParser = new DateParser();
 const recallData = [];
 const uniqueRecallData = {};
 const vehicleMakes = [];
@@ -251,7 +250,7 @@ const throughputCallback = function throughputCallback(expectedWriteThroughput, 
         .on('data', function(line) {
           if (line[LAUNCH_DATE_COL_NO] !== 'Launch Date') {
             const recall = new Recall(
-              trimIfNotEmpty(dateParser.slashFormatToISO(line[LAUNCH_DATE_COL_NO])),
+              trimIfNotEmpty(DateParser.slashFormatToISO(line[LAUNCH_DATE_COL_NO])),
               trimIfNotEmpty(line[RECALL_NUMBER_COL_NO]),
               trimIfNotEmpty(line[MAKE_COL_NO]),
               trimIfNotEmpty(line[CONCERN_COL_NO]),
@@ -261,8 +260,8 @@ const throughputCallback = function throughputCallback(expectedWriteThroughput, 
               trimIfNotEmpty(line[MODEL_COL_NO]),
               trimIfNotEmpty(line[VIN_START_COL_NO]),
               trimIfNotEmpty(line[VIN_END_COL_NO]),
-              trimIfNotEmpty(dateParser.slashFormatToISO(line[BUILD_START_COL_NO])),
-              trimIfNotEmpty(dateParser.slashFormatToISO(line[BUILD_END_COL_NO]))
+              trimIfNotEmpty(DateParser.slashFormatToISO(line[BUILD_START_COL_NO])),
+              trimIfNotEmpty(DateParser.slashFormatToISO(line[BUILD_END_COL_NO]))
             );
             recallData.push(recall);
             uniqueRecallData[`${recall.recall_number}${recall.make}${recall.model}`] = recall;

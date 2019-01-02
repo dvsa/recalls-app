@@ -7,6 +7,36 @@
         {
             "type": "node",
             "request": "launch",
+            "name": "Mocha Tests common",
+            "program": "${workspaceFolder}/common/node_modules/mocha/bin/_mocha",
+            "args": [
+                "-u",
+                "tdd",
+                "--timeout",
+                "999999",
+                "--colors",
+                "${workspaceFolder}/common/test/**/*.test.js"
+            ],
+            "internalConsoleOptions": "openOnSessionStart"
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Mocha Tests frontend",
+            "program": "${workspaceFolder}/frontend/node_modules/mocha/bin/_mocha",
+            "args": [
+                "-u",
+                "tdd",
+                "--timeout",
+                "999999",
+                "--colors",
+                "${workspaceFolder}/frontend/test/**/*.test.js"
+            ],
+            "internalConsoleOptions": "openOnSessionStart"
+        },
+        {
+            "type": "node",
+            "request": "launch",
             "restart": true,
             "name": "Debug backend via NPM",
             "runtimeExecutable": "npm",
