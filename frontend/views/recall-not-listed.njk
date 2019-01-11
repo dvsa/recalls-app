@@ -1,0 +1,23 @@
+{% extends 'layouts/mts-without-container.layout.njk' %}
+{% set pageTitle = 'Check vehicle recalls' %}
+{% block content %}
+  <a href="{{ BASE_URL }}{{backLink}}" class="link-back">Back</a>
+  <header class="content-header">
+    <h1 class="heading-large heading heading--page-heading heading--small-margin-bottom">
+      Why is my make or model not listed?</h1>
+  </header>
+  <div class="row contents">
+    <div class="col-lg-12">
+      <div class="grid-row">
+        <div class="column-three-quarters">
+          <p>The make or model you are looking for has not been recalled.</p>
+
+          <p>If you think the vehicle or equipment you are looking for may 
+              have been recalled, contact the manufacturer or its dealership.</p>
+
+          <p><a href="{{ BASE_URL }}/recall-type">Check for other vehicle or equipment recalls</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

@@ -16,6 +16,7 @@ public abstract class SelectMakePage extends Page {
     @FindBy(id = "make") private WebElement vehicleMakeDropdown;
     @FindBy(className = "error-message") private WebElement errorMessage;
     @FindBy(className = "link-back") private WebElement backButton;
+    @FindBy(id = "recall-not-listed-link") private WebElement recallNotListedLink;
 
     @Override
     protected abstract String getExpectedPageTitle();
@@ -27,7 +28,7 @@ public abstract class SelectMakePage extends Page {
         wait.until(ExpectedConditions.elementToBeClickable(continueButton)).click();
     }
 
-    public void clickContiniueWithNoOptionsSelected() {
+    public void clickContinueWithNoOptionsSelected() {
         FormDataHelper.selectFromDropDownByVisibleText(vehicleMakeDropdown, "Choose a make");
         continueButton.click();
     }
@@ -44,5 +45,10 @@ public abstract class SelectMakePage extends Page {
     public RecallInformationSearchPage clickBackButton() {
         backButton.click();
         return new RecallInformationSearchPage();
+    }
+
+    public RecallNotListedPage clickWhyMakeIsNotListedLink() {
+        recallNotListedLink.click();
+        return new RecallNotListedPage();
     }
 }
