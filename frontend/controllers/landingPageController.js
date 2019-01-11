@@ -33,6 +33,18 @@ class FrontendController {
       smartSurveyFeedback: SmartSurveyFeedback.getInstance(),
     });
   }
+
+  static recallNotListed(response, recallType, make) {
+    let backLink = `/recall-type/${recallType}/make`;
+    if (make) {
+      backLink += `/${make}/model`;
+    }
+
+    response.render('recall-not-listed.njk', {
+      smartSurveyFeedback: SmartSurveyFeedback.getInstance(),
+      backLink,
+    });
+  }
 }
 
 module.exports = FrontendController;

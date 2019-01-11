@@ -100,4 +100,14 @@ router.get([
   resultsController.resultsPage(response, recallType, make, model, year);
 });
 
+router.get([
+  '/recall-type/:recallType/make-not-listed',
+  '/recall-type/:recallType/make/:make/model-not-listed',
+], (req, response) => {
+  const recallType = req.params.recallType;
+  const make = req.params.make;
+  logger.info('User entered recall not listed page');
+  landingPageController.recallNotListed(response, recallType, make);
+});
+
 module.exports = router;
