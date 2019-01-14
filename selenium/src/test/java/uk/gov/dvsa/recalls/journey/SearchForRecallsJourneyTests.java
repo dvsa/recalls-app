@@ -5,6 +5,7 @@ import org.testng.annotations.Test;
 import uk.gov.dvsa.recalls.base.BaseTest;
 import uk.gov.dvsa.recalls.ui.page.EnterYearPage;
 import uk.gov.dvsa.recalls.ui.page.RecallInformationSearchPage;
+import uk.gov.dvsa.recalls.ui.page.RecallNotListedPage;
 import uk.gov.dvsa.recalls.ui.page.ResultsPage;
 import uk.gov.dvsa.recalls.ui.page.SelectEquipmentMakePage;
 import uk.gov.dvsa.recalls.ui.page.SelectEquipmentModelPage;
@@ -47,7 +48,7 @@ public class SearchForRecallsJourneyTests extends BaseTest {
         SelectVehicleMakePage selectMakePage = recallInformationSearchPage.selectVehicleRecallAndContinue();
 
         //When I select no options and click continue, an error appears
-        selectMakePage.clickContiniueWithNoOptionsSelected();
+        selectMakePage.clickContinueWithNoOptionsSelected();
         assertTrue(selectMakePage.formErrorMessageIsVisible(), "I can see the make error message");
 
         //Then I select valid make and continue, I get redirected to the Model Page
@@ -83,7 +84,7 @@ public class SearchForRecallsJourneyTests extends BaseTest {
         resultsPage.clickSearchAgainButton();
     }
 
-    @Test(description = "User can check recalls for an equpment of a particular make and model")
+    @Test(description = "User can check recalls for an equipment of a particular make and model")
     public void searchEquipmentByMakeTest() {
         String make = "COOPER";
         String model = "LT285/75R16";
@@ -99,7 +100,7 @@ public class SearchForRecallsJourneyTests extends BaseTest {
         SelectEquipmentMakePage selectMakePage = recallInformationSearchPage.selectEquipmentRecallAndContinue();
 
         //When I select no options and click continue, an error appears
-        selectMakePage.clickContiniueWithNoOptionsSelected();
+        selectMakePage.clickContinueWithNoOptionsSelected();
         selectMakePage.formErrorMessageIsVisible();
 
         //Then I select valid make and continue, I get redirected to the Model Page
@@ -153,5 +154,40 @@ public class SearchForRecallsJourneyTests extends BaseTest {
         SelectMakePage selectMakePage = selectModelPage.clickBackButton(SelectEquipmentMakePage.class);
         // I click the 'Back' button again, I am redirected to the landing page
         selectMakePage.clickBackButton();
+    }
+
+    @Test(description = "User can access page with more information, when not seeing particular make or model on the list")
+    public void searchMakeAndModelIsNotOnTheListTest() {
+        // Given I am a user of the site and I want to check vehicle recalls
+        // I go to cvr home page
+        RecallInformationSearchPage recallInformationSearchPage = recalls.goToRecallInformationSearchPage();
+
+        // And I select vehicle recalls option
+        // Then I'm redirected to the SelectMake page
+        SelectVehicleMakePage selectMakePage = recallInformationSearchPage.selectVehicleRecallAndContinue();
+
+        // I can't find particular make on the list, so I click 'Why is my vehicle make not listed?' link
+        // Then I'm directed to the RecallNotListed page
+        RecallNotListedPage recallNotListedPage = selectMakePage.clickWhyMakeIsNotListedLink();
+
+        // When I'm on the RecallNotListed page
+        // And I click the 'Check for other vehicle or equipment recalls' link
+        // Then I'm redirected to cvr home page
+        RecallInformationSearchPage recallInformationSearchPage2 = recallNotListedPage.clickCheckForOtherRecallsLink();
+
+        // When I select equipment option
+        SelectEquipmentMakePage selectEquipmentMakePage = recallInformationSearchPage2.selectEquipmentRecallAndContinue();
+
+        // And I select valid make
+        // Then I'm on the SelectModel page
+        SelectEquipmentModelPage selectEquipmentModelPage = selectEquipmentMakePage.selectMakeAndContinue("COOPER");
+
+        // I can't find particular model on the list, so I click 'Why is my vehicle model not listed?' link
+        // Then I'm directed to the RecallNotListed page
+        RecallNotListedPage recallNotListedPage2 = selectEquipmentModelPage.clickWhyModelIsNotListedLink();
+
+        // When I click the 'back' button
+        // Then I'm redirected back to SelectModel page
+        recallNotListedPage2.clickBackButtonRedirectToEquipmentModelPage();
     }
 }
