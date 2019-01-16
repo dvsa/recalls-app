@@ -17,6 +17,7 @@ public abstract class SelectModelPage extends Page {
     @FindBy(id = "model") WebElement vehicleModelDropdown;
     @FindBy(className = "error-message") private WebElement errorMessage;
     @FindBy(className = "link-back") private WebElement backButton;
+    @FindBy(id = "recall-not-listed-link") private WebElement recallNotListedLink;
 
     @Override
     protected abstract String getExpectedPageTitle();
@@ -49,5 +50,10 @@ public abstract class SelectModelPage extends Page {
         } catch (InstantiationException | IllegalAccessException e) {
             throw new PageInstanceNotFoundException(String.format("Could not create a Make Page: %s", clazz.getName()));
         }
+    }
+
+    public RecallNotListedPage clickWhyModelIsNotListedLink() {
+        recallNotListedLink.click();
+        return new RecallNotListedPage();
     }
 }
