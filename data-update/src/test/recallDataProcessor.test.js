@@ -7,6 +7,8 @@ const ModelDbRecordDto = require('cvr-common/src/dto/modelDbRecord');
 const recallDataProcessor = require('../recallDataProcessor');
 const dataUpdateApiClient = require('../dataUpdateApiClient');
 const S3BucketObjectProperties = require('../dto/s3BucketObjectProperties');
+const RecallsMakesModels = require('../dto/recallsMakesModels');
+const envVariables = require('../config/environmentVariables');
 
 let sandbox;
 const MAKE_TOYOTA = 'Toyota';
@@ -15,6 +17,7 @@ const MODEL_COROLLA = 'Corolla';
 const MODEL_E90 = 'E90';
 const FIRST_RECALL = new RecallDbRecordDto(null, 'R/1234/01', MAKE_TOYOTA, null, null, null, null, MODEL_COROLLA);
 const SECOND_RECALL = new RecallDbRecordDto(null, 'R/2222/01', MAKE_BMW, null, null, null, null, MODEL_E90);
+const THIRD_RECALL = new RecallDbRecordDto(null, 'RCOMP/2222/01', 'Equipment make', null, null, null, null, 'Equipment model');
 const ERROR = 'An error occurred';
 const s3CopyObjectResult = { CopyObjectResult: 'result' };
 
@@ -135,17 +138,21 @@ describe('RecallDataProcessor', () => {
 
   describe('compare() method', () => {
     const firstModelRecord = new ModelDbRecordDto(`vehicle-${FIRST_RECALL.make}`, new Set([FIRST_RECALL.model]));
-    const firstMakeRecord = new MakeDbRecordDto('vehicle', new Set([FIRST_RECALL.make]));
+    const secondModelRecord = new ModelDbRecordDto(`vehicle-${SECOND_RECALL.make}`, new Set([SECOND_RECALL.model]));
+    const thirdModelRecord = new ModelDbRecordDto(`equipment-${THIRD_RECALL.make}`, new Set([THIRD_RECALL.model]));
 
-    beforeEach(() => {
-      this.getAllRecalls = getAllRecallsReturns(null, [FIRST_RECALL]);
-    });
+    const firstMakeRecord = new MakeDbRecordDto('vehicle', new Set([FIRST_RECALL.make]));
+    const secondMakeRecord = new MakeDbRecordDto('vehicle', new Set([SECOND_RECALL.make]));
+    const thirdMakeRecord = new MakeDbRecordDto('equipment', new Set([THIRD_RECALL.make]));
+
     afterEach(() => {
       this.getAllRecalls.restore();
       this.getAllMakes.restore();
       this.getAllModels.restore();
     });
+
     it('Returns arrays of modified recalls, models and makes', (done) => {
+      this.getAllRecalls = getAllRecallsReturns(null, [FIRST_RECALL]);
       this.getAllModels = getAllModelsReturns(null, [firstModelRecord]);
       this.getAllMakes = getAllMakesReturns(null, [firstMakeRecord]);
 
@@ -154,19 +161,45 @@ describe('RecallDataProcessor', () => {
       currentRecalls.set(SECOND_RECALL.make_model_recall_number, SECOND_RECALL);
 
       recallDataProcessor.compare(s3Properties, currentRecalls,
-        (err, s3Prop, modifiedRecalls, modifiedMakes, modifiedModels) => {
-          expect(modifiedRecalls).to.be.an('array');
-          expect(modifiedRecalls).to.have.lengthOf(1);
-          expect(modifiedRecalls).to.contain(SECOND_RECALL);
-          expect(modifiedMakes).to.be.an('array');
-          expect(modifiedMakes[0].makes).to.deep.include(SECOND_RECALL.make);
-          expect(modifiedModels).to.be.an('array');
-          expect(modifiedModels[0].models).to.deep.include(SECOND_RECALL.model);
+        (err, s3Prop, modifiedEntries) => {
+          expect(modifiedEntries.recalls).to.be.an('array');
+          expect(modifiedEntries.recalls).to.have.lengthOf(1);
+          expect(modifiedEntries.recalls).to.contain(SECOND_RECALL);
+          expect(modifiedEntries.makes).to.be.an('array');
+          expect(modifiedEntries.makes[0].makes).to.deep.include(SECOND_RECALL.make);
+          expect(modifiedEntries.models).to.be.an('array');
+          expect(modifiedEntries.models[0].models).to.deep.include(SECOND_RECALL.model);
+          done();
+        });
+    });
+    it('Returns arrays of deleted recalls, models and makes', (done) => {
+      this.getAllRecalls = getAllRecallsReturns(null, [FIRST_RECALL, SECOND_RECALL, THIRD_RECALL]);
+      this.getAllModels = getAllModelsReturns(null, [
+        firstModelRecord, secondModelRecord, thirdModelRecord,
+      ]);
+      this.getAllMakes = getAllMakesReturns(null, [
+        firstMakeRecord, secondMakeRecord, thirdMakeRecord,
+      ]);
+
+      const currentRecalls = new Map();
+      currentRecalls.set(FIRST_RECALL.make_model_recall_number, FIRST_RECALL);
+      currentRecalls.set(SECOND_RECALL.make_model_recall_number, SECOND_RECALL);
+
+      recallDataProcessor.compare(s3Properties, currentRecalls,
+        (err, s3Prop, modifiedEntries, deletedEntries) => {
+          expect(deletedEntries.recalls).to.be.an('array');
+          expect(deletedEntries.recalls).to.have.lengthOf(1);
+          expect(deletedEntries.recalls).to.contain(THIRD_RECALL.make_model_recall_number);
+          expect(deletedEntries.makes).to.be.an('array');
+          expect(deletedEntries.makes).to.include(THIRD_RECALL.type);
+          expect(deletedEntries.models).to.be.an('array');
+          expect(deletedEntries.models).to.include(`${THIRD_RECALL.type}-${THIRD_RECALL.make}`);
           done();
         });
     });
     it('Returns modified recalls even if it was unable to fetch previous makes or models', (done) => {
       const currentRecalls = new Map();
+      this.getAllRecalls = getAllRecallsReturns(null, [FIRST_RECALL]);
       this.getAllModels = getAllModelsReturns(ERROR);
       this.getAllMakes = getAllMakesReturns(ERROR);
 
@@ -174,23 +207,23 @@ describe('RecallDataProcessor', () => {
       currentRecalls.set(SECOND_RECALL.make_model_recall_number, SECOND_RECALL);
 
       recallDataProcessor.compare(s3Properties, currentRecalls,
-        (err, s3Prop, modifiedRecalls, modifiedMakes, modifiedModels) => {
-          expect(modifiedRecalls).to.be.an('array');
-          expect(modifiedRecalls).to.have.lengthOf(1);
-          expect(modifiedRecalls).to.contain(SECOND_RECALL);
-          expect(modifiedMakes).to.be.an('array');
-          expect(modifiedMakes).to.have.lengthOf(0);
-          expect(modifiedModels).to.be.an('array');
-          expect(modifiedModels).to.have.lengthOf(0);
+        (err, s3Prop, modifiedEntries) => {
+          expect(modifiedEntries.recalls).to.be.an('array');
+          expect(modifiedEntries.recalls).to.have.lengthOf(1);
+          expect(modifiedEntries.recalls).to.contain(SECOND_RECALL);
+          expect(modifiedEntries.makes).to.be.an('array');
+          expect(modifiedEntries.makes).to.have.lengthOf(0);
+          expect(modifiedEntries.models).to.be.an('array');
+          expect(modifiedEntries.models).to.have.lengthOf(0);
           done();
         });
     });
   });
   describe('insert() method', () => {
     const updateError = 'Mocked error';
-    const recalls = [];
-    const makes = [];
-    const models = [];
+
+    const modifiedEntries = new RecallsMakesModels();
+    const deletedEntries = new RecallsMakesModels();
 
     beforeEach(() => {
       sandbox = sinon.createSandbox();
@@ -198,26 +231,28 @@ describe('RecallDataProcessor', () => {
     afterEach(() => {
       sandbox.restore();
     });
-    it('Sends requests to update recalls, makes and models and copies the CSV to another bucket', (done) => {
+    it('Sends requests to update recalls, makes and models', (done) => {
       mockApiMethodReturnsError(sandbox, 'updateRecalls', null); // No errors, successful call
       mockApiMethodReturnsError(sandbox, 'updateMakes', null); // No errors, successful call
       mockApiMethodReturnsError(sandbox, 'updateModels', null); // No errors, successful call
 
-      recallDataProcessor.insert(s3Properties, recalls, makes, models, (err, data) => {
-        expect(dataUpdateApiClient.updateRecalls.calledOnce).to.equal(true);
-        expect(dataUpdateApiClient.updateMakes.calledOnce).to.equal(true);
-        expect(dataUpdateApiClient.updateModels.calledOnce).to.equal(true);
-        expect(data).to.equal(s3CopyObjectResult);
-        expect(err).to.be.equal(null);
-        done();
-      });
+      recallDataProcessor.insert(s3Properties, modifiedEntries, deletedEntries,
+        (err, s3, deletedKeys) => {
+          expect(dataUpdateApiClient.updateRecalls.calledOnce).to.equal(true);
+          expect(dataUpdateApiClient.updateMakes.calledOnce).to.equal(true);
+          expect(dataUpdateApiClient.updateModels.calledOnce).to.equal(true);
+          expect(deletedKeys).to.equal(deletedEntries);
+          expect(s3).to.equal(s3Properties);
+          expect(err).to.be.equal(null);
+          done();
+        });
     });
     it('Returns an error when updating recalls failed', (done) => {
       mockApiMethodReturnsError(sandbox, 'updateRecalls', updateError);
       mockApiMethodReturnsError(sandbox, 'updateMakes', null);
       mockApiMethodReturnsError(sandbox, 'updateModels', null);
 
-      recallDataProcessor.insert(s3Properties, recalls, makes, models, (err) => {
+      recallDataProcessor.insert(s3Properties, modifiedEntries, deletedEntries, (err) => {
         expect(dataUpdateApiClient.updateRecalls.calledOnce).to.equal(true);
         expect(dataUpdateApiClient.updateMakes.calledOnce).to.equal(true);
         expect(dataUpdateApiClient.updateModels.calledOnce).to.equal(true);
@@ -230,7 +265,7 @@ describe('RecallDataProcessor', () => {
       mockApiMethodReturnsError(sandbox, 'updateMakes', updateError);
       mockApiMethodReturnsError(sandbox, 'updateModels', null);
 
-      recallDataProcessor.insert(s3Properties, recalls, makes, models, (err) => {
+      recallDataProcessor.insert(s3Properties, modifiedEntries, deletedEntries, (err) => {
         expect(dataUpdateApiClient.updateRecalls.calledOnce).to.equal(true);
         expect(dataUpdateApiClient.updateMakes.calledOnce).to.equal(true);
         expect(dataUpdateApiClient.updateModels.calledOnce).to.equal(true);
@@ -244,13 +279,112 @@ describe('RecallDataProcessor', () => {
       mockApiMethodReturnsError(sandbox, 'updateMakes', null);
       mockApiMethodReturnsError(sandbox, 'updateModels', updateError);
 
-      recallDataProcessor.insert(s3Properties, recalls, makes, models, (err) => {
+      recallDataProcessor.insert(s3Properties, modifiedEntries, deletedEntries, (err) => {
+        expect(dataUpdateApiClient.updateRecalls.calledOnce).to.equal(true);
         expect(dataUpdateApiClient.updateRecalls.calledOnce).to.equal(true);
         expect(dataUpdateApiClient.updateMakes.calledOnce).to.equal(true);
         expect(dataUpdateApiClient.updateModels.calledOnce).to.equal(true);
         expect(err).to.equal(updateError);
         done();
       });
+    });
+  });
+
+  describe('delete() method', () => {
+    beforeEach(() => {
+      sandbox = sinon.createSandbox();
+    });
+    afterEach(() => {
+      sandbox.restore();
+    });
+    const deletedEntries = new RecallsMakesModels();
+    const deletionError = new Error('Unable to delete recalls');
+
+    it('Sends requests to update recalls, makes and models', (done) => {
+      mockApiMethodReturnsError(sandbox, 'deleteRecalls', null); // No errors, successful call
+      mockApiMethodReturnsError(sandbox, 'deleteMakes', null); // No errors, successful call
+      mockApiMethodReturnsError(sandbox, 'deleteModels', null); // No errors, successful call
+
+      recallDataProcessor.delete(s3Properties, deletedEntries,
+        (err, s3) => {
+          expect(dataUpdateApiClient.deleteRecalls.calledOnce).to.equal(true);
+          expect(dataUpdateApiClient.deleteMakes.calledOnce).to.equal(true);
+          expect(dataUpdateApiClient.deleteModels.calledOnce).to.equal(true);
+          expect(s3).to.equal(s3Properties);
+          expect(err).to.be.equal(null);
+          done();
+        });
+    });
+    it('Returns an error when deleting recalls failed', (done) => {
+      mockApiMethodReturnsError(sandbox, 'deleteRecalls', deletionError);
+      mockApiMethodReturnsError(sandbox, 'deleteMakes', null); // No errors, successful call
+      mockApiMethodReturnsError(sandbox, 'deleteModels', null); // No errors, successful call
+
+      recallDataProcessor.delete(s3Properties, deletedEntries,
+        (err) => {
+          expect(dataUpdateApiClient.deleteRecalls.calledOnce).to.equal(true);
+          expect(dataUpdateApiClient.deleteMakes.calledOnce).to.equal(true);
+          expect(dataUpdateApiClient.deleteModels.calledOnce).to.equal(true);
+          expect(err).to.be.equal(deletionError);
+          done();
+        });
+    });
+    it('Returns an error when deleting makes failed', (done) => {
+      mockApiMethodReturnsError(sandbox, 'deleteRecalls', null); // No errors, successful call
+      mockApiMethodReturnsError(sandbox, 'deleteMakes', deletionError);
+      mockApiMethodReturnsError(sandbox, 'deleteModels', null); // No errors, successful call
+
+      recallDataProcessor.delete(s3Properties, deletedEntries,
+        (err) => {
+          expect(dataUpdateApiClient.deleteRecalls.calledOnce).to.equal(true);
+          expect(dataUpdateApiClient.deleteMakes.calledOnce).to.equal(true);
+          expect(dataUpdateApiClient.deleteModels.calledOnce).to.equal(true);
+          expect(err).to.be.equal(deletionError);
+          done();
+        });
+    });
+    it('Returns an error when deleting models failed', (done) => {
+      mockApiMethodReturnsError(sandbox, 'deleteRecalls', null); // No errors, successful call
+      mockApiMethodReturnsError(sandbox, 'deleteMakes', null); // No errors, successful call
+      mockApiMethodReturnsError(sandbox, 'deleteModels', deletionError);
+
+      recallDataProcessor.delete(s3Properties, deletedEntries,
+        (err) => {
+          expect(dataUpdateApiClient.deleteRecalls.calledOnce).to.equal(true);
+          expect(dataUpdateApiClient.deleteMakes.calledOnce).to.equal(true);
+          expect(dataUpdateApiClient.deleteModels.calledOnce).to.equal(true);
+          expect(err).to.be.equal(deletionError);
+          done();
+        });
+    });
+  });
+
+  describe('copyCsvToAssets() method', () => {
+    it('Calls AWS S3 client copyObject() method', (done) => {
+      this.copyObject = sinon.spy(s3Properties.s3, 'copyObject');
+
+      recallDataProcessor.copyCsvToAssets(s3Properties, (err) => {
+        expect(this.copyObject.calledOnce).to.equal(true);
+        expect(err).to.equal(null);
+        done();
+      });
+    });
+  });
+
+  describe('isDeleteThresholdExceeded() method', () => {
+    it('is false when threshold is not exceeded', () => {
+      sinon.stub(envVariables, 'deleteThreshold').value('2.5');
+
+      const isExceeded = recallDataProcessor.isDeleteThresholdExceeded(25, 1000);
+
+      expect(isExceeded).to.be.equal(false);
+    });
+    it('is true when threshold is exceeded', () => {
+      sinon.stub(envVariables, 'deleteThreshold').value('2.5');
+
+      const isExceeded = recallDataProcessor.isDeleteThresholdExceeded(26, 1000);
+
+      expect(isExceeded).to.be.equal(true);
     });
   });
 });

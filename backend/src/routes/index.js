@@ -72,6 +72,33 @@ router.patch('/models', (req, res) => {
   });
 });
 
+/** endpoints for deleting data (required by data-update process) */
+router.delete('/recalls', (req, res) => {
+  const recalls = req.body;
+  logger.debug(`DELETE /recalls - Received recall keys: ${JSON.stringify(recalls)}`);
+  recallsResource.deleteRecalls(recalls, (err, data) => {
+    returnApiResponse(err, res, data);
+  });
+});
+
+router.delete('/makes', (req, res) => {
+  const makesResource = new MakesResource(recallsRepository);
+  const makes = req.body;
+  logger.debug(`DELETE /makes - Received keys: ${JSON.stringify(makes)}`);
+  makesResource.deleteMakes(makes, (err, data) => {
+    returnApiResponse(err, res, data);
+  });
+});
+
+router.delete('/models', (req, res) => {
+  const modelsResource = new ModelsResource(recallsRepository);
+  const models = req.body;
+  logger.debug(`DELETE /models - Received keys: ${JSON.stringify(models)}`);
+  modelsResource.deleteModels(models, (err, data) => {
+    returnApiResponse(err, res, data);
+  });
+});
+
 /** All makes of a given type */
 router.get('/recall-type/:type/make', (req, res) => {
   const makesResource = new MakesResource(recallsRepository);

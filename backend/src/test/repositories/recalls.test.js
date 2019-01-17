@@ -6,7 +6,27 @@ const INDEX_NAME = 'recallsSecondaryIndexName';
 const type = 'vehicle';
 const make = 'testMake';
 const model = 'testModel';
+const recallPrimaryKey = 'vehicle-BMW-E90-R/1234/12';
+const makePrimaryKey = 'vehicle';
+const modelPrimaryKey = 'vehicle-BMW';
 const recallsRepository = new RecallsRepository();
+
+const mockSuccessfulDelete = {
+  delete: (params, callback) => callback(null),
+};
+
+const mockFailedDelete = {
+  delete: (params, callback) => callback(new Error('err')),
+};
+
+const mockSuccessfulUpdate = {
+  update: (params, callback) => callback(null),
+};
+
+const mockFailedUpdate = {
+  update: (params, callback) => callback(new Error('err')),
+};
+
 
 describe('RecallsRepository', () => {
   describe('getByMakeAndModel() method', () => {
@@ -116,18 +136,135 @@ describe('RecallsRepository', () => {
     });
   });
 
-  describe('updateMakes() method', () => {
+  describe('deleteMakes() method', () => {
     before(() => {
       recallsRepository.dbClient = {
-        database: { update: (params, callback) => callback(null, params) },
+        database: { delete: (params, callback) => callback(null, params) },
         makesTable: TABLE_NAME,
       };
     });
-
-    it('Should map params properly', (done) => {
-      recallsRepository.updateMakes([make], (err, data) => {
-        expect(data).to.be.an('object');
+    it('Should pass primary keys properly', (done) => {
+      recallsRepository.deleteMakes([makePrimaryKey], (err, data) => {
+        expect(data.Key.type).to.equal(makePrimaryKey);
         expect(data.TableName).to.equal(TABLE_NAME);
+        done();
+      });
+    });
+  });
+
+  describe('deleteModels() method', () => {
+    before(() => {
+      recallsRepository.dbClient = { modelsTable: TABLE_NAME };
+    });
+    it('Should pass primary keys successfully', (done) => {
+      recallsRepository.dbClient.database = mockSuccessfulDelete;
+      recallsRepository.deleteModels([modelPrimaryKey], (err) => {
+        expect(err).to.equal(null);
+        done();
+      });
+    });
+    it('Should report errors properly', (done) => {
+      recallsRepository.dbClient.database = mockFailedDelete;
+      recallsRepository.deleteModels([modelPrimaryKey], (err) => {
+        expect(err).to.be.an('Error');
+        done();
+      });
+    });
+  });
+
+  describe('deleteRecalls() method', () => {
+    before(() => {
+      recallsRepository.dbClient = { modelsTable: TABLE_NAME };
+    });
+    it('Should pass primary keys properly', (done) => {
+      recallsRepository.dbClient.database = mockSuccessfulDelete;
+      recallsRepository.deleteRecalls([recallPrimaryKey], (err) => {
+        expect(err).to.equal(null);
+        done();
+      });
+    });
+    it('Should report errors properly', (done) => {
+      recallsRepository.dbClient.database = mockFailedDelete;
+      recallsRepository.deleteRecalls([recallPrimaryKey], (err) => {
+        expect(err).to.be.an('Error');
+        done();
+      });
+    });
+  });
+
+  describe('deleteMakes() method', () => {
+    before(() => {
+      recallsRepository.dbClient = { modelsTable: TABLE_NAME };
+    });
+    it('Should pass primary keys properly', (done) => {
+      recallsRepository.dbClient.database = mockSuccessfulDelete;
+      recallsRepository.deleteMakes([makePrimaryKey], (err) => {
+        expect(err).to.equal(null);
+        done();
+      });
+    });
+    it('Should report errors properly', (done) => {
+      recallsRepository.dbClient.database = mockFailedDelete;
+      recallsRepository.deleteMakes([makePrimaryKey], (err) => {
+        expect(err).to.be.an('Error');
+        done();
+      });
+    });
+  });
+
+  describe('updateMakes() method', () => {
+    before(() => {
+      recallsRepository.dbClient = { makesTable: TABLE_NAME };
+    });
+    it('Should map params properly', (done) => {
+      recallsRepository.dbClient.database = mockSuccessfulUpdate;
+      recallsRepository.updateMakes([make], (err) => {
+        expect(err).to.be.equal(null);
+        done();
+      });
+    });
+    it('Should report errors properly', (done) => {
+      recallsRepository.dbClient.database = mockFailedUpdate;
+      recallsRepository.updateMakes([makePrimaryKey], (err) => {
+        expect(err).to.be.an('Error');
+        done();
+      });
+    });
+  });
+  describe('updateModels() method', () => {
+    before(() => {
+      recallsRepository.dbClient = { makesTable: TABLE_NAME };
+    });
+    it('Should map params properly', (done) => {
+      recallsRepository.dbClient.database = mockSuccessfulUpdate;
+      recallsRepository.updateModels([make], (err) => {
+        expect(err).to.be.equal(null);
+        done();
+      });
+    });
+    it('Should report errors properly', (done) => {
+      recallsRepository.dbClient.database = mockFailedUpdate;
+      recallsRepository.updateModels([modelPrimaryKey], (err) => {
+        expect(err).to.be.an('Error');
+        done();
+      });
+    });
+  });
+  describe('updateRecalls() method', () => {
+    before(() => {
+      recallsRepository.dbClient = { makesTable: TABLE_NAME };
+    });
+    it('Should map params properly', (done) => {
+      recallsRepository.dbClient.database = mockSuccessfulUpdate;
+      recallsRepository.updateRecalls([{}], (err) => {
+        expect(err).to.be.equal(null);
+        done();
+      });
+    });
+    it('Should report errors properly', (done) => {
+      recallsRepository.dbClient.database = mockFailedUpdate;
+      recallsRepository.updateRecalls([recallPrimaryKey], (err) => {
+        expect(err).to.be.an('Error');
         done();
       });
     });

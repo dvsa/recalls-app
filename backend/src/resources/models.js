@@ -49,7 +49,7 @@ class ModelsResource {
       const modelsList = this.constructor.mapModelsListToDbRecordDto(models);
       this.recallsRepository.updateModels(modelsList, (err) => {
         if (err) {
-          logger.error('Unable to update make and type in models table. Error JSON:', JSON.stringify(err, null, 2));
+          logger.error('Unable to update make and type in models table. Error JSON:', err);
           callback(err);
         } else {
           logger.info('Models uploaded successfully in models table');
@@ -57,6 +57,18 @@ class ModelsResource {
         }
       });
     }
+  }
+
+  deleteModels(modelsPrimaryKeys, callback) {
+    this.recallsRepository.deleteModels(modelsPrimaryKeys, (err, data) => {
+      if (err) {
+        logger.error('Unable to delete models. Error JSON:', err);
+        callback(err);
+      } else {
+        logger.info(`Models deleted successfully from recalls table: ${JSON.stringify(data)}`);
+        callback(null);
+      }
+    });
   }
 }
 

@@ -17,7 +17,7 @@ class DataUpdateApiClient {
         console.info('DataUpdateApiClient.getAllModels() - HTTP response code ', res && res.statusCode);
 
         if (err != null) {
-          console.error('DataUpdateApiClient.getAllModels() - Error while calling API: ', err);
+          DataUpdateApiClient.logErrorMessage('DataUpdateApiClient.getAllModels() - Error while calling API: ', err);
           callback(err);
         } else {
           console.debug('DataUpdateApiClient.getAllModels() - returning: ', body);
@@ -33,7 +33,7 @@ class DataUpdateApiClient {
         console.info('DataUpdateApiClient.getAllMakes() - HTTP response code ', res && res.statusCode);
 
         if (err != null) {
-          console.error('DataUpdateApiClient.getAllMakes() - Error while calling API: ', err);
+          DataUpdateApiClient.logErrorMessage('DataUpdateApiClient.getAllMakes() - Error while calling API: ', err);
           callback(err);
         } else {
           console.debug('DataUpdateApiClient.getAllMakes() - returning: ', body);
@@ -49,7 +49,7 @@ class DataUpdateApiClient {
         console.info('DataUpdateApiClient.getAllRecalls() - HTTP response code ', res && res.statusCode);
 
         if (err != null) {
-          console.error('DataUpdateApiClient.getAllRecalls() - Error while calling API: ', err);
+          DataUpdateApiClient.logErrorMessage('DataUpdateApiClient.getAllRecalls() - Error while calling API: ', err);
           callback(err);
         } else {
           console.debug('DataUpdateApiClient.getAllRecalls() - returning: ', body);
@@ -69,7 +69,7 @@ class DataUpdateApiClient {
       }, (err, res) => {
         console.info('DataUpdateApiClient.updateRecalls() - HTTP response code ', res && res.statusCode);
         if (err != null) {
-          console.error('DataUpdateApiClient.updateRecalls() - Error while calling API: ', err);
+          DataUpdateApiClient.logErrorMessage('DataUpdateApiClient.updateRecalls() - Error while calling API: ', err);
           callback(err);
         } else {
           callback(null, res);
@@ -95,7 +95,7 @@ class DataUpdateApiClient {
       }, (err, res) => {
         console.info('DataUpdateApiClient.updateMakes() - HTTP response code ', res && res.statusCode);
         if (err != null) {
-          console.error('DataUpdateApiClient.updateMakes() - Error while calling API: ', err);
+          DataUpdateApiClient.logErrorMessage('DataUpdateApiClient.updateMakes() - Error while calling API: ', err);
           callback(err);
         } else {
           callback(null, res);
@@ -118,7 +118,67 @@ class DataUpdateApiClient {
       }, (err, res) => {
         console.info('DataUpdateApiClient.updateModels() - HTTP response code ', res && res.statusCode);
         if (err != null) {
-          console.error('DataUpdateApiClient.updateModels() - Error while calling API: ', err);
+          DataUpdateApiClient.logErrorMessage('DataUpdateApiClient.updateModels() - Error while calling API: ', err);
+          callback(err);
+        } else {
+          callback(null, res);
+        }
+      });
+    }
+  }
+
+  static deleteRecalls(recalls, callback) {
+    const path = `${RECALLS_BACKEND_URL}/recalls`;
+    if (_.isArray(recalls) && recalls.length === 0) {
+      console.info('DataUpdateApiClient.deleteRecalls() - payload contains no recall keys. Skipping this request.');
+      callback();
+    } else {
+      request.delete({
+        url: path, body: recalls, json: true, headers: DataUpdateApiClient.getRequestHeaders(),
+      }, (err, res) => {
+        console.info(`DataUpdateApiClient.deleteRecalls() - Deleting ${recalls.length} recalls. HTTP response code: `, res && res.statusCode);
+        if (err != null) {
+          DataUpdateApiClient.logErrorMessage('DataUpdateApiClient.deleteRecalls() - Error while calling API: ', err);
+          callback(err);
+        } else {
+          callback(null, res);
+        }
+      });
+    }
+  }
+
+  static deleteMakes(makes, callback) {
+    const path = `${RECALLS_BACKEND_URL}/makes`;
+    if (_.isArray(makes) && makes.length === 0) {
+      console.info('DataUpdateApiClient.deleteMakes() - payload contains no keys. Skipping this request.');
+      callback();
+    } else {
+      request.delete({
+        url: path, body: makes, json: true, headers: DataUpdateApiClient.getRequestHeaders(),
+      }, (err, res) => {
+        console.info(`DataUpdateApiClient.deleteMakes() - Deleting ${makes.length} makes. HTTP response code `, res && res.statusCode);
+        if (err != null) {
+          DataUpdateApiClient.logErrorMessage('DataUpdateApiClient.deleteMakes() - Error while calling API: ', err);
+          callback(err);
+        } else {
+          callback(null, res);
+        }
+      });
+    }
+  }
+
+  static deleteModels(models, callback) {
+    const path = `${RECALLS_BACKEND_URL}/models`;
+    if (_.isArray(models) && models.length === 0) {
+      console.info('DataUpdateApiClient.deleteModels() - payload contains no keys. Skipping this request.');
+      callback();
+    } else {
+      request.delete({
+        url: path, body: models, json: true, headers: DataUpdateApiClient.getRequestHeaders(),
+      }, (err, res) => {
+        console.info(`DataUpdateApiClient.deleteModels() - Deleting ${models.length} models. HTTP response code `, res && res.statusCode);
+        if (err != null) {
+          DataUpdateApiClient.logErrorMessage('DataUpdateApiClient.deleteModels() - Error while calling API: ', err);
           callback(err);
         } else {
           callback(null, res);
@@ -160,6 +220,14 @@ class DataUpdateApiClient {
     console.debug('Setting request headers:', headers);
 
     return headers;
+  }
+
+  static logErrorMessage(message, apiErr) {
+    const statusCode = apiErr && apiErr.statusCode;
+    const statusMessage = apiErr && apiErr.statusMessage;
+    const body = apiErr && apiErr.body;
+
+    console.error(`${message} - ${statusCode} ${statusMessage} - ${body}`);
   }
 }
 

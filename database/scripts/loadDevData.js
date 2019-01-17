@@ -279,7 +279,7 @@ const throughputCallback = function throughputCallback(expectedWriteThroughput, 
           insertMakesToDb();
           insertRecallsToDb();
           insertModelsToDb();
-          // Start waiting on expected ammount of recalls to be loaded, then decrease throughput via countCallback
+          // Start waiting on expected amount of recalls to be loaded, then decrease throughput via countCallback
           console.log(`Expecting ${uniqueRowsRead} recalls`);
           setTimeout(function(){
             getRecallCount(countCallback);

@@ -3,4 +3,5 @@ module.exports = {
   environment: process.env.ENVIRONMENT,
   assetsBucketName: process.env.ASSETS_BUCKET_NAME,
   lambdaName: process.env.LAMBDA_NAME,
+  deleteThreshold: process.env.DELETE_THRESHOLD,
 };

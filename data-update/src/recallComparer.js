@@ -34,6 +34,48 @@ class RecallComparer {
   }
 
   /**
+   * @returns {string[]} primary keys of recalls that should be deleted
+   */
+  findDeletedRecallsPrimaryKeys() {
+    return RecallComparer.findDeletedKeys(this.previousRecalls, this.currentRecalls, 'make_model_recall_number');
+  }
+
+  /**
+   * @param {Map<String, MakeDbRecordDto>} previousMakes outdated makes from DB
+   * @param {Map<String, MakeDbRecordDto>} currentMakes current makes from CSV
+   * @returns {string[]} primary keys of makes that should be deleted
+   */
+  static findDeletedMakesPrimaryKeys(previousMakes, currentMakes) {
+    return RecallComparer.findDeletedKeys(previousMakes, currentMakes, 'type');
+  }
+
+  /**
+   * @param {Map<String, ModelDbRecordDto>} previousModels outdated models from DB
+   * @param {Map<String, ModelDbRecordDto>} currentModels current models from CSV
+   * @returns {string[]} primary keys of models that should be deleted
+   */
+  static findDeletedModelsPrimaryKeys(previousModels, currentModels) {
+    return RecallComparer.findDeletedKeys(previousModels, currentModels, 'type_make');
+  }
+
+  /**
+   * @param {Map} previousMap previous objects containing primary keys as one of their properties
+   * @param {Map} currentMap current objects containing primary keys as one of their properties
+   * @param {string} keyName name of a property that stores the primary key
+   * @returns {string[]} primary keys of records that should be deleted
+   */
+  static findDeletedKeys(previousMap, currentMap, keyName) {
+    const deletedKeys = [];
+    for (const [key, previousEntry] of previousMap) {
+      if (!currentMap.has(key)) {
+        console.debug(`The following key is no longer present in the current dataset and will be deleted: ${keyName} = ${key}`);
+        deletedKeys.push(previousEntry[keyName]);
+      }
+    }
+    return deletedKeys;
+  }
+
+  /**
    * Iterates over currentRecalls and compares them with previousRecalls
    * uses make_model_recall_number to find corresponding recalls in both maps
    *
@@ -55,11 +97,11 @@ class RecallComparer {
    * Finds objects in currentModels that are not the same as their equivalents in previousModels
    * Equivalent objects are fetched from both maps by the same key
    * @param {Map<ModelDbRecordDto>} previousModels
+   * @param {Map<ModelDbRecordDto>} currentModels
    * @returns {ModelDbRecordDto[]} New sets of models for records which were updated or added
    */
-  findModifiedModels(previousModels) {
+  static findModifiedModels(previousModels, currentModels) {
     const modifiedModels = [];
-    const currentModels = this.constructor.extractModelsFromRecalls(this.currentRecalls);
 
     for (const [typeAndMake, currentModel] of currentModels) {
       const previousModel = previousModels.get(typeAndMake);
@@ -75,11 +117,11 @@ class RecallComparer {
    * Finds objects in currentMakes that are not the same as their equivalents in previousMakes
    * Equivalent objects are fetched from both maps by the same key
    * @param {Map<MakeDbRecordDto>} previousMakes
+   * @param {Map<MakeDbRecordDto>} currentMakes
    * @returns {MakeDbRecordDto[]} New sets of makes for records which were updated or added
    */
-  findModifiedMakes(previousMakes) {
+  static findModifiedMakes(previousMakes, currentMakes) {
     const modifiedMakes = [];
-    const currentMakes = this.constructor.extractMakesFromRecalls(this.currentRecalls);
 
     for (const [type, currentMake] of currentMakes) {
       const previousMake = previousMakes.get(type);
