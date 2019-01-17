@@ -127,6 +127,66 @@ class DataUpdateApiClient {
     }
   }
 
+  static deleteRecalls(recalls, callback) {
+    const path = `${RECALLS_BACKEND_URL}/recalls`;
+    if (_.isArray(recalls) && recalls.length === 0) {
+      console.info('DataUpdateApiClient.deleteRecalls() - payload contains no recall keys. Skipping this request.');
+      callback();
+    } else {
+      request.delete({
+        url: path, body: recalls, json: true, headers: DataUpdateApiClient.getRequestHeaders(),
+      }, (err, res) => {
+        console.info(`DataUpdateApiClient.deleteRecalls() - Deleting ${recalls.length} recalls. HTTP response code `, res && res.statusCode);
+        if (err != null) {
+          console.error('DataUpdateApiClient.deleteRecalls() - Error while calling API: ', err);
+          callback(err);
+        } else {
+          callback(null, res);
+        }
+      });
+    }
+  }
+
+  static deleteMakes(makes, callback) {
+    const path = `${RECALLS_BACKEND_URL}/makes`;
+    if (_.isArray(makes) && makes.length === 0) {
+      console.info('DataUpdateApiClient.deleteMakes() - payload contains no keys. Skipping this request.');
+      callback();
+    } else {
+      request.delete({
+        url: path, body: makes, json: true, headers: DataUpdateApiClient.getRequestHeaders(),
+      }, (err, res) => {
+        console.info(`DataUpdateApiClient.deleteMakes() - Deleting ${makes.length} makes. HTTP response code `, res && res.statusCode);
+        if (err != null) {
+          console.error('DataUpdateApiClient.deleteMakes() - Error while calling API: ', err);
+          callback(err);
+        } else {
+          callback(null, res);
+        }
+      });
+    }
+  }
+
+  static deleteModels(models, callback) {
+    const path = `${RECALLS_BACKEND_URL}/models`;
+    if (_.isArray(models) && models.length === 0) {
+      console.info('DataUpdateApiClient.deleteModels() - payload contains no keys. Skipping this request.');
+      callback();
+    } else {
+      request.delete({
+        url: path, body: models, json: true, headers: DataUpdateApiClient.getRequestHeaders(),
+      }, (err, res) => {
+        console.info(`DataUpdateApiClient.deleteModels() - Deleting ${models.length} models. HTTP response code `, res && res.statusCode);
+        if (err != null) {
+          console.error('DataUpdateApiClient.deleteModels() - Error while calling API: ', err);
+          callback(err);
+        } else {
+          callback(null, res);
+        }
+      });
+    }
+  }
+
   /**
    * @param {Object[]} models
    * @returns {ModelDbRecordDto[]}

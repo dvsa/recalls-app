@@ -63,8 +63,14 @@ const recallItems = {
   ],
 };
 
+const successfulDeleteResponse = 'Records have been deleted';
+
 function getAllRecalls(callback) {
   callback(null, recallItems);
+}
+
+function deleteRecalls(callback) {
+  callback(null, successfulDeleteResponse);
 }
 
 function getByMakeAndModel(type, make, model, callback) {
@@ -205,6 +211,20 @@ describe('RecallsResource', () => {
 
         expect(data[0].recall_number).to.equal(FIRST_RECALL_NUMBER);
         expect(data[1].recall_number).to.equal(SECOND_RECALL_NUMBER);
+        done();
+      });
+    });
+  });
+
+  describe('deleteRecalls() method', () => {
+    it('Should attempt to delete recalls and fetch a response', (done) => {
+      const recallsRepository = new RecallsRepository();
+      sinon.stub(recallsRepository, 'deleteRecalls').callsFake(deleteRecalls);
+
+      const recallsResource = new RecallsResource(recallsRepository);
+      recallsResource.deleteRecalls((err, data) => {
+        expect(err).to.be.equal(null);
+        expect(data).to.contain(successfulDeleteResponse);
         done();
       });
     });

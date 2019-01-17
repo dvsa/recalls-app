@@ -102,6 +102,57 @@ class RecallsRepository {
     Promise.all(promises);
   }
 
+  async deleteRecalls(recallsPrimaryKeys, callback) {
+    const promises = recallsPrimaryKeys.map((primaryKey) => {
+      const recallsParams = {
+        TableName: this.dbClient.recallsTable,
+        Key: {
+          make_model_recall_number: primaryKey,
+        },
+      };
+
+      logger.debug(`Deleting recall with make_model_recall_number : ${primaryKey}`);
+
+      return this.dbClient.database.delete(recallsParams, callback);
+    });
+
+    Promise.all(promises);
+  }
+
+  async deleteMakes(makesPrimaryKeys, callback) {
+    const promises = makesPrimaryKeys.map((primaryKey) => {
+      const makesParams = {
+        TableName: this.dbClient.makesTable,
+        Key: {
+          type: primaryKey,
+        },
+      };
+
+      logger.debug(`Deleting makes for: ${primaryKey}`);
+
+      return this.dbClient.database.delete(makesParams, callback);
+    });
+
+    Promise.all(promises);
+  }
+
+  async deleteModels(modelsPrimaryKeys, callback) {
+    const promises = modelsPrimaryKeys.map((primaryKey) => {
+      const modelsParams = {
+        TableName: this.dbClient.modelsTable,
+        Key: {
+          type_make: primaryKey,
+        },
+      };
+
+      logger.debug(`Deleting models for: ${primaryKey}`);
+
+      return this.dbClient.database.delete(modelsParams, callback);
+    });
+
+    Promise.all(promises);
+  }
+
   async updateModels(models, callback) {
     const promises = models.map((record) => {
       const modelsParams = {

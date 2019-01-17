@@ -10,6 +10,53 @@ function convertCsvToRecallDtos(csvPath) {
 }
 
 describe('RecallComparer', () => {
+  describe('findDeletedRecallsPrimaryKeys()', () => {
+    it('Returns primary keys of deleted recalls', () => {
+      /** In a real scenario previousRecalls would be fetched from the API
+       * and currentRecalls would come from a recently uploaded CSV file */
+      const previousRecalls = convertCsvToRecallDtos(`${__dirname}/data/testData-BeforeDeleting.csv`);
+      const currentRecalls = convertCsvToRecallDtos(`${__dirname}/data/testData-AfterDeleting.csv`);
+
+      const comparer = new RecallComparer(previousRecalls, currentRecalls);
+      const deletedRecalls = comparer.findDeletedRecallsPrimaryKeys();
+
+      expect(deletedRecalls).to.have.lengthOf(2);
+      expect(deletedRecalls).to.include('OTHER EQUIPMENT-Composite X-RCOMP/2009/009');
+      expect(deletedRecalls).to.include('MITSUBISHI-LANCER EVO-R/2014/013');
+    });
+  });
+  describe('findDeletedMakesPrimaryKeys()', () => {
+    it('Returns primary keys of deleted makes', () => {
+      const previousRecalls = convertCsvToRecallDtos(`${__dirname}/data/testData-BeforeDeleting.csv`);
+      const currentRecalls = convertCsvToRecallDtos(`${__dirname}/data/testData-AfterDeleting.csv`);
+
+      const comparer = new RecallComparer(previousRecalls, currentRecalls);
+      const previousMakes = comparer.constructor.extractMakesFromRecalls(previousRecalls);
+      const currentMakes = RecallComparer.extractMakesFromRecalls(currentRecalls);
+
+      const deletedMakes = RecallComparer.findDeletedMakesPrimaryKeys(previousMakes, currentMakes);
+
+      expect(deletedMakes).to.have.lengthOf(1);
+      expect(deletedMakes).to.include('equipment');
+    });
+  });
+  describe('findDeletedModelsPrimaryKeys()', () => {
+    it('Returns primary keys of deleted models', () => {
+      const previousRecalls = convertCsvToRecallDtos(`${__dirname}/data/testData-BeforeDeleting.csv`);
+      const currentRecalls = convertCsvToRecallDtos(`${__dirname}/data/testData-AfterDeleting.csv`);
+
+      const comparer = new RecallComparer(previousRecalls, currentRecalls);
+      const previousModels = comparer.constructor.extractModelsFromRecalls(previousRecalls);
+      const currentModels = RecallComparer.extractModelsFromRecalls(currentRecalls);
+
+      const deletedModels = RecallComparer.findDeletedModelsPrimaryKeys(
+        previousModels, currentModels,
+      );
+
+      expect(deletedModels).to.have.lengthOf(1);
+      expect(deletedModels).to.include('equipment-OTHER EQUIPMENT');
+    });
+  });
   describe('findModifiedRecalls()', () => {
     it('Returns recalls that were modified or added under new make-model-recallNumber combination', () => {
       /** In a real scenario previousRecalls would be fetched from the API
@@ -50,7 +97,8 @@ describe('RecallComparer', () => {
       const comparer = new RecallComparer(previousRecalls, currentRecalls);
       // previousModels would normally be fetched from the back-end
       const previousModels = comparer.constructor.extractModelsFromRecalls(previousRecalls);
-      const modifiedModels = comparer.findModifiedModels(previousModels);
+      const currentModels = RecallComparer.extractModelsFromRecalls(currentRecalls);
+      const modifiedModels = RecallComparer.findModifiedModels(previousModels, currentModels);
 
       expect(modifiedModels).to.have.lengthOf(3);
       expect(modifiedModels[0].type_make).to.equal('vehicle-MITSUBISHI');
@@ -70,7 +118,8 @@ describe('RecallComparer', () => {
       const comparer = new RecallComparer(previousRecalls, currentRecalls);
       // previousMakes would normally be fetched from the back-end
       const previousMakes = comparer.constructor.extractMakesFromRecalls(previousRecalls);
-      const modifiedMakes = comparer.findModifiedMakes(previousMakes);
+      const currentMakes = RecallComparer.extractMakesFromRecalls(currentRecalls);
+      const modifiedMakes = RecallComparer.findModifiedMakes(previousMakes, currentMakes);
 
       expect(modifiedMakes).to.have.lengthOf(2);
       expect(modifiedMakes[0].type).to.equal('vehicle');

@@ -6,6 +6,9 @@ const INDEX_NAME = 'recallsSecondaryIndexName';
 const type = 'vehicle';
 const make = 'testMake';
 const model = 'testModel';
+const recallPrimaryKey = 'vehicle-BMW-E90-R/1234/12';
+const makePrimaryKey = 'vehicle';
+const modelPrimaryKey = 'vehicle-BMW';
 const recallsRepository = new RecallsRepository();
 
 describe('RecallsRepository', () => {
@@ -110,6 +113,54 @@ describe('RecallsRepository', () => {
     it('Should map recalls properly', (done) => {
       recallsRepository.getAllModels((err, data) => {
         expect(data).to.be.an('object');
+        expect(data.TableName).to.equal(TABLE_NAME);
+        done();
+      });
+    });
+  });
+
+  describe('deleteRecalls() method', () => {
+    before(() => {
+      recallsRepository.dbClient = {
+        database: { delete: (params, callback) => callback(null, params) },
+        recallsTable: TABLE_NAME,
+      };
+    });
+    it('Should pass primary keys properly', (done) => {
+      recallsRepository.deleteRecalls([recallPrimaryKey], (err, data) => {
+        expect(data.Key.make_model_recall_number).to.equal(recallPrimaryKey);
+        expect(data.TableName).to.equal(TABLE_NAME);
+        done();
+      });
+    });
+  });
+
+  describe('deleteMakes() method', () => {
+    before(() => {
+      recallsRepository.dbClient = {
+        database: { delete: (params, callback) => callback(null, params) },
+        makesTable: TABLE_NAME,
+      };
+    });
+    it('Should pass primary keys properly', (done) => {
+      recallsRepository.deleteMakes([makePrimaryKey], (err, data) => {
+        expect(data.Key.type).to.equal(makePrimaryKey);
+        expect(data.TableName).to.equal(TABLE_NAME);
+        done();
+      });
+    });
+  });
+
+  describe('deleteModels() method', () => {
+    before(() => {
+      recallsRepository.dbClient = {
+        database: { delete: (params, callback) => callback(null, params) },
+        modelsTable: TABLE_NAME,
+      };
+    });
+    it('Should pass primary keys properly', (done) => {
+      recallsRepository.deleteModels([modelPrimaryKey], (err, data) => {
+        expect(data.Key.type_make).to.equal(modelPrimaryKey);
         expect(data.TableName).to.equal(TABLE_NAME);
         done();
       });

@@ -96,6 +96,18 @@ class RecallsResource {
     }
   }
 
+  deleteRecalls(recallsPrimaryKeys, callback) {
+    this.recallsRepository.deleteRecalls(recallsPrimaryKeys, (err, data) => {
+      if (err) {
+        logger.error('Unable to delete recalls. Error JSON:', JSON.stringify(err, null, 2));
+        callback(err);
+      } else {
+        logger.info(`Recalls deleted successfully from recalls table: ${JSON.stringify(data)}`);
+        callback(null);
+      }
+    });
+  }
+
   static handleError(err, type, make, model, year, callback) {
     logger.error(`An error occurred while fetching recalls for type=${type}, make=${make}, model=${model}, year=${year}`);
     callback(err);

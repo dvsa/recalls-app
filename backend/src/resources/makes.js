@@ -57,6 +57,18 @@ class MakesResource {
       });
     }
   }
+
+  deleteMakes(makesPrimaryKeys, callback) {
+    this.recallsRepository.deleteMakes(makesPrimaryKeys, (err, data) => {
+      if (err) {
+        logger.error('Unable to delete makes. Error JSON:', JSON.stringify(err, null, 2));
+        callback(err);
+      } else {
+        logger.info(`Makes deleted successfully from recalls table: ${JSON.stringify(data)}`);
+        callback(null);
+      }
+    });
+  }
 }
 
 module.exports = MakesResource;
