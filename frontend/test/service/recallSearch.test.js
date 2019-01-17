@@ -24,18 +24,17 @@ function mapRecallsToDtoReturns(mappedRecalls) {
 }
 
 function createRecallDto(make) {
-  const recallDto = new RecallDto();
-  recallDto.make = make;
-  recallDto.model = 'Model';
-  recallDto.recallNumber = 'Number';
-  recallDto.defectDescription = 'Description';
-  recallDto.launchDate = 'Launch date';
-  recallDto.concern = 'Concern';
-  recallDto.remedy = 'Remedy';
-  recallDto.affectedVehiclesNumber = 'Affected number';
-  recallDto.buildStart = '19-04-2010';
-  recallDto.buildEnd = '20-05-2018';
-  return recallDto;
+  return new RecallDto(
+    make,
+    'Model',
+    'Number',
+    'Description',
+    'Launch date',
+    'Concern',
+    'Remedy',
+    'Affected number',
+    [{ start: '2010-04-19', end: '2018-05-20' }],
+  );
 }
 
 function fakeGet(key) {

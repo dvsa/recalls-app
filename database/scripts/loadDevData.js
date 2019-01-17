@@ -1,6 +1,6 @@
 const AWS = require("aws-sdk");
 const CSV = require('fast-csv');
-const Recall = require('../model/recall');
+const RecallDbRecordDto = require('cvr-common/src/dto/recallDbRecord');
 const DateParser = require('cvr-common/src/helpers/DateParser');
 const delay = ms => new Promise(res => setTimeout(res, ms));
 const ENVIRONMENT = process.env.ENVIRONMENT;
@@ -249,7 +249,7 @@ const throughputCallback = function throughputCallback(expectedWriteThroughput, 
         CSV.fromPath('../documents/RecallsFileSmall.csv')
         .on('data', function(line) {
           if (line[LAUNCH_DATE_COL_NO] !== 'Launch Date') {
-            const recall = new Recall(
+            const recall = new RecallDbRecordDto(
               trimIfNotEmpty(DateParser.slashFormatToISO(line[LAUNCH_DATE_COL_NO])),
               trimIfNotEmpty(line[RECALL_NUMBER_COL_NO]),
               trimIfNotEmpty(line[MAKE_COL_NO]),

@@ -8,8 +8,7 @@ class RecallDto {
     concern,
     remedy,
     affectedVehiclesNumber,
-    buildStart,
-    buildEnd,
+    buildRange,
   ) {
     this.make = make;
     this.model = model;
@@ -19,8 +18,18 @@ class RecallDto {
     this.concern = concern;
     this.remedy = remedy;
     this.affectedVehiclesNumber = affectedVehiclesNumber;
-    this.buildStart = new Date(buildStart);
-    this.buildEnd = new Date(buildEnd);
+    this.buildRange = this.constructor.parseDateRanges(buildRange);
+  }
+
+  static parseDateRanges(buildRange) {
+    const parsedBuildRange = buildRange || [];
+    return parsedBuildRange.map((dateRange) => {
+      const parsedDateRange = {
+        start: new Date(dateRange.start),
+        end: new Date(dateRange.end),
+      };
+      return parsedDateRange;
+    });
   }
 }
 

@@ -72,20 +72,17 @@ class RecallSearch {
   static mapRecallsToDto(body) {
     logger.debug('Entering RecallSearch.mapRecallsToDto()');
     const parsedRecalls = JSON.parse(body);
-    return parsedRecalls.map((recall) => {
-      const recallDto = new RecallDto();
-      recallDto.make = recall.make;
-      recallDto.model = recall.model;
-      recallDto.recallNumber = recall.recallNumber;
-      recallDto.defectDescription = recall.defectDescription;
-      recallDto.launchDate = recall.launchDate;
-      recallDto.concern = recall.concern;
-      recallDto.remedy = recall.remedy;
-      recallDto.affectedVehiclesNumber = recall.affectedVehiclesNumber;
-      recallDto.buildStart = recall.buildStart;
-      recallDto.buildEnd = recall.buildEnd;
-      return recallDto;
-    });
+    return parsedRecalls.map(recall => new RecallDto(
+      recall.make,
+      recall.model,
+      recall.recallNumber,
+      recall.defectDescription,
+      recall.launchDate,
+      recall.concern,
+      recall.remedy,
+      recall.affectedVehiclesNumber,
+      recall.buildRange,
+    ));
   }
 
   static getRequestHeaders() {

@@ -24,12 +24,60 @@ router.get('/*', (req, res, next) => {
   next();
 });
 
+/** endpoints for fetching data required for data-update process */
+router.get('/recalls', (req, res) => {
+  recallsResource.getAllRecalls((err, data) => {
+    returnApiResponse(err, res, data);
+  });
+});
+
+router.get('/makes', (req, res) => {
+  const makesResource = new MakesResource(recallsRepository);
+  makesResource.getAllMakes((err, data) => {
+    returnApiResponse(err, res, data);
+  });
+});
+
+router.get('/models', (req, res) => {
+  const modelsResource = new ModelsResource(recallsRepository);
+  modelsResource.getAllModels((err, data) => {
+    returnApiResponse(err, res, data);
+  });
+});
+
+/** endpoints for patching data required for data-update process */
+router.patch('/recalls', (req, res) => {
+  const recalls = req.body;
+  logger.debug(`PATCH /recalls - Received recall data: ${JSON.stringify(recalls)}`);
+  recallsResource.updateRecalls(recalls, (err, data) => {
+    returnApiResponse(err, res, data);
+  });
+});
+
+router.patch('/makes', (req, res) => {
+  const makesResource = new MakesResource(recallsRepository);
+  const makes = req.body;
+  logger.debug(`PATCH /makes - Received makes data: ${JSON.stringify(makes)}`);
+  makesResource.updateMakes(makes, (err, data) => {
+    returnApiResponse(err, res, data);
+  });
+});
+
+router.patch('/models', (req, res) => {
+  const modelsResource = new ModelsResource(recallsRepository);
+  const models = req.body;
+  logger.debug(`PATCH /models- Received models data: ${JSON.stringify(models)}`);
+  modelsResource.updateModels(models, (err, data) => {
+    returnApiResponse(err, res, data);
+  });
+});
+
 /** All makes of a given type */
 router.get('/recall-type/:type/make', (req, res) => {
   const makesResource = new MakesResource(recallsRepository);
   const { type } = req.params;
   logger.info(`Requesting makes by type ${type}`);
-  makesResource.getAllMakes(type, (err, data) => {
+  makesResource.getAllMakesByType(type, (err, data) => {
     returnApiResponse(err, res, data);
   });
 });
@@ -41,7 +89,7 @@ router.get('/recall-type/:type/make/:make/model', (req, res) => {
 
   logger.info(`Requesting models by type ${type} and make ${make}`);
   const modelsResource = new ModelsResource(recallsRepository);
-  modelsResource.getAllModels(type, make, (err, data) => {
+  modelsResource.getAllModelsByTypeAndMake(type, make, (err, data) => {
     returnApiResponse(err, res, data);
   });
 });

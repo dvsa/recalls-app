@@ -11,6 +11,7 @@ const app = express();
 
 app.use(bodyParser.urlencoded({
   extended: true,
+  limit: '100mb',
 }));
 app.use(awsServerlessExpressMiddleware.eventContext());
 app.use(httpContext.middleware);
@@ -26,7 +27,9 @@ loggerFactory.initialize(app, httpContext, {
 
 const indexRouter = require('./routes');
 
-app.use(bodyParser.json());
+app.use(bodyParser.json({
+  limit: '100mb',
+}));
 app.use('/', indexRouter);
 
 const { logger } = loggerFactory;
