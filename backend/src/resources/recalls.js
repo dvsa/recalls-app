@@ -102,43 +102,59 @@ class RecallsResource {
   }
 
   /**
-   * Filters out recalls which contain no build date range that includes given year
+   * Filters out recalls with recall dates (startDate, endDate or launchDate)
+   * matching the year
    * @param {RecallDto[]} recalls
    * @param {number} year
    */
   static filterByDate(recalls, year) {
     return recalls.filter((recall) => {
-      for (const dateRange of recall.buildRange) {
-        if (this.isYearWithinDateRange(dateRange.start, dateRange.end, year)) {
-          return true;
+      const launchDate = recall.launchDate ? new Date(recall.launchDate) : null;
+      if (recall.buildRange.length > 0) {
+        for (const dateRange of recall.buildRange) {
+          if (this.isRecallDatesCorrect(dateRange.start, dateRange.end, launchDate, year)) {
+            return true;
+          }
         }
+        return false;
       }
-      return false;
+      return this.isRecallDatesCorrect(null, null, launchDate, year);
     });
   }
 
   /**
+   * True if recall should occur in results (startDate, endDate or launchDate
+   * matches the selected year):
+   *
+   * True if startDate and endDate is empty and launchDate is greater or
+   * equal to the first day of the year
+   * True if startDate is empty and endDate is greater or equal to the first day of the year
+   * True if endDate is empty and startDate is less or equal to the last day of the year
    * True if the date range (startDate - endDate) includes at least a single day of given year
+   * False otherwise
+   *
    * @param {Date} startDate
    * @param {Date} endDate
+   * @param {Date} launchDate
    * @param {number} year
    */
-  static isYearWithinDateRange(startDate, endDate, year) {
-    if (this.isAnyDateInvalid([startDate, endDate])) {
-      return false;
+  static isRecallDatesCorrect(startDate, endDate, launchDate, year) {
+    if (this.isDateInvalid(startDate)) {
+      if (this.isDateInvalid(endDate)) {
+        return !this.isDateInvalid(launchDate) && launchDate.getFullYear() >= year;
+      }
+      return endDate.getFullYear() >= year;
     }
-    const yearStart = new Date(year, 0, 1);
-    const yearEnd = new Date(year, 11, 31);
-    return startDate <= yearEnd && endDate >= yearStart;
+
+    if (this.isDateInvalid(endDate)) {
+      return startDate.getFullYear() <= year;
+    }
+
+    return startDate.getFullYear() <= year && endDate.getFullYear() >= year;
   }
 
-  static isAnyDateInvalid(dates) {
-    for (const date of dates) {
-      if (typeof date.getTime !== 'function' || Number.isNaN(date.getTime())) {
-        return true;
-      }
-    }
-    return false;
+  static isDateInvalid(date) {
+    return (!date || typeof date.getTime !== 'function' || Number.isNaN(date.getTime()));
   }
 }
 

@@ -210,34 +210,59 @@ describe('RecallsResource', () => {
     });
   });
 
-  describe('isYearWithinDateRange() method', () => {
-    it('Should return false when startDate is not an number', (done) => {
-      expect(RecallsResource.isYearWithinDateRange('text', new Date('2018-01-02'), 2018)).to.equal(false);
+  describe('isRecallDatesCorrect() method', () => {
+    it('Should return true when startDate and endDate are not valid and launchDate is greater or equal to the first day of the year', (done) => {
+      expect(RecallsResource.isRecallDatesCorrect(null, null, new Date('2018-01-02'), 2017)).to.equal(true);
+      expect(RecallsResource.isRecallDatesCorrect('text', null, new Date('2018-12-02'), 2018)).to.equal(true);
+      expect(RecallsResource.isRecallDatesCorrect(null, 'text', new Date('2018-01-01'), 2018)).to.equal(true);
+      expect(RecallsResource.isRecallDatesCorrect('text', 'text', new Date('2018-12-31'), 2018)).to.equal(true);
       done();
     });
 
-    it('Should return false when endDate is not an number', (done) => {
-      expect(RecallsResource.isYearWithinDateRange(new Date('2018-01-02'), 'text', 2018)).to.equal(false);
+    it('Should return false when startDate and endDate are not valid and launchDate is less than the first day of the year', (done) => {
+      expect(RecallsResource.isRecallDatesCorrect(null, null, new Date('2017-12-31'), 2018)).to.equal(false);
+      expect(RecallsResource.isRecallDatesCorrect('text', 'text', new Date('2017-12-31'), 2018)).to.equal(false);
+      expect(RecallsResource.isRecallDatesCorrect('text', 'text', null, 1900)).to.equal(false);
       done();
     });
 
-    it('Should return false when startDate is after year', (done) => {
-      expect(RecallsResource.isYearWithinDateRange(new Date('2018-01-01'), new Date('2018-01-02'), 2017)).to.equal(false);
+    it('Should return true when startDate is not valid and endDate is greater or equal to the first day of the year', (done) => {
+      expect(RecallsResource.isRecallDatesCorrect(null, new Date('2018-01-02'), null, 2017)).to.equal(true);
+      expect(RecallsResource.isRecallDatesCorrect(null, new Date('2018-01-02'), null, 2018)).to.equal(true);
+      expect(RecallsResource.isRecallDatesCorrect(null, new Date('2019-01-01'), new Date('2017-01-01'), 2019)).to.equal(true);
       done();
     });
 
-    it('Should return false when endDate is before year', (done) => {
-      expect(RecallsResource.isYearWithinDateRange(new Date('2016-01-01'), new Date('2016-01-02'), 2017)).to.equal(false);
+    it('Should return false when startDate is not valid and endDate is less than the first day of the year', (done) => {
+      expect(RecallsResource.isRecallDatesCorrect(null, new Date('2017-01-01'), null, 2018)).to.equal(false);
+      expect(RecallsResource.isRecallDatesCorrect('text', new Date('2017-12-31'), new Date('2018-01-01'), 2018)).to.equal(false);
       done();
     });
 
-    it('Should return true when startDate and endDate are in the same year as year', (done) => {
-      expect(RecallsResource.isYearWithinDateRange(new Date('2017-01-01'), new Date('2017-01-02'), 2017)).to.equal(true);
+    it('Should return true when endDate is not valid and startDate is less or equal to the last day of the year', (done) => {
+      expect(RecallsResource.isRecallDatesCorrect(new Date('2017-01-01'), null, null, 2018)).to.equal(true);
+      expect(RecallsResource.isRecallDatesCorrect(new Date('2018-12-31'), 'text', new Date('2018-01-01'), 2018)).to.equal(true);
       done();
     });
 
-    it('Should return true when startDate is before and endDate is after year', (done) => {
-      expect(RecallsResource.isYearWithinDateRange(new Date('2016-01-01'), new Date('2018-01-02'), 2017)).to.equal(true);
+    it('Should return false when endDate is not valid and startDate is greater than the last day of the year', (done) => {
+      expect(RecallsResource.isRecallDatesCorrect(new Date('2019-01-01'), null, null, 2018)).to.equal(false);
+      expect(RecallsResource.isRecallDatesCorrect(new Date('2020-12-31'), 'text', new Date('2018-01-01'), 2018)).to.equal(false);
+      done();
+    });
+
+    it('Should return a true when the date range (startDate - endDate) includes at least a single day of given year', (done) => {
+      expect(RecallsResource.isRecallDatesCorrect(new Date('2017-01-01'), new Date('2017-01-02'), null, 2017)).to.equal(true);
+      expect(RecallsResource.isRecallDatesCorrect(new Date('2018-12-31'), new Date('2018-12-31'), null, 2018)).to.equal(true);
+      expect(RecallsResource.isRecallDatesCorrect(new Date('2016-01-01'), new Date('2018-01-02'), 'text', 2017)).to.equal(true);
+      done();
+    });
+
+    it('Should return a false when the date range (startDate - endDate) not includes at least a single day of given year', (done) => {
+      expect(RecallsResource.isRecallDatesCorrect('text', new Date('2018-01-02'), null, 2019)).to.equal(false);
+      expect(RecallsResource.isRecallDatesCorrect(new Date('2018-01-02'), 'text', null, 2017)).to.equal(false);
+      expect(RecallsResource.isRecallDatesCorrect(new Date('2018-01-01'), new Date('2018-01-02'), null, 2017)).to.equal(false);
+      expect(RecallsResource.isRecallDatesCorrect(new Date('2016-01-01'), new Date('2016-01-02'), null, 2017)).to.equal(false);
       done();
     });
   });
