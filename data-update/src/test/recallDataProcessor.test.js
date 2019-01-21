@@ -15,9 +15,11 @@ const MAKE_TOYOTA = 'Toyota';
 const MAKE_BMW = 'BMW';
 const MODEL_COROLLA = 'Corolla';
 const MODEL_E90 = 'E90';
-const FIRST_RECALL = new RecallDbRecordDto(null, 'R/1234/01', MAKE_TOYOTA, null, null, null, null, MODEL_COROLLA);
-const SECOND_RECALL = new RecallDbRecordDto(null, 'R/2222/01', MAKE_BMW, null, null, null, null, MODEL_E90);
-const THIRD_RECALL = new RecallDbRecordDto(null, 'RCOMP/2222/01', 'Equipment make', null, null, null, null, 'Equipment model');
+const FIRST_RECALL = new RecallDbRecordDto('01/01/2015', 'R/2015/01', MAKE_TOYOTA, 'concern', 'defect', 'remedy', '10', MODEL_COROLLA, null, null, '01/01/2014', '01/01/2015');
+const SECOND_RECALL = new RecallDbRecordDto('01/01/2016', 'R/2016/01', MAKE_BMW, 'concern', 'defect', 'remedy', '10', MODEL_E90, null, null, '01/01/2014', '01/01/2015');
+const THIRD_RECALL = new RecallDbRecordDto('01/01/2016', 'RCOMP/2222/01', 'Equipment make', 'concern', 'defect', 'remedy', '100', 'Equipment model');
+const FIRST_RECALL_INVALID = new RecallDbRecordDto(null, 'R/2015/01', MAKE_TOYOTA, 'concern', 'defect', 'remedy', '10', MODEL_COROLLA, null, null, '01/01/2014', '01/01/2015');
+const INVALID_RECALL = new RecallDbRecordDto(null, 'R/2012/01', 'make', 'concern', 'defect', 'remedy', '100', 'model');
 const ERROR = 'An error occurred';
 const s3CopyObjectResult = { CopyObjectResult: 'result' };
 
@@ -215,6 +217,59 @@ describe('RecallDataProcessor', () => {
           expect(modifiedEntries.makes).to.have.lengthOf(0);
           expect(modifiedEntries.models).to.be.an('array');
           expect(modifiedEntries.models).to.have.lengthOf(0);
+          done();
+        });
+    });
+    it('When recall to be updated is invalid and it has previous version, returns modifiedEntries array without that recall', (done) => {
+      this.getAllRecalls = getAllRecallsReturns(null, [FIRST_RECALL]);
+      this.getAllModels = getAllModelsReturns(null, [firstModelRecord]);
+      this.getAllMakes = getAllMakesReturns(null, [firstMakeRecord]);
+
+      const currentRecalls = new Map();
+      currentRecalls.set(FIRST_RECALL_INVALID.make_model_recall_number, FIRST_RECALL_INVALID);
+
+      recallDataProcessor.compare(s3Properties, currentRecalls,
+        (err, s3Prop, modifiedEntries, deletedEntries) => {
+          expect(modifiedEntries.recalls).to.be.an('array');
+          expect(modifiedEntries.recalls).to.have.lengthOf(0);
+          expect(modifiedEntries.makes).to.be.an('array');
+          expect(modifiedEntries.makes).to.have.lengthOf(0);
+          expect(modifiedEntries.models).to.be.an('array');
+          expect(modifiedEntries.models).to.have.lengthOf(0);
+
+          expect(deletedEntries.recalls).to.be.an('array');
+          expect(deletedEntries.recalls).to.have.lengthOf(0);
+          expect(deletedEntries.makes).to.be.an('array');
+          expect(deletedEntries.makes).to.have.lengthOf(0);
+          expect(deletedEntries.models).to.be.an('array');
+          expect(deletedEntries.models).to.have.lengthOf(0);
+          done();
+        });
+    });
+    it('When new recall to be added is invalid, returns modifiedEntries array without that recall', (done) => {
+      this.getAllRecalls = getAllRecallsReturns(null, [FIRST_RECALL]);
+      this.getAllModels = getAllModelsReturns(null, [firstModelRecord]);
+      this.getAllMakes = getAllMakesReturns(null, [firstMakeRecord]);
+
+      const currentRecalls = new Map();
+      currentRecalls.set(INVALID_RECALL.make_model_recall_number, INVALID_RECALL);
+      currentRecalls.set(FIRST_RECALL.make_model_recall_number, FIRST_RECALL);
+
+      recallDataProcessor.compare(s3Properties, currentRecalls,
+        (err, s3Prop, modifiedEntries, deletedEntries) => {
+          expect(modifiedEntries.recalls).to.be.an('array');
+          expect(modifiedEntries.recalls).to.have.lengthOf(0);
+          expect(modifiedEntries.makes).to.be.an('array');
+          expect(modifiedEntries.makes).to.have.lengthOf(0);
+          expect(modifiedEntries.models).to.be.an('array');
+          expect(modifiedEntries.models).to.have.lengthOf(0);
+
+          expect(deletedEntries.recalls).to.be.an('array');
+          expect(deletedEntries.recalls).to.have.lengthOf(0);
+          expect(deletedEntries.makes).to.be.an('array');
+          expect(deletedEntries.makes).to.have.lengthOf(0);
+          expect(deletedEntries.models).to.be.an('array');
+          expect(deletedEntries.models).to.have.lengthOf(0);
           done();
         });
     });

@@ -1,6 +1,8 @@
 const { expect } = require('chai');
 const DateParser = require('../../src/helpers/DateParser');
 
+const DATE_INVALID = 'invalid';
+
 const csvYear = '2006';
 const csvMonth = '07';
 const csvDay = '28';
@@ -31,10 +33,31 @@ describe('DateParser', () => {
       done();
     });
 
-    it('Should return null for malformed data', (done) => {
+    it('Should return DATE_INVALID for malformed data', (done) => {
       const parsedDate = DateParser.parseSlashFormatDate('32/10/2000');
 
-      expect(parsedDate).to.be.null;
+      expect(parsedDate).to.equal(DATE_INVALID);
+      done();
+    });
+
+    it('Should return DATE_INVALID for incorrect data with 3-digit year', (done) => {
+      const parsedDate = DateParser.parseSlashFormatDate('12/10/200');
+
+      expect(parsedDate).to.equal(DATE_INVALID);
+      done();
+    });
+
+    it('Should return DATE_INVALID for incorrect data with 1-digit year', (done) => {
+      const parsedDate = DateParser.parseSlashFormatDate('12/10/2');
+
+      expect(parsedDate).to.equal(DATE_INVALID);
+      done();
+    });
+
+    it('Should return DATE_INVALID for incorrect data with 5-digit year', (done) => {
+      const parsedDate = DateParser.parseSlashFormatDate('12/10/20000');
+
+      expect(parsedDate).to.equal(DATE_INVALID);
       done();
     });
   });
@@ -46,10 +69,10 @@ describe('DateParser', () => {
       done();
     });
 
-    it('Should return null if it is unable to convert string to a date', (done) => {
+    it('Should return DATE_INVALID if it is unable to convert string to a date', (done) => {
       const parsedDate = DateParser.slashFormatToISO('a');
 
-      expect(parsedDate).to.be.null;
+      expect(parsedDate).to.equal(DATE_INVALID);
       done();
     });
   });

@@ -1,22 +1,22 @@
-const { logger } = require('../logger/loggerFactory');
+const DATE_INVALID = 'invalid';
 
 class DateParser {
   /**
    * Accepts dates in the following format: dd/mm/yyyy
-   * Returns a Date object or null if it was unable to parse the date
+   * Returns a Date object, null if the date is empty
+   * or 'invalid' if it was unable to parse the date
    * @param {String} date
-   * @returns {Date|null}
+   * @returns {Date|null|String}
    */
   static parseSlashFormatDate(date) {
     if (date == null || date.length === 0) {
       return null;
     }
-
     const dateSegments = date.match(new RegExp(/(\d+)\/(\d+)\/(\d+)/));
 
     if (dateSegments == null || dateSegments.length !== 4) {
-      logger.warn(`Unable to parse the following date: ${date}. Please use the following format: dd/mm/yyyy`);
-      return null;
+      console.warn(`Unable to parse the following date: ${date}. Please use the following format: dd/mm/yyyy`);
+      return DATE_INVALID;
     }
 
     const day = dateSegments[1];
@@ -25,10 +25,11 @@ class DateParser {
 
     const isoDateString = `${year}-${month}-${day}`;
     const parsedDate = new Date(isoDateString);
-
-    if (Number.isNaN(Number(parsedDate))) {
-      logger.warn(`Unable to parse the following date: ${date}. Please use the following format: dd/mm/yyyy`);
-      return null;
+    const isYearLengthValid = year.length === 2 || year.length === 4;
+    if (Number.isNaN(parsedDate.getTime()) || !isYearLengthValid
+      || parsedDate.getFullYear > (new Date().getFullYear())) {
+      console.warn(`Unable to parse the following date: ${date}. Please use the following format: dd/mm/yyyy`);
+      return DATE_INVALID;
     }
     return parsedDate;
   }
@@ -40,6 +41,9 @@ class DateParser {
     const parsedDate = DateParser.parseSlashFormatDate(date);
     if (parsedDate == null) {
       return null;
+    }
+    if (parsedDate === DATE_INVALID) {
+      return DATE_INVALID;
     }
     return parsedDate.toISOString().split('T')[0];
   }

@@ -1,3 +1,5 @@
+const RecallValidator = require('../helpers/RecallValidator');
+
 class RecallDbRecordDto {
   constructor(
     launchDate,
@@ -35,6 +37,23 @@ class RecallDbRecordDto {
     if (buildStart || buildEnd) {
       this.build_range = [RecallDbRecordDto.createRangeObject(buildStart, buildEnd)];
     }
+  }
+
+  /**
+   * @returns bool
+   */
+  isValid() {
+    return RecallValidator.isValid(
+      this.launch_date,
+      this.recall_number,
+      this.make,
+      this.concern,
+      this.defect,
+      this.remedy,
+      this.vehicle_number,
+      this.model,
+      this.build_range,
+    );
   }
 
   /**

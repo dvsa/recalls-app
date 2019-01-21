@@ -57,7 +57,7 @@ describe('RecallComparer', () => {
       expect(deletedModels).to.include('equipment-OTHER EQUIPMENT');
     });
   });
-  describe('findModifiedRecalls()', () => {
+  describe('findModifiedAndValidRecalls()', () => {
     it('Returns recalls that were modified or added under new make-model-recallNumber combination', () => {
       /** In a real scenario previousRecalls would be fetched from the API
        * and currentRecalls would come from a recently uploaded CSV file */
@@ -65,7 +65,7 @@ describe('RecallComparer', () => {
       const currentRecalls = convertCsvToRecallDtos(`${__dirname}/data/testDataWithAdditionalRecalls.csv`);
 
       const comparer = new RecallComparer(previousRecalls, currentRecalls);
-      const modifiedRecalls = comparer.findModifiedRecalls();
+      const modifiedRecalls = comparer.findModifiedAndValidRecalls();
 
       expect(modifiedRecalls).to.have.lengthOf(6);
 
@@ -84,7 +84,7 @@ describe('RecallComparer', () => {
       const currentRecalls = convertCsvToRecallDtos(`${__dirname}/data/testDataWithAdditionalRecalls-Reordered.csv`);
 
       const comparer = new RecallComparer(previousRecalls, currentRecalls);
-      const modifiedRecalls = comparer.findModifiedRecalls();
+      const modifiedRecalls = comparer.findModifiedAndValidRecalls();
 
       expect(modifiedRecalls).to.have.lengthOf(0);
     });
