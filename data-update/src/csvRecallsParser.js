@@ -34,6 +34,7 @@ class CsvRecallsParser {
     const trim = this.constructor.trimIfNotEmpty;
     return (!line.Make || trim(line.Make).length === 0)
       || (!line.Model || trim(line.Model).length === 0)
+      || (!line.Remedy || trim(line.Remedy).length === 0)
       || (!line['Recalls Number'] || trim(line['Recalls Number']).length === 0);
   }
 

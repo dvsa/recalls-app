@@ -6,6 +6,9 @@ const INDEX_NAME = 'recallsSecondaryIndexName';
 const type = 'vehicle';
 const make = 'testMake';
 const model = 'testModel';
+const models = [{ type_make: type, models: [model] }];
+const recalls = [{ make_model_recall_number: 'testMakeModelRecallNumber' }];
+const exclusiveStartKey = 1;
 const recallPrimaryKey = 'vehicle-BMW-E90-R/1234/12';
 const makePrimaryKey = 'vehicle';
 const modelPrimaryKey = 'vehicle-BMW';
@@ -76,10 +79,20 @@ describe('RecallsRepository', () => {
       };
     });
 
-    it('Should map recalls properly', (done) => {
-      recallsRepository.getAllRecalls((err, data) => {
+    it('Should map recalls properly without exclusiveStartKey', (done) => {
+      recallsRepository.getAllRecalls(null, (err, data) => {
         expect(data).to.be.an('object');
         expect(data.TableName).to.equal(TABLE_NAME);
+        expect(data.ExclusiveStartKey).to.equal(undefined);
+        done();
+      });
+    });
+
+    it('Should map recalls properly with exclusiveStartKey', (done) => {
+      recallsRepository.getAllRecalls(exclusiveStartKey, (err, data) => {
+        expect(data).to.be.an('object');
+        expect(data.TableName).to.equal(TABLE_NAME);
+        expect(data.ExclusiveStartKey).to.equal(exclusiveStartKey);
         done();
       });
     });
@@ -93,10 +106,20 @@ describe('RecallsRepository', () => {
       };
     });
 
-    it('Should map recalls properly', (done) => {
-      recallsRepository.getAllMakes((err, data) => {
+    it('Should map recalls properly without exclusiveStartKey', (done) => {
+      recallsRepository.getAllMakes(null, (err, data) => {
         expect(data).to.be.an('object');
         expect(data.TableName).to.equal(TABLE_NAME);
+        expect(data.ExclusiveStartKey).to.equal(undefined);
+        done();
+      });
+    });
+
+    it('Should map recalls properly with exclusiveStartKey', (done) => {
+      recallsRepository.getAllMakes(exclusiveStartKey, (err, data) => {
+        expect(data).to.be.an('object');
+        expect(data.TableName).to.equal(TABLE_NAME);
+        expect(data.ExclusiveStartKey).to.equal(exclusiveStartKey);
         done();
       });
     });
@@ -110,10 +133,20 @@ describe('RecallsRepository', () => {
       };
     });
 
-    it('Should map recalls properly', (done) => {
-      recallsRepository.getAllModels((err, data) => {
+    it('Should map recalls properly without exclusiveStartKey', (done) => {
+      recallsRepository.getAllModels(null, (err, data) => {
         expect(data).to.be.an('object');
         expect(data.TableName).to.equal(TABLE_NAME);
+        expect(data.ExclusiveStartKey).to.equal(undefined);
+        done();
+      });
+    });
+
+    it('Should map recalls properly without exclusiveStartKey', (done) => {
+      recallsRepository.getAllModels(exclusiveStartKey, (err, data) => {
+        expect(data).to.be.an('object');
+        expect(data.TableName).to.equal(TABLE_NAME);
+        expect(data.ExclusiveStartKey).to.equal(exclusiveStartKey);
         done();
       });
     });
@@ -258,6 +291,42 @@ describe('RecallsRepository', () => {
       recallsRepository.updateModels([modelPrimaryKey], (err) => {
         expect(err).to.be.an('Error');
         // TODO: finish
+        done();
+      });
+    });
+  });
+  describe('updateModels() method', () => {
+    before(() => {
+      recallsRepository.dbClient = {
+        database: { update: (params, callback) => callback(new Error('error'), params) },
+        modelsTable: TABLE_NAME,
+      };
+    });
+
+    it('Should map params properly', (done) => {
+      recallsRepository.updateModels(models, (err, data) => {
+        expect(err.message).to.equal('error');
+        expect(data).to.be.an('object');
+        expect(data.TableName).to.equal(TABLE_NAME);
+        expect(data.Key.type_make).to.equal(type);
+        done();
+      });
+    });
+  });
+  describe('updateRecalls() method', () => {
+    before(() => {
+      recallsRepository.dbClient = {
+        database: { update: (params, callback) => callback(new Error('error'), params) },
+        recallsTable: TABLE_NAME,
+      };
+    });
+
+    it('Should map params properly', (done) => {
+      recallsRepository.updateRecalls(recalls, (err, data) => {
+        expect(err.message).to.equal('error');
+        expect(data).to.be.an('object');
+        expect(data.TableName).to.equal(TABLE_NAME);
+        expect(data.Key.make_model_recall_number).to.equal('testMakeModelRecallNumber');
         done();
       });
     });

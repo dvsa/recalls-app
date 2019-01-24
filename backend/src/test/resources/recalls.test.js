@@ -18,6 +18,8 @@ const FIRST_MAKE_MODEL_RECALL_NUMBER = 'LAND ROVER-DISCOVERY SPORT-R/2017/153';
 const SECOND_MAKE_MODEL_RECALL_NUMBER = 'LAND ROVER-DEFENDER-R/2009/091';
 const DUMMY_RECALL = new RecallDbRecordDto(null, 'R/1234/01');
 
+const lastEvaluatedKey = 6;
+
 const recallItems = {
   Items: [
     {
@@ -66,8 +68,9 @@ const recallItems = {
 const successfulDeleteResponse = 'Records have been deleted';
 const failedDeleteResponse = 'Error while deleting recalls';
 
-function getAllRecalls(callback) {
-  callback(null, recallItems);
+function getAllRecalls(exclusiveStartKey, callback) {
+  const recallsList = { Items: recallItems.Items, LastEvaluatedKey: lastEvaluatedKey };
+  callback(null, recallsList);
 }
 
 function deleteRecalls(callback) {
@@ -166,12 +169,14 @@ describe('RecallsResource', () => {
       sinon.stub(recallsRepository, 'getAllRecalls').callsFake(getAllRecalls);
 
       const recallsResource = new RecallsResource(recallsRepository);
-      recallsResource.getAllRecalls((err, data) => {
-        expect(data).to.be.an('array');
-        expect(data).to.have.lengthOf(3);
+      recallsResource.getAllRecalls(1, (err, data) => {
+        expect(data.items).to.be.an('array');
+        expect(data.items).to.have.lengthOf(3);
 
-        expect(data[0].recall_number).to.equal(FIRST_RECALL_NUMBER);
-        expect(data[1].recall_number).to.equal(SECOND_RECALL_NUMBER);
+        expect(data.items[0].recall_number).to.equal(FIRST_RECALL_NUMBER);
+        expect(data.items[1].recall_number).to.equal(SECOND_RECALL_NUMBER);
+
+        expect(data.lastEvaluatedKey).to.equal(lastEvaluatedKey);
         done();
       });
     });
@@ -210,12 +215,12 @@ describe('RecallsResource', () => {
       sinon.stub(recallsRepository, 'getAllRecalls').callsFake(getAllRecalls);
 
       const recallsResource = new RecallsResource(recallsRepository);
-      recallsResource.getAllRecalls((err, data) => {
-        expect(data).to.be.an('array');
-        expect(data).to.have.lengthOf(3);
+      recallsResource.getAllRecalls(null, (err, data) => {
+        expect(data.items).to.be.an('array');
+        expect(data.items).to.have.lengthOf(3);
 
-        expect(data[0].recall_number).to.equal(FIRST_RECALL_NUMBER);
-        expect(data[1].recall_number).to.equal(SECOND_RECALL_NUMBER);
+        expect(data.items[0].recall_number).to.equal(FIRST_RECALL_NUMBER);
+        expect(data.items[1].recall_number).to.equal(SECOND_RECALL_NUMBER);
         done();
       });
     });

@@ -21,26 +21,38 @@ class RecallsRepository {
     this.dbClient.database.query(params, callback);
   }
 
-  getAllRecalls(callback) {
+  getAllRecalls(exclusiveStartKey, callback) {
     const params = {
       TableName: this.dbClient.recallsTable,
     };
 
+    if (exclusiveStartKey) {
+      params.ExclusiveStartKey = exclusiveStartKey;
+    }
+
     this.dbClient.database.scan(params, callback);
   }
 
-  getAllMakes(callback) {
+  getAllMakes(exclusiveStartKey, callback) {
     const params = {
       TableName: this.dbClient.makesTable,
     };
 
+    if (exclusiveStartKey) {
+      params.ExclusiveStartKey = exclusiveStartKey;
+    }
+
     this.dbClient.database.scan(params, callback);
   }
 
-  getAllModels(callback) {
+  getAllModels(exclusiveStartKey, callback) {
     const params = {
       TableName: this.dbClient.modelsTable,
     };
+
+    if (exclusiveStartKey) {
+      params.ExclusiveStartKey = exclusiveStartKey;
+    }
 
     this.dbClient.database.scan(params, callback);
   }

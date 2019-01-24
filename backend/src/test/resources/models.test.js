@@ -11,6 +11,8 @@ const MODEL_YARIS = 'Yaris';
 const MODEL_COROLLA = 'Corolla';
 const MODEL_CELICA = 'Celica';
 
+const lastEvaluatedKey = 6;
+
 const DELETE_ERROR = 'Error while deleting models';
 function getAllModelsByTypeAndMake(type, make, callback) {
   callback(null, {
@@ -18,8 +20,9 @@ function getAllModelsByTypeAndMake(type, make, callback) {
   });
 }
 
-function getAllModels(callback) {
+function getAllModels(exclusiveStartKey, callback) {
   callback(null, {
+    LastEvaluatedKey: lastEvaluatedKey,
     Items: [
       { type: 'equipment-APEC', models: [MODEL_YARIS] },
       { type: 'vehicle-TOYOTA', models: [MODEL_CELICA, MODEL_COROLLA, MODEL_YARIS] },
@@ -100,13 +103,15 @@ describe('ModelsResource', () => {
       sinon.stub(recallsRepository, 'getAllModels').callsFake(getAllModels);
 
       const makesResource = new ModelsResource(recallsRepository);
-      makesResource.getAllModels((err, data) => {
-        expect(data).to.be.an('array');
-        expect(data).to.have.lengthOf(2);
+      makesResource.getAllModels(1, (err, data) => {
+        expect(data.items).to.be.an('array');
+        expect(data.items).to.have.lengthOf(2);
 
-        expect(data[0].models).to.nested.include(MODEL_YARIS);
-        expect(data[0].models).to.not.nested.include(MODEL_COROLLA);
-        expect(data[1].models).to.nested.include(MODEL_COROLLA);
+        expect(data.items[0].models).to.nested.include(MODEL_YARIS);
+        expect(data.items[0].models).to.not.nested.include(MODEL_COROLLA);
+        expect(data.items[1].models).to.nested.include(MODEL_COROLLA);
+
+        expect(data.lastEvaluatedKey).to.equal(lastEvaluatedKey);
         done();
       });
     });
