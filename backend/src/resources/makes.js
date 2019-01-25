@@ -61,7 +61,7 @@ class MakesResource {
   deleteMakes(makesPrimaryKeys, callback) {
     this.recallsRepository.deleteMakes(makesPrimaryKeys, (err, data) => {
       if (err) {
-        logger.error('Unable to delete makes. Error JSON:', JSON.stringify(err, null, 2));
+        logger.error('Unable to delete makes. Error JSON:', err);
         callback(err);
       } else {
         logger.info(`Makes deleted successfully from recalls table: ${JSON.stringify(data)}`);

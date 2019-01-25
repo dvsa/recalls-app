@@ -62,7 +62,7 @@ class ModelsResource {
   deleteModels(modelsPrimaryKeys, callback) {
     this.recallsRepository.deleteModels(modelsPrimaryKeys, (err, data) => {
       if (err) {
-        logger.error('Unable to delete models. Error JSON:', JSON.stringify(err, null, 2));
+        logger.error('Unable to delete models. Error JSON:', err);
         callback(err);
       } else {
         logger.info(`Models deleted successfully from recalls table: ${JSON.stringify(data)}`);

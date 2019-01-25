@@ -119,22 +119,6 @@ describe('RecallsRepository', () => {
     });
   });
 
-  describe('deleteRecalls() method', () => {
-    before(() => {
-      recallsRepository.dbClient = {
-        database: { delete: (params, callback) => callback(null, params) },
-        recallsTable: TABLE_NAME,
-      };
-    });
-    it('Should pass primary keys properly', (done) => {
-      recallsRepository.deleteRecalls([recallPrimaryKey], (err, data) => {
-        expect(data.Key.make_model_recall_number).to.equal(recallPrimaryKey);
-        expect(data.TableName).to.equal(TABLE_NAME);
-        done();
-      });
-    });
-  });
-
   describe('deleteMakes() method', () => {
     before(() => {
       recallsRepository.dbClient = {
@@ -154,31 +138,126 @@ describe('RecallsRepository', () => {
   describe('deleteModels() method', () => {
     before(() => {
       recallsRepository.dbClient = {
-        database: { delete: (params, callback) => callback(null, params) },
+        database: { delete: (params, callback) => callback(null) },
         modelsTable: TABLE_NAME,
       };
     });
     it('Should pass primary keys properly', (done) => {
-      recallsRepository.deleteModels([modelPrimaryKey], (err, data) => {
-        expect(data.Key.type_make).to.equal(modelPrimaryKey);
-        expect(data.TableName).to.equal(TABLE_NAME);
+      recallsRepository.deleteModels([modelPrimaryKey], (err) => {
+        expect(err).to.equal(null);
+        // TODO: finish
+        done();
+      });
+    });
+    it('Should report errors properly', (done) => {
+      recallsRepository.dbClient = {
+        database: { delete: (params, callback) => callback(new Error()) },
+        modelsTable: TABLE_NAME,
+      };
+      recallsRepository.deleteModels([modelPrimaryKey], (err) => {
+        expect(err).to.be.an('Error');
+        // TODO: finish
+        done();
+      });
+    });
+  });
+
+  describe('deleteRecalls() method', () => {
+    before(() => {
+      recallsRepository.dbClient = {
+        database: { delete: (params, callback) => callback(null) },
+        modelsTable: TABLE_NAME,
+      };
+    });
+    it('Should pass primary keys properly', (done) => {
+      recallsRepository.deleteRecalls([recallPrimaryKey], (err) => {
+        expect(err).to.equal(null);
+        // TODO: finish
+        done();
+      });
+    });
+    it('Should report errors properly', (done) => {
+      recallsRepository.dbClient = {
+        database: { delete: (params, callback) => callback(new Error()) },
+        modelsTable: TABLE_NAME,
+      };
+      recallsRepository.deleteRecalls([recallPrimaryKey], (err) => {
+        expect(err).to.be.an('Error');
+        // TODO: finish
+        done();
+      });
+    });
+  });
+
+  describe('deleteMakes() method', () => {
+    it('Should pass primary keys properly', (done) => {
+      recallsRepository.dbClient = {
+        database: { delete: (params, callback) => callback(null) },
+        modelsTable: TABLE_NAME,
+      };
+
+      recallsRepository.deleteMakes([makePrimaryKey], (err) => {
+        expect(err).to.equal(null);
+        // TODO: finish
+        done();
+      });
+    });
+    it('Should report errors properly', (done) => {
+      recallsRepository.dbClient = {
+        database: { delete: (params, callback) => callback(new Error()) },
+        modelsTable: TABLE_NAME,
+      };
+      recallsRepository.deleteMakes([makePrimaryKey], (err) => {
+        expect(err).to.be.an('Error');
+        // TODO: finish
         done();
       });
     });
   });
 
   describe('updateMakes() method', () => {
-    before(() => {
+    it('Should map params properly', (done) => {
       recallsRepository.dbClient = {
         database: { update: (params, callback) => callback(null, params) },
         makesTable: TABLE_NAME,
       };
-    });
-
-    it('Should map params properly', (done) => {
       recallsRepository.updateMakes([make], (err, data) => {
         expect(data).to.be.an('object');
         expect(data.TableName).to.equal(TABLE_NAME);
+        done();
+      });
+    });
+    it('Should report errors properly', (done) => {
+      recallsRepository.dbClient = {
+        database: { update: (params, callback) => callback(new Error()) },
+        modelsTable: TABLE_NAME,
+      };
+      recallsRepository.updateMakes([makePrimaryKey], (err) => {
+        expect(err).to.be.an('Error');
+        // TODO: finish
+        done();
+      });
+    });
+  });
+  describe('updateModels() method', () => {
+    it('Should map params properly', (done) => {
+      recallsRepository.dbClient = {
+        database: { update: (params, callback) => callback(null, params) },
+        makesTable: TABLE_NAME,
+      };
+      recallsRepository.updateModels([make], (err) => {
+        expect(err).to.be.equal(null);
+        done();
+      });
+    });
+    it('Should report errors properly', (done) => {
+      recallsRepository.dbClient = {
+        database: { update: (params, callback) => callback(new Error()) },
+        modelsTable: TABLE_NAME,
+      };
+      recallsRepository.updateModels([modelPrimaryKey], (err) => {
+        expect(err).to.be.an('Error');
+        // TODO: finish
         done();
       });
     });

@@ -11,6 +11,7 @@ const MODEL_YARIS = 'Yaris';
 const MODEL_COROLLA = 'Corolla';
 const MODEL_CELICA = 'Celica';
 
+const DELETE_ERROR = 'Error while deleting models';
 function getAllModelsByTypeAndMake(type, make, callback) {
   callback(null, {
     Item: { models: [MODEL_CELICA, MODEL_COROLLA, MODEL_YARIS] },
@@ -47,7 +48,7 @@ function updateModelsWithError(models, callback) {
 }
 
 function deleteModelsWithError(models, callback) {
-  callback(new Error('Error'), null);
+  callback(new Error(DELETE_ERROR), null);
 }
 
 describe('ModelsResource', () => {
@@ -145,7 +146,7 @@ describe('ModelsResource', () => {
       const modelsResource = new ModelsResource(recallsRepository);
       modelsResource.deleteModels([{}], (err, data) => {
         expect(data).to.be.an('undefined');
-        expect(err.message).to.equal('Error');
+        expect(err.message).to.equal(DELETE_ERROR);
         expect(deleteModelsWithError).to.throw(Error);
         done();
       });

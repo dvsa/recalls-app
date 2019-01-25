@@ -72,19 +72,22 @@ class RecallDataProcessor {
             const currentMakes = RecallComparer.extractMakesFromRecalls(currentRecalls);
             const currentModels = RecallComparer.extractModelsFromRecalls(currentRecalls);
 
-
-            const modifiedEntries = RecallDataProcessor.handleModifiedEntries(
-              makesErr, modelsErr, comparer,
-              previousMakes, currentMakes, previousModels, currentModels,
-            );
             const deletedEntries = RecallDataProcessor.handleDeletedEntries(
               makesErr, modelsErr, comparer,
               previousMakes, currentMakes, previousModels, currentModels,
             );
 
-            RecallDataProcessor.handleDeleteThreshold(
-              modifiedEntries, deletedEntries, previousRecalls, s3Properties, next,
-            );
+            if (RecallDataProcessor.isDeleteThresholdExceeded(
+              deletedEntries.recalls.length, previousRecalls.length,
+            )) {
+              next(new Error(`Deleting ${deletedEntries.recalls.length} recalls exceeds the configured threshold (DELETE_THRESHOLD environment variable). Aborting the data update process.`));
+            } else {
+              const modifiedEntries = RecallDataProcessor.handleModifiedEntries(
+                makesErr, modelsErr, comparer,
+                previousMakes, currentMakes, previousModels, currentModels,
+              );
+              next(null, s3Properties, modifiedEntries, deletedEntries);
+            }
           });
         });
       }
@@ -281,17 +284,6 @@ class RecallDataProcessor {
         callback(null, data);
       }
     });
-  }
-
-  static handleDeleteThreshold(modifiedEntries, deletedEntries, previousRecalls,
-    s3Properties, next) {
-    if (RecallDataProcessor.isDeleteThresholdExceeded(
-      deletedEntries.recalls.length, previousRecalls.length,
-    )) {
-      next(new Error(`Deleting ${deletedEntries.recalls.length} recalls exceeds the configured threshold (DELETE_THRESHOLD environment variable). Aborting the data update process.`));
-    } else {
-      next(null, s3Properties, modifiedEntries, deletedEntries);
-    }
   }
 }
 

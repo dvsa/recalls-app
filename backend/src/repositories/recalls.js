@@ -67,7 +67,7 @@ class RecallsRepository {
     this.dbClient.database.get(params, callback);
   }
 
-  async updateRecalls(recalls, callback) {
+  updateRecalls(recalls, callback) {
     const promises = recalls.map((record) => {
       const recallsParams = {
         TableName: this.dbClient.recallsTable,
@@ -96,13 +96,27 @@ class RecallsRepository {
 
       logger.debug(`Updating recall with make_model_recall_number : ${record.make_model_recall_number}`);
 
-      return this.dbClient.database.update(recallsParams, callback);
+      return new Promise((resolve, reject) => {
+        this.dbClient.database.update(recallsParams, (err, data) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(data);
+          }
+        });
+      });
     });
 
-    Promise.all(promises);
+    return Promise.all(promises).then((data) => {
+      logger.debug(`Successfully updated recall: ${JSON.stringify(data)}`);
+      callback(null);
+    }).catch((err) => {
+      logger.error('Error updating recall: ', err);
+      callback(err);
+    });
   }
 
-  async deleteRecalls(recallsPrimaryKeys, callback) {
+  deleteRecalls(recallsPrimaryKeys, callback) {
     const promises = recallsPrimaryKeys.map((primaryKey) => {
       const recallsParams = {
         TableName: this.dbClient.recallsTable,
@@ -110,17 +124,29 @@ class RecallsRepository {
           make_model_recall_number: primaryKey,
         },
       };
-
       logger.debug(`Deleting recall with make_model_recall_number : ${primaryKey}`);
-
-      return this.dbClient.database.delete(recallsParams, callback);
+      return new Promise((resolve, reject) => {
+        this.dbClient.database.delete(recallsParams, (err, data) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(data);
+          }
+        });
+      });
     });
 
-    Promise.all(promises);
+    return Promise.all(promises).then((data) => {
+      logger.debug(`Successfully deleted recalls: ${JSON.stringify(data)}`);
+      callback(null);
+    }).catch((err) => {
+      logger.error('Error deleting recall: ', err);
+      callback(err);
+    });
   }
 
-  async deleteMakes(makesPrimaryKeys, callback) {
-    const promises = makesPrimaryKeys.map((primaryKey) => {
+  deleteMakes(makesPrimaryKeys, callback) {
+    for (const primaryKey of makesPrimaryKeys) {
       const makesParams = {
         TableName: this.dbClient.makesTable,
         Key: {
@@ -130,13 +156,11 @@ class RecallsRepository {
 
       logger.debug(`Deleting makes for: ${primaryKey}`);
 
-      return this.dbClient.database.delete(makesParams, callback);
-    });
-
-    Promise.all(promises);
+      this.dbClient.database.delete(makesParams, callback);
+    }
   }
 
-  async deleteModels(modelsPrimaryKeys, callback) {
+  deleteModels(modelsPrimaryKeys, callback) {
     const promises = modelsPrimaryKeys.map((primaryKey) => {
       const modelsParams = {
         TableName: this.dbClient.modelsTable,
@@ -147,13 +171,27 @@ class RecallsRepository {
 
       logger.debug(`Deleting models for: ${primaryKey}`);
 
-      return this.dbClient.database.delete(modelsParams, callback);
+      return new Promise((resolve, reject) => {
+        this.dbClient.database.delete(modelsParams, (err, data) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(data);
+          }
+        });
+      });
     });
 
-    Promise.all(promises);
+    return Promise.all(promises).then((data) => {
+      logger.debug(`Successfully deleted models: ${JSON.stringify(data)}`);
+      callback(null);
+    }).catch((err) => {
+      logger.error('Error deleting model: ', err);
+      callback(err);
+    });
   }
 
-  async updateModels(models, callback) {
+  updateModels(models, callback) {
     const promises = models.map((record) => {
       const modelsParams = {
         TableName: this.dbClient.modelsTable,
@@ -168,10 +206,24 @@ class RecallsRepository {
 
       logger.debug(`Updating model with type_make : ${record.type_make}`);
 
-      return this.dbClient.database.update(modelsParams, callback);
+      return new Promise((resolve, reject) => {
+        this.dbClient.database.update(modelsParams, (err, data) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(data);
+          }
+        });
+      });
     });
 
-    Promise.all(promises);
+    return Promise.all(promises).then((data) => {
+      logger.debug(`Successfully updated models: ${JSON.stringify(data)}`);
+      callback(null);
+    }).catch((err) => {
+      logger.error('Error deleting models: ', err);
+      callback(err);
+    });
   }
 
   updateMakes(makes, callback) {

@@ -5,6 +5,7 @@ const RecallsRepository = require('../../repositories/recalls');
 const MakesResource = require('../../resources/makes');
 
 const TYPE = RecallType.vehicle;
+const DELETE_ERROR = 'Error while deleting makes';
 
 function getAllMakesByType(type, callback) {
   callback(null, {
@@ -30,7 +31,7 @@ function updateMakesWithError(makes, callback) {
 }
 
 function deleteMakesWithError(makes, callback) {
-  callback(new Error('Error'), null);
+  callback(new Error(DELETE_ERROR), null);
 }
 
 function getAllMakesByTypeWithError(type, callback) {
@@ -120,7 +121,7 @@ describe('MakesResource', () => {
       const makesResource = new MakesResource(recallsRepository);
       makesResource.deleteMakes(['R/2000/01'], (err, data) => {
         expect(data).to.be.an('undefined');
-        expect(err.message).to.equal('Error');
+        expect(err.message).to.equal(DELETE_ERROR);
         expect(deleteMakesWithError).to.throw(Error);
         done();
       });

@@ -7,7 +7,9 @@ const MODELS_TABLE_NAME = `cvr-${envVariables.environment}-models`;
 const RECALLS_SECONDARY_INDEX_NAME = 'type-make-model-gsi';
 const AWS_REGION = envVariables.awsRegion;
 
-AWS.config.update({ region: AWS_REGION });
+AWS.config.update({
+  region: AWS_REGION,
+});
 
 class DbClient {
   constructor(database) {
