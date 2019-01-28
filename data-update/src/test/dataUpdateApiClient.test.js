@@ -54,7 +54,7 @@ describe('DataUpdateApiClient', () => {
 
       dataUpdateApiClient.updateRecalls(RECALLS, (err, res) => {
         expect(err).to.equal(ERROR);
-        expect(res).to.equal(undefined);
+        expect(res).to.deep.equal(undefined);
         done();
       });
     });
@@ -63,7 +63,7 @@ describe('DataUpdateApiClient', () => {
 
       dataUpdateApiClient.updateRecalls(RECALLS, (err, res) => {
         expect(err).to.equal(null);
-        expect(res).to.equal(RESULTS);
+        expect(res).to.deep.equal(RESULTS);
         done();
       });
     });
@@ -72,7 +72,7 @@ describe('DataUpdateApiClient', () => {
 
       dataUpdateApiClient.updateRecalls(MANY_RECALLS, (err, res) => {
         expect(err).to.equal(null);
-        expect(res).to.equal(MANY_RESULTS);
+        expect(res).to.deep.equal(MANY_RESULTS);
         done();
       });
     });
@@ -83,7 +83,7 @@ describe('DataUpdateApiClient', () => {
 
       dataUpdateApiClient.updateMakes(MAKES, (err, res) => {
         expect(err).to.equal(ERROR);
-        expect(res).to.equal(undefined);
+        expect(res).to.deep.equal(undefined);
         done();
       });
     });
@@ -92,7 +92,7 @@ describe('DataUpdateApiClient', () => {
 
       dataUpdateApiClient.updateMakes(MAKES, (err, res) => {
         expect(err).to.equal(null);
-        expect(res).to.equal(RESULTS);
+        expect(res).to.deep.equal(RESULTS);
         done();
       });
     });
@@ -101,7 +101,7 @@ describe('DataUpdateApiClient', () => {
 
       dataUpdateApiClient.updateMakes(MANY_MAKES, (err, res) => {
         expect(err).to.equal(null);
-        expect(res).to.equal(MANY_RESULTS);
+        expect(res).to.deep.equal(MANY_RESULTS);
         done();
       });
     });
@@ -112,7 +112,7 @@ describe('DataUpdateApiClient', () => {
 
       dataUpdateApiClient.updateModels(MODELS, (err, res) => {
         expect(err).to.equal(ERROR);
-        expect(res).to.equal(undefined);
+        expect(res).to.deep.equal(undefined);
         done();
       });
     });
@@ -121,7 +121,7 @@ describe('DataUpdateApiClient', () => {
 
       dataUpdateApiClient.updateModels(MODELS, (err, res) => {
         expect(err).to.equal(null);
-        expect(res).to.equal(RESULTS);
+        expect(res).to.deep.equal(RESULTS);
         done();
       });
     });
@@ -130,7 +130,7 @@ describe('DataUpdateApiClient', () => {
 
       dataUpdateApiClient.updateModels(MANY_MODELS, (err, res) => {
         expect(err).to.equal(null);
-        expect(res).to.equal(MANY_RESULTS);
+        expect(res).to.deep.equal(MANY_RESULTS);
         done();
       });
     });

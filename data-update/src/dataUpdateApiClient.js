@@ -1,5 +1,6 @@
 const request = require('request');
 const crypto = require('crypto');
+const sequential = require('promise-sequential');
 const _ = require('lodash');
 const requestHeaders = require('cvr-common/src/constants/requestHeaders');
 const ModelDbRecordDto = require('cvr-common/src/dto/modelDbRecord');
@@ -13,10 +14,8 @@ const PAGINATION_ITEMS_COUNT = 500;
 class DataUpdateApiClient {
   static getAllModels(callback) {
     const path = `${RECALLS_BACKEND_URL}/models`;
-    const queryParams = {};
     const headers = DataUpdateApiClient.getRequestHeaders();
-    const resultSet = [];
-    this.doGet(path, headers, resultSet, queryParams, (err, body) => {
+    this.doGet(path, headers, [], {}, (err, body) => {
       if (err) {
         console.error('DataUpdateApiClient.getAllModels() - Error while calling API: ', err);
         callback(err);
@@ -29,10 +28,8 @@ class DataUpdateApiClient {
 
   static getAllMakes(callback) {
     const path = `${RECALLS_BACKEND_URL}/makes`;
-    const queryParams = {};
     const headers = DataUpdateApiClient.getRequestHeaders();
-    const resultSet = [];
-    this.doGet(path, headers, resultSet, queryParams, (err, body) => {
+    this.doGet(path, headers, [], {}, (err, body) => {
       if (err) {
         console.error('DataUpdateApiClient.getAllMakes() - Error while calling API: ', err);
         callback(err);
@@ -45,10 +42,8 @@ class DataUpdateApiClient {
 
   static getAllRecalls(callback) {
     const path = `${RECALLS_BACKEND_URL}/recalls`;
-    const queryParams = {};
     const headers = DataUpdateApiClient.getRequestHeaders();
-    const resultSet = [];
-    this.doGet(path, headers, resultSet, queryParams, (err, body) => {
+    this.doGet(path, headers, [], {}, (err, body) => {
       if (err) {
         console.error('DataUpdateApiClient.getAllRecalls() - Error while calling API: ', err);
         callback(err);
@@ -60,21 +55,19 @@ class DataUpdateApiClient {
   }
 
   static updateRecalls(recalls, callback) {
-    const path = `${RECALLS_BACKEND_URL}/recalls`;
-    const headers = DataUpdateApiClient.getRequestHeaders();
     if (_.isArray(recalls) && recalls.length === 0) {
       console.info('DataUpdateApiClient.updateRecalls() - payload contains no recalls. Skipping this request.');
       callback();
     } else {
-      this.patchWithPagination(path, recalls, headers, (err, res) => {
-        console.info('DataUpdateApiClient.updateRecalls() - HTTP response code ', res && res.statusCode);
-        if (err != null) {
-          DataUpdateApiClient.logErrorMessage('DataUpdateApiClient.updateRecalls() - Error while calling API: ', err);
+      const path = `${RECALLS_BACKEND_URL}/recalls`;
+      const headers = DataUpdateApiClient.getRequestHeaders();
+      sequential(this.getBodiesForPatch(recalls)
+        .map(body => this.getPatchPromise(path, body, headers)))
+        .then((responses => callback(null, responses)))
+        .catch((err) => {
+          console.error('DataUpdateApiClient.updateRecalls() - Error while calling API: ', err);
           callback(err);
-        } else {
-          callback(null, res);
-        }
-      });
+        });
     }
   }
 
@@ -82,43 +75,38 @@ class DataUpdateApiClient {
    * @param {MakeDbRecordDto[]} makes
    */
   static updateMakes(makes, callback) {
-    const path = `${RECALLS_BACKEND_URL}/makes`;
-    const serializedMakes = makes.map(make => make.serialize());
-    const headers = DataUpdateApiClient.getRequestHeaders();
-
     if (_.isArray(makes) && makes.length === 0) {
       console.info('DataUpdateApiClient.updateMakes() - payload contains no makes. Skipping this request.');
       callback();
     } else {
-      this.patchWithPagination(path, serializedMakes, headers, (err, res) => {
-        console.info('DataUpdateApiClient.updateMakes() - HTTP response code ', res && res.statusCode);
-        if (err != null) {
-          DataUpdateApiClient.logErrorMessage('DataUpdateApiClient.updateMakes() - Error while calling API: ', err);
+      const path = `${RECALLS_BACKEND_URL}/makes`;
+      const serializedMakes = makes.map(make => make.serialize());
+      const headers = DataUpdateApiClient.getRequestHeaders();
+      sequential(this.getBodiesForPatch(serializedMakes)
+        .map(body => this.getPatchPromise(path, body, headers)))
+        .then((responses => callback(null, responses)))
+        .catch((err) => {
+          console.error('DataUpdateApiClient.updateMakes() - Error while calling API: ', err);
           callback(err);
-        } else {
-          callback(null, res);
-        }
-      });
+        });
     }
   }
 
   static updateModels(models, callback) {
-    const path = `${RECALLS_BACKEND_URL}/models`;
-    const serializedModels = models.map(model => model.serialize());
-    const headers = DataUpdateApiClient.getRequestHeaders();
-
-    if (_.isArray(models) && models.length === 0) {
+    if (!models || (_.isArray(models) && models.length === 0)) {
       console.info('DataUpdateApiClient.updateModels() - payload contains no models. Skipping this request.');
       callback();
     } else {
-      this.patchWithPagination(path, serializedModels, headers, (err, res) => {
-        console.info('DataUpdateApiClient.updateModels() - HTTP response code ', res && res.statusCode);
-        if (err != null) {
-          DataUpdateApiClient.logErrorMessage('DataUpdateApiClient.updateModels() - Error while calling API: ', err);
+      const path = `${RECALLS_BACKEND_URL}/models`;
+      const serializedModels = models.map(model => model.serialize());
+      const headers = DataUpdateApiClient.getRequestHeaders();
+
+      sequential(this.getBodiesForPatch(serializedModels)
+        .map(body => this.getPatchPromise(path, body, headers)))
+        .then(responses => callback(null, responses))
+        .catch((err) => {
+          console.error('DataUpdateApiClient.updateModels() - Error while calling API: ', err);
           callback(err);
-        } else {
-          callback(null, res);
-        }
       });
     }
   }
@@ -185,32 +173,36 @@ class DataUpdateApiClient {
 
   /**
    * for to long body (more than PAGINATION_ITEMS_COUNT) request will be splitted into few
+   * if any error was returned, last one will be called by callback
    */
-  static patchWithPagination(path, body, headers, callback) {
+  static getBodiesForPatch(body) {
     const bodyLength = body.length;
+    const bodies = [];
     for (let start = 0; start < bodyLength; start += PAGINATION_ITEMS_COUNT) {
       const end = start + PAGINATION_ITEMS_COUNT <= bodyLength
-        ? start + PAGINATION_ITEMS_COUNT - 1 : bodyLength - 1;
+        ? start + PAGINATION_ITEMS_COUNT : bodyLength;
       const serializedBody = body.slice(start, end);
-      console.debug(`Calling API for ${path} - [${start}:${end}] of ${bodyLength} items`);
-      this.doPatch(path, serializedBody, headers, callback);
+      bodies.push(serializedBody);
+      console.debug(`Calling API for PATCH with [${start}:${end}] of ${bodyLength} items`);
     }
+    return bodies;
   }
 
-  static doPatch(path, body, headers, callback) {
-    request.patch({
-      url: path,
-      body,
-      json: true,
-      headers,
-    }, (err, res) => {
-      console.info(`${path} - HTTP response code ${res && res.statusCode}`);
-      if (err) {
-        console.error(path, ' - Error while calling API: ', err);
-        callback(err);
-      } else {
-        callback(null, res);
-      }
+  static getPatchPromise(path, body, headers) {
+    return () => new Promise((resolve, reject) => {
+      request.patch({
+        url: path,
+        body,
+        json: true,
+        headers,
+      }, (err, res) => {
+        console.info(`${path} - HTTP response code ${res && res.statusCode}`);
+        if (err) {
+          reject(err);
+        } else {
+          resolve(res);
+        }
+      });
     });
   }
 
@@ -219,26 +211,29 @@ class DataUpdateApiClient {
    * get will be regenerated with exclusiveStartKey query param (value: lastEvaluatedKey)
    * and response merged
    */
-  static doGet(path, headers, resultSet = [], queryParams = {}, callback) {
+  static doGet(path, headers, resultSet, queryParams, callback) {
     request.get({
       url: path, qs: queryParams, headers,
     }, (err, res, body) => {
-      console.info('body : ', body);
       console.info(`${path} with queryParams: ${JSON.stringify(queryParams)} - HTTP response code ${res && res.statusCode}`);
       if (err) {
         console.error(path, ' - Error while calling API: ', err);
         callback(err);
       } else {
-        console.debug(path, ' - returning: ', body);
         const data = JSON.parse(body);
         const set = resultSet.concat(data.items);
         if (data.lastEvaluatedKey) {
-          console.debug(path, ' - lastEvaluatedKey detected, generating additional request');
-          const queryStrings = Object.assign({ exclusiveStartKey: data.lastEvaluatedKey },
-            queryParams);
-          this.doGet(path, headers, set, queryStrings, callback);
+          console.debug(path, ' - lastEvaluatedKey : ', data.lastEvaluatedKey, ' detected, generating additional request');
+          this.doGet(
+            path,
+            headers,
+            set,
+            Object.assign({ exclusiveStartKey: data.lastEvaluatedKey }),
+            callback,
+          );
+        } else {
+          callback(null, set);
         }
-        callback(null, set);
       }
     });
   }
