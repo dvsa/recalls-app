@@ -99,6 +99,7 @@ class RecallsRepository {
       return new Promise((resolve, reject) => {
         this.dbClient.database.update(recallsParams, (err, data) => {
           if (err) {
+            logger.error(`Unable to update recall with the following primary key: ${record.make_model_recall_number}`, err);
             reject(err);
           } else {
             resolve(data);
@@ -128,6 +129,7 @@ class RecallsRepository {
       return new Promise((resolve, reject) => {
         this.dbClient.database.delete(recallsParams, (err, data) => {
           if (err) {
+            logger.error(`Unable to delete recall with the following primary key: ${primaryKey}`, err);
             reject(err);
           } else {
             resolve(data);
@@ -174,6 +176,7 @@ class RecallsRepository {
       return new Promise((resolve, reject) => {
         this.dbClient.database.delete(modelsParams, (err, data) => {
           if (err) {
+            logger.error(`Unable to delete model with the following primary key: ${primaryKey}`, err);
             reject(err);
           } else {
             resolve(data);
@@ -209,6 +212,7 @@ class RecallsRepository {
       return new Promise((resolve, reject) => {
         this.dbClient.database.update(modelsParams, (err, data) => {
           if (err) {
+            logger.error(`Unable to update model with the following primary key: ${record.type_make}`, err);
             reject(err);
           } else {
             resolve(data);

@@ -136,7 +136,7 @@ class DataUpdateApiClient {
       request.delete({
         url: path, body: recalls, json: true, headers: DataUpdateApiClient.getRequestHeaders(),
       }, (err, res) => {
-        console.info(`DataUpdateApiClient.deleteRecalls() - Deleting ${recalls.length} recalls. HTTP response: ${res.statusCode} - `, res);
+        console.info(`DataUpdateApiClient.deleteRecalls() - Deleting ${recalls.length} recalls. HTTP response code: `, res && res.statusCode);
         if (err != null) {
           DataUpdateApiClient.logErrorMessage('DataUpdateApiClient.deleteRecalls() - Error while calling API: ', err);
           callback(err);
