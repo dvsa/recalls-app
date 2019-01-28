@@ -6,8 +6,8 @@ const INDEX_NAME = 'recallsSecondaryIndexName';
 const type = 'vehicle';
 const make = 'testMake';
 const model = 'testModel';
-const models = [{ type_make: type, models: [model] }];
-const recalls = [{ make_model_recall_number: 'testMakeModelRecallNumber' }];
+// const models = [{ type_make: type, models: [model] }];
+// const recalls = [{ make_model_recall_number: 'testMakeModelRecallNumber' }];
 const exclusiveStartKey = 1;
 const recallPrimaryKey = 'vehicle-BMW-E90-R/1234/12';
 const makePrimaryKey = 'vehicle';
@@ -295,40 +295,40 @@ describe('RecallsRepository', () => {
       });
     });
   });
-  describe('updateModels() method', () => {
-    before(() => {
-      recallsRepository.dbClient = {
-        database: { update: (params, callback) => callback(new Error('error'), params) },
-        modelsTable: TABLE_NAME,
-      };
-    });
-
-    it('Should map params properly', (done) => {
-      recallsRepository.updateModels(models, (err, data) => {
-        expect(err.message).to.equal('error');
-        expect(data).to.be.an('object');
-        expect(data.TableName).to.equal(TABLE_NAME);
-        expect(data.Key.type_make).to.equal(type);
-        done();
-      });
-    });
-  });
-  describe('updateRecalls() method', () => {
-    before(() => {
-      recallsRepository.dbClient = {
-        database: { update: (params, callback) => callback(new Error('error'), params) },
-        recallsTable: TABLE_NAME,
-      };
-    });
-
-    it('Should map params properly', (done) => {
-      recallsRepository.updateRecalls(recalls, (err, data) => {
-        expect(err.message).to.equal('error');
-        expect(data).to.be.an('object');
-        expect(data.TableName).to.equal(TABLE_NAME);
-        expect(data.Key.make_model_recall_number).to.equal('testMakeModelRecallNumber');
-        done();
-      });
-    });
-  });
+  // describe('updateModels() method', () => {
+  //   before(() => {
+  //     recallsRepository.dbClient = {
+  //       database: { update: (params, callback) => callback(new Error('error'), params) },
+  //       modelsTable: TABLE_NAME,
+  //     };
+  //   });
+  //
+  //   it('Should map params properly', (done) => {
+  //     recallsRepository.updateModels(models, (err, data) => {
+  //       expect(err.message).to.equal('error');
+  //       expect(data).to.be.an('object');
+  //       expect(data.TableName).to.equal(TABLE_NAME);
+  //       expect(data.Key.type_make).to.equal(type);
+  //       done();
+  //     });
+  //   });
+  // });
+  // describe('updateRecalls() method', () => {
+  //   before(() => {
+  //     recallsRepository.dbClient = {
+  //       database: { update: (params, callback) => callback(new Error('error'), params) },
+  //       recallsTable: TABLE_NAME,
+  //     };
+  //   });
+  //
+  //   it('Should map params properly', (done) => {
+  //     recallsRepository.updateRecalls(recalls, (err, data) => {
+  //       expect(err.message).to.equal('error');
+  //       expect(data).to.be.an('object');
+  //       expect(data.TableName).to.equal(TABLE_NAME);
+  //       expect(data.Key.make_model_recall_number).to.equal('testMakeModelRecallNumber');
+  //       done();
+  //     });
+  //   });
+  // });
 });

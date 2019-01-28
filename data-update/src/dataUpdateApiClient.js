@@ -107,7 +107,7 @@ class DataUpdateApiClient {
         .catch((err) => {
           console.error('DataUpdateApiClient.updateModels() - Error while calling API: ', err);
           callback(err);
-      });
+        });
     }
   }
 
