@@ -48,7 +48,7 @@ class MakesResource {
       const makesList = this.constructor.mapMakesListToDbRecordDto(makes);
       this.recallsRepository.updateMakes(makesList, (err) => {
         if (err) {
-          logger.error('Unable to update type and make in makes table. Error JSON:', JSON.stringify(err, null, 2));
+          logger.error('Unable to update type and make in makes table. Error JSON:', err);
           callback(err);
         } else {
           logger.info('Makes uploaded successfully in makes table');
@@ -56,6 +56,18 @@ class MakesResource {
         }
       });
     }
+  }
+
+  deleteMakes(makesPrimaryKeys, callback) {
+    this.recallsRepository.deleteMakes(makesPrimaryKeys, (err, data) => {
+      if (err) {
+        logger.error('Unable to delete makes. Error JSON:', err);
+        callback(err);
+      } else {
+        logger.info(`Makes deleted successfully from recalls table: ${JSON.stringify(data)}`);
+        callback(null);
+      }
+    });
   }
 }
 

@@ -3,6 +3,7 @@ const Parser = require('./csvRecallsParser');
 const RecallComparer = require('./recallComparer');
 const DataUpdateApiClient = require('./dataUpdateApiClient');
 const S3BucketObjectProperties = require('./dto/s3BucketObjectProperties');
+const RecallsMakesModels = require('./dto/recallsMakesModels');
 const envVariables = require('./config/environmentVariables');
 
 class RecallDataProcessor {
@@ -19,7 +20,7 @@ class RecallDataProcessor {
     },
     (err, data) => {
       if (err) {
-        console.error('Error when dowloading csv file from S3 bucket:', err);
+        console.error('Error when downloading csv file from S3 bucket:', err);
         next(err);
       } else {
         const csvBuffer = data.Body;
@@ -68,30 +69,39 @@ class RecallDataProcessor {
               previousRecalls,
             );
             const comparer = new RecallComparer(previousRecallsMap, currentRecalls);
-            const modifiedRecalls = comparer.findModifiedRecalls();
+            const currentMakes = RecallComparer.extractMakesFromRecalls(currentRecalls);
+            const currentModels = RecallComparer.extractModelsFromRecalls(currentRecalls);
 
-            const modifiedModels = RecallDataProcessor.handleModifiedModels(
-              modelsErr, comparer, previousModels,
-            );
-            const modifiedMakes = RecallDataProcessor.handleModifiedMakes(
-              makesErr, comparer, previousMakes,
+            const deletedEntries = RecallDataProcessor.handleDeletedEntries(
+              makesErr, modelsErr, comparer,
+              previousMakes, currentMakes, previousModels, currentModels,
             );
 
-            next(null, s3Properties, modifiedRecalls, modifiedMakes, modifiedModels);
+            if (RecallDataProcessor.isDeleteThresholdExceeded(
+              deletedEntries.recalls.length, previousRecalls.length,
+            )) {
+              next(new Error(`Deleting ${deletedEntries.recalls.length} recalls exceeds the configured threshold (DELETE_THRESHOLD environment variable). Aborting the data update process.`));
+            } else {
+              const modifiedEntries = RecallDataProcessor.handleModifiedEntries(
+                makesErr, modelsErr, comparer,
+                previousMakes, currentMakes, previousModels, currentModels,
+              );
+              next(null, s3Properties, modifiedEntries, deletedEntries);
+            }
           });
         });
       }
     });
   }
 
-  static insert(s3Properties, recalls, makes, models, next) {
-    console.info(`Number of modified recalls entries: ${recalls.length}`);
-    console.info(`Number of modified makes entries: ${makes.length}`);
-    console.info(`Number of modified models entries: ${models.length}`);
+  static insert(s3Properties, modifiedEntries, deletedEntries, next) {
+    console.info(`Number of modified recalls entries: ${modifiedEntries.recalls.length}`);
+    console.info(`Number of modified makes entries: ${modifiedEntries.makes.length}`);
+    console.info(`Number of modified models entries: ${modifiedEntries.models.length}`);
 
-    DataUpdateApiClient.updateRecalls(recalls, (recallsErr) => {
-      DataUpdateApiClient.updateMakes(makes, (makesErr) => {
-        DataUpdateApiClient.updateModels(models, (modelsErr) => {
+    DataUpdateApiClient.updateRecalls(modifiedEntries.recalls, (recallsErr) => {
+      DataUpdateApiClient.updateMakes(modifiedEntries.makes, (makesErr) => {
+        DataUpdateApiClient.updateModels(modifiedEntries.models, (modelsErr) => {
           RecallDataProcessor.handleUpdateError('recalls', recallsErr);
           RecallDataProcessor.handleUpdateError('makes', makesErr);
           RecallDataProcessor.handleUpdateError('models', modelsErr);
@@ -100,18 +110,50 @@ class RecallDataProcessor {
           if (updateErr) {
             next(updateErr);
           } else {
-            const destBucket = envVariables.assetsBucketName;
-            RecallDataProcessor.copyToBucket(s3Properties, destBucket, `documents/${s3Properties.srcKey}`, (err, data) => {
-              if (err) {
-                next(err);
-              } else {
-                next(null, data);
-              }
-            });
+            next(null, s3Properties, deletedEntries);
           }
         });
       });
     });
+  }
+
+  static delete(s3Properties, deletedEntries, next) {
+    console.info(`Number of recalls to delete: ${deletedEntries.recalls.length}`);
+    console.info(`Number of makes to delete: ${deletedEntries.makes.length}`);
+    console.info(`Number of models to delete: ${deletedEntries.models.length}`);
+
+    DataUpdateApiClient.deleteRecalls(deletedEntries.recalls, (recallsErr) => {
+      DataUpdateApiClient.deleteMakes(deletedEntries.makes, (makesErr) => {
+        DataUpdateApiClient.deleteModels(deletedEntries.models, (modelsErr) => {
+          RecallDataProcessor.handleDeletionError('recalls', recallsErr);
+          RecallDataProcessor.handleDeletionError('makes', makesErr);
+          RecallDataProcessor.handleDeletionError('models', modelsErr);
+
+          const deleteErr = recallsErr || makesErr || modelsErr;
+
+          if (deleteErr) {
+            next(deleteErr);
+          } else {
+            next(null, s3Properties);
+          }
+        });
+      });
+    });
+  }
+
+  static copyCsvToAssets(s3Properties, next) {
+    const destBucket = envVariables.assetsBucketName;
+    RecallDataProcessor.copyToBucket(s3Properties, destBucket, `documents/${s3Properties.srcKey}`, (err, data) => {
+      next(err, data);
+    });
+  }
+
+  static isDeleteThresholdExceeded(numberOfDeletions, totalRecords) {
+    const thresholdPercentagePoints = envVariables.deleteThreshold;
+    const deletedRecordsPercentagePoints = numberOfDeletions / totalRecords * 100;
+    const isExceeded = deletedRecordsPercentagePoints > thresholdPercentagePoints;
+    console.debug(`Does deleting ${numberOfDeletions} out of ${totalRecords} records exceed the threshold of ${thresholdPercentagePoints}%? - ${isExceeded}`);
+    return isExceeded;
   }
 
   static handleUpdateError(typeOfData, err) {
@@ -120,24 +162,71 @@ class RecallDataProcessor {
     }
   }
 
-  static handleModifiedModels(modelsErr, comparer, previousModels) {
+  static handleDeletionError(typeOfData, err) {
+    if (err) {
+      console.error(`Error while deleting ${typeOfData}: ${err}`);
+    }
+  }
+
+  static handleModifiedModels(modelsErr, previousModels, currentModelsMap) {
     if (modelsErr) {
       console.warn(`Error while fetching models from API: ${JSON.stringify(modelsErr)}`);
       console.info('Models will not be updated due to missing data');
       return [];
     }
     const previousModelsMap = RecallDataProcessor.mapModelsByTypeMake(previousModels);
-    return comparer.findModifiedModels(previousModelsMap);
+
+    return RecallComparer.findModifiedModels(previousModelsMap, currentModelsMap);
   }
 
-  static handleModifiedMakes(makesErr, comparer, previousMakes) {
+  static handleModifiedMakes(makesErr, previousMakes, currentMakesMap) {
     if (makesErr) {
       console.warn(`Error while fetching makes from API: ${JSON.stringify(makesErr)}`);
       console.info('Makes will not be updated due to missing data');
       return [];
     }
     const previousMakesMap = RecallDataProcessor.mapMakesByType(previousMakes);
-    return comparer.findModifiedMakes(previousMakesMap);
+
+    return RecallComparer.findModifiedMakes(previousMakesMap, currentMakesMap);
+  }
+
+  static handleDeletedMakes(makesErr, previousMakes, currentMakesMap) {
+    if (makesErr) {
+      console.info('Makes will not be deleted due to missing data');
+      return [];
+    }
+
+    const previousMakesMap = RecallDataProcessor.mapMakesByType(previousMakes);
+
+    return RecallComparer.findDeletedMakesPrimaryKeys(previousMakesMap, currentMakesMap);
+  }
+
+  static handleDeletedModels(modelsErr, previousModels, currentModelsMap) {
+    if (modelsErr) {
+      console.info('Models will not be deleted due to missing data');
+      return [];
+    }
+    const previousModelsMap = RecallDataProcessor.mapModelsByTypeMake(previousModels);
+
+    return RecallComparer.findDeletedModelsPrimaryKeys(previousModelsMap, currentModelsMap);
+  }
+
+  static handleModifiedEntries(makesErr, modelsErr, comparer,
+    previousMakes, currentMakes, previousModels, currentModels) {
+    return new RecallsMakesModels(
+      comparer.findModifiedRecalls(),
+      RecallDataProcessor.handleModifiedMakes(makesErr, previousMakes, currentMakes),
+      RecallDataProcessor.handleModifiedModels(modelsErr, previousModels, currentModels),
+    );
+  }
+
+  static handleDeletedEntries(makesErr, modelsErr, comparer,
+    previousMakes, currentMakes, previousModels, currentModels) {
+    return new RecallsMakesModels(
+      comparer.findDeletedRecallsPrimaryKeys(),
+      RecallDataProcessor.handleDeletedMakes(makesErr, previousMakes, currentMakes),
+      RecallDataProcessor.handleDeletedModels(modelsErr, previousModels, currentModels),
+    );
   }
 
   /**
@@ -185,8 +274,8 @@ class RecallDataProcessor {
       CopySource: `${s3Properties.srcBucket}/${s3Properties.srcKey}`,
       Key: destKey,
     };
+    console.debug('Copying CSV file to assets bucket. Params: ', params);
     s3Properties.s3.copyObject(params, (err, data) => {
-      console.debug('Copying CSV file to assets bucket. Params: ', params);
       if (err) {
         console.error('Error while copying CSV file to assets bucket', err);
         callback(err);

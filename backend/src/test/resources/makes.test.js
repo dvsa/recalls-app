@@ -5,6 +5,7 @@ const RecallsRepository = require('../../repositories/recalls');
 const MakesResource = require('../../resources/makes');
 
 const TYPE = RecallType.vehicle;
+const DELETE_ERROR = 'Error while deleting makes';
 
 function getAllMakesByType(type, callback) {
   callback(null, {
@@ -27,6 +28,10 @@ function getEmptyResponse(makes, callback) {
 
 function updateMakesWithError(makes, callback) {
   callback(new Error('Error'), null);
+}
+
+function deleteMakesWithError(makes, callback) {
+  callback(new Error(DELETE_ERROR), null);
 }
 
 function getAllMakesByTypeWithError(type, callback) {
@@ -101,6 +106,33 @@ describe('MakesResource', () => {
 
       const makesResource = new MakesResource(recallsRepository);
       makesResource.updateMakes([{}], (err, data) => {
+        expect(data).to.be.an('undefined');
+        expect(err).to.be.an('null');
+        done();
+      });
+    });
+  });
+
+  describe('deleteMakes() method', () => {
+    it('Should return error when RecallsRepository returns an error', (done) => {
+      const recallsRepository = new RecallsRepository();
+      sinon.stub(recallsRepository, 'deleteMakes').callsFake(deleteMakesWithError);
+
+      const makesResource = new MakesResource(recallsRepository);
+      makesResource.deleteMakes(['R/2000/01'], (err, data) => {
+        expect(data).to.be.an('undefined');
+        expect(err.message).to.equal(DELETE_ERROR);
+        expect(deleteMakesWithError).to.throw(Error);
+        done();
+      });
+    });
+
+    it('Should return an empty response when makes will be deleted', (done) => {
+      const recallsRepository = new RecallsRepository();
+      sinon.stub(recallsRepository, 'deleteMakes').callsFake(getEmptyResponse);
+
+      const makesResource = new MakesResource(recallsRepository);
+      makesResource.deleteMakes([{}], (err, data) => {
         expect(data).to.be.an('undefined');
         expect(err).to.be.an('null');
         done();

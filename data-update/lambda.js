@@ -21,6 +21,8 @@ module.exports = {
           RecallDataProcessor.parse,
           RecallDataProcessor.compare,
           RecallDataProcessor.insert,
+          RecallDataProcessor.delete,
+          RecallDataProcessor.copyCsvToAssets,
         ],
         (err) => {
           if (err) {

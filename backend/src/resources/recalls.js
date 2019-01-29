@@ -86,7 +86,7 @@ class RecallsResource {
       const recallsList = this.constructor.mapRecallToListDbRecordDto(recalls);
       this.recallsRepository.updateRecalls(recallsList, (err) => {
         if (err) {
-          logger.error('Unable to update recalls. Error JSON:', JSON.stringify(err, null, 2));
+          logger.error('Unable to update recalls. Error JSON:', err);
           callback(err);
         } else {
           logger.info('Recalls uploaded successfully in recalls table');
@@ -94,6 +94,18 @@ class RecallsResource {
         }
       });
     }
+  }
+
+  deleteRecalls(recallsPrimaryKeys, callback) {
+    this.recallsRepository.deleteRecalls(recallsPrimaryKeys, (err) => {
+      if (err) {
+        logger.error('Unable to delete recalls. Error JSON:', err);
+        callback(err);
+      } else {
+        logger.info('Recalls deleted successfully from recalls table');
+        callback(null);
+      }
+    });
   }
 
   static handleError(err, type, make, model, year, callback) {

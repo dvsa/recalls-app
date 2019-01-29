@@ -11,6 +11,7 @@ const MODEL_YARIS = 'Yaris';
 const MODEL_COROLLA = 'Corolla';
 const MODEL_CELICA = 'Celica';
 
+const DELETE_ERROR = 'Error while deleting models';
 function getAllModelsByTypeAndMake(type, make, callback) {
   callback(null, {
     Item: { models: [MODEL_CELICA, MODEL_COROLLA, MODEL_YARIS] },
@@ -44,6 +45,10 @@ function getAllModelsByTypeAndMakeWithError(type, make, callback) {
 
 function updateModelsWithError(models, callback) {
   callback(new Error('Error'), null);
+}
+
+function deleteModelsWithError(models, callback) {
+  callback(new Error(DELETE_ERROR), null);
 }
 
 describe('ModelsResource', () => {
@@ -127,6 +132,32 @@ describe('ModelsResource', () => {
 
       const modelsResource = new ModelsResource(recallsRepository);
       modelsResource.updateModels([{}], (err, data) => {
+        expect(data).to.be.an('undefined');
+        expect(err).to.be.an('null');
+        done();
+      });
+    });
+  });
+  describe('deleteModels() method', () => {
+    it('Should return error when RecallsRepository returns an error', (done) => {
+      const recallsRepository = new RecallsRepository();
+      sinon.stub(recallsRepository, 'deleteModels').callsFake(deleteModelsWithError);
+
+      const modelsResource = new ModelsResource(recallsRepository);
+      modelsResource.deleteModels([{}], (err, data) => {
+        expect(data).to.be.an('undefined');
+        expect(err.message).to.equal(DELETE_ERROR);
+        expect(deleteModelsWithError).to.throw(Error);
+        done();
+      });
+    });
+
+    it('Should return an empty response when models will be deleted', (done) => {
+      const recallsRepository = new RecallsRepository();
+      sinon.stub(recallsRepository, 'deleteModels').callsFake(getEmptyResponse);
+
+      const modelsResource = new ModelsResource(recallsRepository);
+      modelsResource.deleteModels([{}], (err, data) => {
         expect(data).to.be.an('undefined');
         expect(err).to.be.an('null');
         done();

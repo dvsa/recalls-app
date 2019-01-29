@@ -63,8 +63,19 @@ const recallItems = {
   ],
 };
 
+const successfulDeleteResponse = 'Records have been deleted';
+const failedDeleteResponse = 'Error while deleting recalls';
+
 function getAllRecalls(callback) {
   callback(null, recallItems);
+}
+
+function deleteRecalls(callback) {
+  callback(null, successfulDeleteResponse);
+}
+
+function deleteRecallsWithError(callback) {
+  callback(new Error(failedDeleteResponse), null);
 }
 
 function getByMakeAndModel(type, make, model, callback) {
@@ -205,6 +216,32 @@ describe('RecallsResource', () => {
 
         expect(data[0].recall_number).to.equal(FIRST_RECALL_NUMBER);
         expect(data[1].recall_number).to.equal(SECOND_RECALL_NUMBER);
+        done();
+      });
+    });
+  });
+
+  describe('deleteRecalls() method', () => {
+    it('Should attempt to delete recalls and fetch a response', (done) => {
+      const recallsRepository = new RecallsRepository();
+      sinon.stub(recallsRepository, 'deleteRecalls').callsFake(deleteRecalls);
+
+      const recallsResource = new RecallsResource(recallsRepository);
+      recallsResource.deleteRecalls((err, data) => {
+        expect(err).to.be.equal(null);
+        expect(data).to.contain(successfulDeleteResponse);
+        done();
+      });
+    });
+    it('Should return an error if it was unable to delete recalls', (done) => {
+      const recallsRepository = new RecallsRepository();
+      sinon.stub(recallsRepository, 'deleteRecalls').callsFake(deleteRecallsWithError);
+
+      const recallsResource = new RecallsResource(recallsRepository);
+      recallsResource.deleteRecalls((err, data) => {
+        expect(err).to.be.an('Error');
+        expect(err.message).to.be.equal(failedDeleteResponse);
+        expect(data).to.be.equal(null);
         done();
       });
     });
