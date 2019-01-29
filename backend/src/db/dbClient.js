@@ -9,6 +9,8 @@ const AWS_REGION = envVariables.awsRegion;
 
 AWS.config.update({
   region: AWS_REGION,
+  maxRetries: 10,
+  retryDelayOptions: { base: 200 },
 });
 
 class DbClient {
