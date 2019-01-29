@@ -179,8 +179,8 @@ class DataUpdateApiClient {
     const bodyLength = body.length;
     const bodies = [];
     for (let start = 0; start < bodyLength; start += PAGINATION_ITEMS_COUNT) {
-      const end = start + PAGINATION_ITEMS_COUNT <= bodyLength
-        ? start + PAGINATION_ITEMS_COUNT : bodyLength;
+      const end = (start + PAGINATION_ITEMS_COUNT - 1) <= bodyLength
+        ? start + PAGINATION_ITEMS_COUNT - 1 : bodyLength;
       const serializedBody = body.slice(start, end);
       bodies.push(serializedBody);
       console.debug(`Calling API for PATCH with [${start}:${end}] of ${bodyLength} items`);
