@@ -1,4 +1,5 @@
 const { logger } = require('cvr-common/src/logger/loggerFactory');
+const sequential = require('promise-sequential');
 const DbClient = require('../db/dbClient');
 
 class RecallsRepository {
@@ -21,26 +22,38 @@ class RecallsRepository {
     this.dbClient.database.query(params, callback);
   }
 
-  getAllRecalls(callback) {
+  getAllRecalls(exclusiveStartKey, callback) {
     const params = {
       TableName: this.dbClient.recallsTable,
     };
 
+    if (exclusiveStartKey) {
+      params.ExclusiveStartKey = exclusiveStartKey;
+    }
+
     this.dbClient.database.scan(params, callback);
   }
 
-  getAllMakes(callback) {
+  getAllMakes(exclusiveStartKey, callback) {
     const params = {
       TableName: this.dbClient.makesTable,
     };
 
+    if (exclusiveStartKey) {
+      params.ExclusiveStartKey = exclusiveStartKey;
+    }
+
     this.dbClient.database.scan(params, callback);
   }
 
-  getAllModels(callback) {
+  getAllModels(exclusiveStartKey, callback) {
     const params = {
       TableName: this.dbClient.modelsTable,
     };
+
+    if (exclusiveStartKey) {
+      params.ExclusiveStartKey = exclusiveStartKey;
+    }
 
     this.dbClient.database.scan(params, callback);
   }
@@ -96,7 +109,7 @@ class RecallsRepository {
 
       logger.debug(`Updating recall with make_model_recall_number : ${record.make_model_recall_number}`);
 
-      return new Promise((resolve, reject) => {
+      return () => new Promise((resolve, reject) => {
         this.dbClient.database.update(recallsParams, (err, data) => {
           if (err) {
             logger.error(`Unable to update recall with the following primary key: ${record.make_model_recall_number}`, err);
@@ -108,7 +121,7 @@ class RecallsRepository {
       });
     });
 
-    return Promise.all(promises).then((data) => {
+    return sequential(promises).then((data) => {
       logger.debug(`Successfully updated ${data.length} recall(s)`);
       callback(null);
     }).catch((err) => {
@@ -126,7 +139,7 @@ class RecallsRepository {
         },
       };
       logger.debug(`Deleting recall with make_model_recall_number : ${primaryKey}`);
-      return new Promise((resolve, reject) => {
+      return () => new Promise((resolve, reject) => {
         this.dbClient.database.delete(recallsParams, (err, data) => {
           if (err) {
             logger.error(`Unable to delete recall with the following primary key: ${primaryKey}`, err);
@@ -138,7 +151,7 @@ class RecallsRepository {
       });
     });
 
-    return Promise.all(promises).then((data) => {
+    return sequential(promises).then((data) => {
       logger.debug(`Successfully deleted ${data.length} recall(s)`);
       callback(null);
     }).catch((err) => {
@@ -173,7 +186,7 @@ class RecallsRepository {
 
       logger.debug(`Deleting models for: ${primaryKey}`);
 
-      return new Promise((resolve, reject) => {
+      return () => new Promise((resolve, reject) => {
         this.dbClient.database.delete(modelsParams, (err, data) => {
           if (err) {
             logger.error(`Unable to delete model with the following primary key: ${primaryKey}`, err);
@@ -185,7 +198,7 @@ class RecallsRepository {
       });
     });
 
-    return Promise.all(promises).then((data) => {
+    return sequential(promises).then((data) => {
       logger.debug(`Successfully deleted ${data.length} model(s)`);
       callback(null);
     }).catch((err) => {
@@ -209,7 +222,7 @@ class RecallsRepository {
 
       logger.debug(`Updating model with type_make : ${record.type_make}`);
 
-      return new Promise((resolve, reject) => {
+      return () => new Promise((resolve, reject) => {
         this.dbClient.database.update(modelsParams, (err, data) => {
           if (err) {
             logger.error(`Unable to update model with the following primary key: ${record.type_make}`, err);
@@ -221,7 +234,7 @@ class RecallsRepository {
       });
     });
 
-    return Promise.all(promises).then((data) => {
+    return sequential(promises).then((data) => {
       logger.debug(`Successfully updated ${data.length} model(s)`);
       callback(null);
     }).catch((err) => {

@@ -30,6 +30,7 @@
     "body-parser": "^1.18.3",
     "express": "^4.16.4",
     "express-http-context": "^1.2.0",
+    "promise-sequential": "^1.1.1",
     "lodash": "^4.17.11"
   },
   "devDependencies": {

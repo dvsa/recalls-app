@@ -1,5 +1,6 @@
 const { logger } = require('cvr-common/src/logger/loggerFactory');
 const ModelDbRecordDto = require('cvr-common/src/dto/modelDbRecord');
+const ResponseDbRecordDto = require('cvr-common/src/dto/responseDbRecord');
 
 class ModelsResource {
   constructor(recallsRepository) {
@@ -13,15 +14,16 @@ class ModelsResource {
     ));
   }
 
-  getAllModels(callback) {
-    this.recallsRepository.getAllModels((err, data) => {
+  getAllModels(exclusiveStartKey, callback) {
+    this.recallsRepository.getAllModels(exclusiveStartKey, (err, data) => {
       if (err) {
         logger.error('Error while retrieving all models', err);
         callback(err);
       } else {
         logger.info(`Mapping all models. Number of fetched items: ${data.Items.length}`);
         const retrievedModels = this.constructor.mapModelsListToDbRecordDto(data.Items);
-        callback(null, retrievedModels);
+        const responseDbRecordDto = new ResponseDbRecordDto(data.LastEvaluatedKey, retrievedModels);
+        callback(null, responseDbRecordDto);
       }
     });
   }

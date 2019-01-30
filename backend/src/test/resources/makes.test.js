@@ -7,14 +7,17 @@ const MakesResource = require('../../resources/makes');
 const TYPE = RecallType.vehicle;
 const DELETE_ERROR = 'Error while deleting makes';
 
+const lastEvaluatedKey = 6;
+
 function getAllMakesByType(type, callback) {
   callback(null, {
     Item: { makes: ['HONDA', 'TOYOTA', 'KIA'] },
   });
 }
 
-function getAllMakes(callback) {
+function getAllMakes(exclusiveStartKey, callback) {
   callback(null, {
+    LastEvaluatedKey: lastEvaluatedKey,
     Items: [
       { type: 'equipment', makes: ['ASEC', 'BELRON'] },
       { type: 'vehicle', makes: ['HONDA', 'TOYOTA', 'KIA'] },
@@ -74,13 +77,15 @@ describe('MakesResource', () => {
       sinon.stub(recallsRepository, 'getAllMakes').callsFake(getAllMakes);
 
       const makesResource = new MakesResource(recallsRepository);
-      makesResource.getAllMakes((err, data) => {
-        expect(data).to.be.an('array');
-        expect(data).to.have.lengthOf(2);
+      makesResource.getAllMakes(1, (err, data) => {
+        expect(data.items).to.be.an('array');
+        expect(data.items).to.have.lengthOf(2);
 
-        expect(data[0].makes).to.nested.include('ASEC');
-        expect(data[0].makes).to.not.nested.include('TOYOTA');
-        expect(data[1].makes).to.nested.include('TOYOTA');
+        expect(data.items[0].makes).to.nested.include('ASEC');
+        expect(data.items[0].makes).to.not.nested.include('TOYOTA');
+        expect(data.items[1].makes).to.nested.include('TOYOTA');
+
+        expect(data.lastEvaluatedKey).to.equal(lastEvaluatedKey);
         done();
       });
     });

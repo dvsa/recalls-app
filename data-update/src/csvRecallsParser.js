@@ -34,6 +34,7 @@ class CsvRecallsParser {
     const trim = this.constructor.trimIfNotEmpty;
     return (!line.Make || trim(line.Make).length === 0)
       || (!line.Model || trim(line.Model).length === 0)
+      || (!line.Remedy || trim(line.Remedy).length === 0)
       || (!line['Recalls Number'] || trim(line['Recalls Number']).length === 0);
   }
 
@@ -89,7 +90,7 @@ class CsvRecallsParser {
 
         for (const line of json) {
           if (this.isAnyRequiredFieldMissing(line)) {
-            console.warn(`The following CSV line cannot be processed as it is missing one of the required fields (Make, Model, Recalls Number): \r${JSON.stringify(line)}`);
+            console.warn(`The following CSV line cannot be processed as it is missing one of the required fields (Make, Model, Remedy, Recalls Number): \r${JSON.stringify(line)}`);
           } else {
             const recall = this.csvLineToRecall(line);
             recalls = this.addRecallOrMergeIfExists(recall, recalls);

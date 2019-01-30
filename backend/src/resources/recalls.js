@@ -1,5 +1,6 @@
 const RecallDto = require('cvr-common/src/dto/recall');
 const RecallDbRecordDto = require('cvr-common/src/dto/recallDbRecord');
+const ResponseDbRecordDto = require('cvr-common/src/dto/responseDbRecord');
 const { logger } = require('cvr-common/src/logger/loggerFactory');
 
 class RecallsResource {
@@ -41,14 +42,15 @@ class RecallsResource {
     });
   }
 
-  getAllRecalls(callback) {
-    this.recallsRepository.getAllRecalls((err, data) => {
+  getAllRecalls(exclusiveStartKey, callback) {
+    this.recallsRepository.getAllRecalls(exclusiveStartKey, (err, data) => {
       if (err) {
         this.constructor.handleError(err, null, null, null, null, callback);
       } else {
         logger.info(`Mapping all recalls. Number of fetched items: ${data.Items.length}`);
         const recalls = this.constructor.mapRecallToListDbRecordDto(data.Items);
-        callback(null, recalls);
+        const responseDbRecordDto = new ResponseDbRecordDto(data.LastEvaluatedKey, recalls);
+        callback(null, responseDbRecordDto);
       }
     });
   }
