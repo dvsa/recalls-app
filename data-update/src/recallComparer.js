@@ -76,18 +76,22 @@ class RecallComparer {
   }
 
   /**
-   * Iterates over currentRecalls and compares them with previousRecalls
-   * uses make_model_recall_number to find corresponding recalls in both maps
+   * Iterates over currentRecalls, validates them and compares with previousRecalls
+   * Uses make_model_recall_number to find corresponding recalls in both maps
    *
    * @returns {RecallDbRecordDto[]} array of objects from currentRecalls
    * which were new or different than their equivalents in previousRecalls
    */
-  findModifiedRecalls() {
+  findModifiedAndValidRecalls() {
     const modifiedRecalls = [];
     for (const [key, currentRecall] of this.currentRecalls) {
       const previousRecall = this.previousRecalls.get(key);
-      if (RecallComparer.areRecallsDifferent(previousRecall, currentRecall)) {
-        modifiedRecalls.push(currentRecall);
+      if (currentRecall.isValid()) {
+        if (RecallComparer.areRecallsDifferent(previousRecall, currentRecall)) {
+          modifiedRecalls.push(currentRecall);
+        }
+      } else {
+        this.constructor.handleInvalidRecall(key, previousRecall, this.currentRecalls);
       }
     }
     return modifiedRecalls;
@@ -130,6 +134,31 @@ class RecallComparer {
       }
     }
     return modifiedMakes;
+  }
+
+  /**
+   * Removes invalid recall from currentRecalls list, or replaces it with previous version,
+   * because we don't update the db with invalid recalls.
+   *
+   * If the recall has previous version, method restores the recall to that version
+   * to avoid deleting that recall (if the recall is not present on the currentRecalls list
+   * but is in the db, it'll be marked for the deletion).
+   * If the previous version doesn't exist (and that means it's a new recall),
+   * removes recall from the currentRecalls list (it's inccorect so we won't add it to the db).
+   *
+   * @param {string} key
+   * @param {Map<String, RecallDbRecordDto>} previousVersion
+   * @param {Map<RecallDbRecordDto>} currentRecalls
+   */
+  static handleInvalidRecall(key, previousVersion, currentRecalls) {
+    console.warn(`Invalid recall with key ${key}`);
+    if (previousVersion != null) {
+      console.info('Replacing invalid recall with previous version');
+      currentRecalls.set(key, previousVersion);
+    } else {
+      console.info('No previous version present, removing invalid recall');
+      currentRecalls.delete(key);
+    }
   }
 
   static areObjectsDifferent(previousObject, currentObject, fieldsToCompare) {

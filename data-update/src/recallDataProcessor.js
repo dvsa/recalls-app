@@ -49,8 +49,12 @@ class RecallDataProcessor {
       const recalls = parser.parse();
 
       console.info(`Number of recalls: ${recalls.size}`);
-
-      next(null, s3Properties, recalls);
+      if (recalls.size === 0) {
+        console.error('Recall file is empty');
+        next(new Error(RecallDataProcessor.noDataError));
+      } else {
+        next(null, s3Properties, recalls);
+      }
     }
   }
 
@@ -69,6 +73,7 @@ class RecallDataProcessor {
               previousRecalls,
             );
             const comparer = new RecallComparer(previousRecallsMap, currentRecalls);
+            const modifiedRecalls = comparer.findModifiedAndValidRecalls();
             const currentMakes = RecallComparer.extractMakesFromRecalls(currentRecalls);
             const currentModels = RecallComparer.extractModelsFromRecalls(currentRecalls);
 
@@ -83,7 +88,7 @@ class RecallDataProcessor {
               next(new Error(`Deleting ${deletedEntries.recalls.length} recalls exceeds the configured threshold (DELETE_THRESHOLD environment variable). Aborting the data update process.`));
             } else {
               const modifiedEntries = RecallDataProcessor.handleModifiedEntries(
-                makesErr, modelsErr, comparer,
+                makesErr, modelsErr, modifiedRecalls,
                 previousMakes, currentMakes, previousModels, currentModels,
               );
               next(null, s3Properties, modifiedEntries, deletedEntries);
@@ -211,10 +216,10 @@ class RecallDataProcessor {
     return RecallComparer.findDeletedModelsPrimaryKeys(previousModelsMap, currentModelsMap);
   }
 
-  static handleModifiedEntries(makesErr, modelsErr, comparer,
+  static handleModifiedEntries(makesErr, modelsErr, modifiedRecalls,
     previousMakes, currentMakes, previousModels, currentModels) {
     return new RecallsMakesModels(
-      comparer.findModifiedRecalls(),
+      modifiedRecalls,
       RecallDataProcessor.handleModifiedMakes(makesErr, previousMakes, currentMakes),
       RecallDataProcessor.handleModifiedModels(modelsErr, previousModels, currentModels),
     );
