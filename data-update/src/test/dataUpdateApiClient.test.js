@@ -151,7 +151,9 @@ describe('DataUpdateApiClient', () => {
   describe('getRequestHeaders()  ', () => {
     it('Should return correct request headers object', (done) => {
       const lambdaName = 'cvr-data-update-lambda';
+      const recallsBackendApiKey = 'keykeykeykey';
       sinon.stub(envVariables, 'lambdaName').value(lambdaName);
+      sinon.stub(envVariables, 'recallsBackendApiKey').value(recallsBackendApiKey);
 
       const headers = dataUpdateApiClient.getRequestHeaders();
 
@@ -159,6 +161,7 @@ describe('DataUpdateApiClient', () => {
       expect(headers[requestHeaders.PARENT_REQUEST_ID]).to.be.a('string');
       expect(headers[requestHeaders.PARENT_REQUEST_ID]).to.have.lengthOf(40);
       expect(headers[requestHeaders.CALLER_NAME]).to.equal(lambdaName);
+      expect(headers[requestHeaders.API_KEY]).to.equal(recallsBackendApiKey);
       done();
     });
   });

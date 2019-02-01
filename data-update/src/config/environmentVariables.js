@@ -4,4 +4,5 @@ module.exports = {
   assetsBucketName: process.env.ASSETS_BUCKET_NAME,
   lambdaName: process.env.LAMBDA_NAME,
   deleteThreshold: process.env.DELETE_THRESHOLD,
+  recallsBackendApiKey: process.env.BACKEND_API_KEY,
 };

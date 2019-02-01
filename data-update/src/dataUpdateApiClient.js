@@ -217,6 +217,7 @@ class DataUpdateApiClient {
     const headers = {};
     headers[requestHeaders.PARENT_REQUEST_ID] = crypto.randomBytes(20).toString('hex');
     headers[requestHeaders.CALLER_NAME] = envVariables.lambdaName;
+    headers[requestHeaders.API_KEY] = envVariables.recallsBackendApiKey;
     console.debug('Setting request headers:', headers);
 
     return headers;

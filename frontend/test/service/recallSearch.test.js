@@ -7,6 +7,7 @@ const RecallDto = require('cvr-common/src/dto/recall');
 const requestHeaders = require('cvr-common/src/constants/requestHeaders');
 const sessionStorageConstants = require('cvr-common/src/constants/sessionStorageKeys');
 const recallSearch = require('../../service/recallSearch');
+const envVariables = require('../../config/environmentVariables');
 
 const TYPE_VEHICLE = 'vehicle';
 const MAKE_LAND_ROVER = 'LAND ROVER';
@@ -18,6 +19,7 @@ const SECOND_RESULT = 'result 2';
 const RESULTS = [FIRST_RESULT, SECOND_RESULT];
 const FAKE_HEADER_REQUEST_ID_KEY = 'fake request id key header';
 const FAKE_HEADER_FUNCTION_NAME = 'fake function name header';
+const FAKE_API_KEY = 'apikeyapikeyapikey';
 
 function mapRecallsToDtoReturns(mappedRecalls) {
   return sinon.stub(recallSearch, 'mapRecallsToDto').returns(mappedRecalls);
@@ -132,6 +134,7 @@ describe('RecallSearch', () => {
   describe('getRequestHeaders()  ', () => {
     before(() => {
       this.httpContext = sinon.stub(httpContext, 'get').callsFake(fakeGet);
+      sinon.stub(envVariables, 'recallsBackendApiKey').value(FAKE_API_KEY);
     });
     after(() => {
       this.httpContext.restore();
@@ -143,6 +146,7 @@ describe('RecallSearch', () => {
       expect(headers).to.be.an('object');
       expect(headers[requestHeaders.PARENT_REQUEST_ID]).to.equal(FAKE_HEADER_REQUEST_ID_KEY);
       expect(headers[requestHeaders.CALLER_NAME]).to.equal(FAKE_HEADER_FUNCTION_NAME);
+      expect(headers[requestHeaders.API_KEY]).to.equal(FAKE_API_KEY);
       done();
     });
   });

@@ -93,6 +93,7 @@ class RecallSearch {
     headers[requestHeaders.CALLER_NAME] = httpContext.get(
       sessionStorageConstants.FUNCTION_NAME,
     );
+    headers[requestHeaders.API_KEY] = envVariables.recallsBackendApiKey;
     logger.debug('Setting request headers:', headers);
 
     return headers;
