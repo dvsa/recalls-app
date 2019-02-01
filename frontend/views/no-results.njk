@@ -1,0 +1,24 @@
+{% extends 'layouts/mts-without-container.layout.njk' %}
+
+{% set pageTitle = title + ' - Check vehicle recalls' %}
+
+{% block content %}
+  <a href="{{backLink}}" class="link-back">Back</a>
+  <header class="content-header">
+    <h1 id="vehicle-or-component-title" class="heading-large heading heading--page-heading heading--small-margin-bottom">
+      {{title}}
+    </h1>
+  </header>
+
+  <div class="row contents">
+    <div class="col-lg-12">
+      <div class="grid-row">
+        <div class="column-three-quarters">
+          <p>This vehicle has <b>no recalls.</b></p>
+          <p>If you think this vehicle may have been recalled, contact the manufacturer's dealership.</p>
+          <p><a href="{{ BASE_URL }}/recall-type" id="link-home">Check for other vehicle or equipment recalls</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

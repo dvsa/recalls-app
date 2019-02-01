@@ -84,7 +84,11 @@ class ResultsController {
         backLink,
       };
 
-      response.render('results-page.njk', params);
+      if (!recalls || recalls.length === 0) {
+        response.render('no-results.njk', params);
+      } else {
+        response.render('results-page.njk', params);
+      }
     }
   }
 

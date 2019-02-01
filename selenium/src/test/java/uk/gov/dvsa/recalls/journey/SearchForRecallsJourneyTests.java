@@ -3,16 +3,7 @@ package uk.gov.dvsa.recalls.journey;
 import org.testng.annotations.Test;
 
 import uk.gov.dvsa.recalls.base.BaseTest;
-import uk.gov.dvsa.recalls.ui.page.EnterYearPage;
-import uk.gov.dvsa.recalls.ui.page.RecallInformationSearchPage;
-import uk.gov.dvsa.recalls.ui.page.RecallNotListedPage;
-import uk.gov.dvsa.recalls.ui.page.ResultsPage;
-import uk.gov.dvsa.recalls.ui.page.SelectEquipmentMakePage;
-import uk.gov.dvsa.recalls.ui.page.SelectEquipmentModelPage;
-import uk.gov.dvsa.recalls.ui.page.SelectMakePage;
-import uk.gov.dvsa.recalls.ui.page.SelectModelPage;
-import uk.gov.dvsa.recalls.ui.page.SelectVehicleMakePage;
-import uk.gov.dvsa.recalls.ui.page.SelectVehicleModelPage;
+import uk.gov.dvsa.recalls.ui.page.*;
 
 import java.io.UnsupportedEncodingException;
 
@@ -65,7 +56,7 @@ public class SearchForRecallsJourneyTests extends BaseTest {
         assertTrue(yearPage.enterYearAndExpectError("123", yearPage.FOUR_DIGITS_MSG), "I can see the manufacture year error message");
         assertTrue(yearPage.enterYearAndExpectError("3005", yearPage.IN_THE_FUTURE_MSG), "I can see the manufacture year error message");
 
-        ResultsPage resultsPage = yearPage.enterYearAndContinue(year);
+        ResultsPage resultsPage = (ResultsPage) yearPage.enterYearAndContinue(year, ResultsPage.class);
 
         //Then I should be redirected to the Results page and the header should contain make of the vehicle
         assertTrue(resultsPage.headerContains(expectedPageHeader), "Header contains correct text");
@@ -133,7 +124,7 @@ public class SearchForRecallsJourneyTests extends BaseTest {
     @Test(description = "User can use the 'Back' buttons to get from the vehicle results page to the landing page")
     public void vehicleBackButtonsTest() throws UnsupportedEncodingException {
         // When I am on the results page
-        ResultsPage resultsPage = recalls.goToResultsPage(RESULTS_PAGE_PATH_VEHICLE, "vehicle", make, model, year);
+        ResultsPage resultsPage = recalls.goToResultsPage(RESULTS_PAGE_PATH_VEHICLE, RECALL_TYPE_VEHICLE, make, model, year);
         // And I click the 'Back' button, I am redirected to the year selection page
         EnterYearPage enterYearPage = (EnterYearPage) resultsPage.clickBackButton(EnterYearPage.class);
         // I click the 'Back' button again, I am redirected to the make page
@@ -147,7 +138,7 @@ public class SearchForRecallsJourneyTests extends BaseTest {
     @Test(description = "User can use the 'Back' buttons to get from the equipment results page to the landing page")
     public void equipmentBackButtonsTest() throws UnsupportedEncodingException {
         // When I am on the results page
-        ResultsPage resultsPage = recalls.goToResultsPage(RESULTS_PAGE_PATH_EQUIPMENT, "equipment", make, model);
+        ResultsPage resultsPage = recalls.goToResultsPage(RESULTS_PAGE_PATH_EQUIPMENT, RECALL_TYPE_EQUIPMENT, make, model);
         // I click the 'Back' button again, I am redirected to the make page
         SelectEquipmentModelPage selectModelPage = (SelectEquipmentModelPage) resultsPage.clickBackButton(SelectEquipmentModelPage.class);
         // I click the 'Back' button again, I am redirected to the make page
@@ -189,5 +180,23 @@ public class SearchForRecallsJourneyTests extends BaseTest {
         // When I click the 'back' button
         // Then I'm redirected back to SelectModel page
         recallNotListedPage2.clickBackButtonRedirectToEquipmentModelPage();
+    }
+
+    @Test(description = "User is informed there are no recalls for the vehicle he is searching for")
+    public void searchNoResultsForGivenYearTest() throws UnsupportedEncodingException {
+        String yearWithNoRecall = "2000";
+        // When I am on the results page and I can see recalls
+        ResultsPage resultsPage = recalls.goToResultsPage(RESULTS_PAGE_PATH_VEHICLE, RECALL_TYPE_VEHICLE, make, model, year);
+
+        // And I click the 'Back' button
+        // Then I am redirected to the year selection page
+        EnterYearPage enterYearPage = (EnterYearPage) resultsPage.clickBackButton(EnterYearPage.class);
+
+        // When I select a vehicle year without recalls
+        // Then I get redirected to no results page
+        NoResultsPage noResultsPage = (NoResultsPage)enterYearPage.enterYearAndContinue(yearWithNoRecall, NoResultsPage.class);
+
+        // And I can navigate back to the home page
+        noResultsPage.clickHomeLink();
     }
 }

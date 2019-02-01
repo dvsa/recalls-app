@@ -27,10 +27,14 @@ public class EnterYearPage extends Page {
         return "What year was the vehicle made?";
     }
 
-    public ResultsPage enterYearAndContinue(String year) {
+    public Page enterYearAndContinue(String year, Class<? extends Page> clazz) {
         FormDataHelper.enterText(manufactureYearField, year);
         clickContinueButtonWhenReady();
-        return new ResultsPage();
+        try {
+            return clazz.newInstance();
+        } catch (InstantiationException | IllegalAccessException e) {
+            throw new PageInstanceNotFoundException(String.format("Could not create a Results Page: %s", clazz.getName()));
+        }
     }
 
     public boolean enterYearAndExpectError(String year, String error) {
