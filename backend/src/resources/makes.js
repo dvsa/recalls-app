@@ -1,5 +1,6 @@
 const { logger } = require('cvr-common/src/logger/loggerFactory');
 const MakeDbRecordDto = require('cvr-common/src/dto/makeDbRecord');
+const ResponseDbRecordDto = require('cvr-common/src/dto/responseDbRecord');
 
 class MakesResource {
   constructor(recallsRepository) {
@@ -27,15 +28,16 @@ class MakesResource {
     });
   }
 
-  getAllMakes(callback) {
-    this.recallsRepository.getAllMakes((err, data) => {
+  getAllMakes(exclusiveStartKey, callback) {
+    this.recallsRepository.getAllMakes(exclusiveStartKey, (err, data) => {
       if (err) {
         logger.error('Error while retrieving all makes', err);
         callback(err);
       } else {
         logger.info(`Mapping all makes. Number of fetched items: ${data.Items.length}`);
-        const retrievedModels = this.constructor.mapMakesListToDbRecordDto(data.Items);
-        callback(null, retrievedModels);
+        const retrievedMakes = this.constructor.mapMakesListToDbRecordDto(data.Items);
+        const responseDbRecordDto = new ResponseDbRecordDto(data.LastEvaluatedKey, retrievedMakes);
+        callback(null, responseDbRecordDto);
       }
     });
   }

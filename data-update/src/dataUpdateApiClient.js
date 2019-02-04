@@ -1,5 +1,6 @@
 const request = require('request');
 const crypto = require('crypto');
+const sequential = require('promise-sequential');
 const _ = require('lodash');
 const requestHeaders = require('cvr-common/src/constants/requestHeaders');
 const ModelDbRecordDto = require('cvr-common/src/dto/modelDbRecord');
@@ -8,73 +9,65 @@ const RecallDbRecordDto = require('cvr-common/src/dto/recallDbRecord');
 const envVariables = require('./config/environmentVariables');
 
 const RECALLS_BACKEND_URL = envVariables.recallsBackendUrl;
+const PAGINATION_ITEMS_COUNT = 250;
 
 class DataUpdateApiClient {
   static getAllModels(callback) {
     const path = `${RECALLS_BACKEND_URL}/models`;
-    request.get({ url: path, headers: DataUpdateApiClient.getRequestHeaders() },
-      (err, res, body) => {
-        console.info('DataUpdateApiClient.getAllModels() - HTTP response code ', res && res.statusCode);
-
-        if (err != null) {
-          DataUpdateApiClient.logErrorMessage('DataUpdateApiClient.getAllModels() - Error while calling API: ', err);
-          callback(err);
-        } else {
-          console.debug('DataUpdateApiClient.getAllModels() - returning: ', body);
-          callback(null, DataUpdateApiClient.mapModels(JSON.parse(body)));
-        }
-      });
+    const headers = DataUpdateApiClient.getRequestHeaders();
+    this.doGet(path, headers, [], {}, (err, body) => {
+      if (err) {
+        console.error('DataUpdateApiClient.getAllModels() - Error while calling API: ', err);
+        callback(err);
+      } else {
+        console.debug(`DataUpdateApiClient.getAllModels() - returning ${body.length} items`);
+        callback(null, DataUpdateApiClient.mapModels(body));
+      }
+    });
   }
 
   static getAllMakes(callback) {
     const path = `${RECALLS_BACKEND_URL}/makes`;
-    request.get({ url: path, headers: DataUpdateApiClient.getRequestHeaders() },
-      (err, res, body) => {
-        console.info('DataUpdateApiClient.getAllMakes() - HTTP response code ', res && res.statusCode);
-
-        if (err != null) {
-          DataUpdateApiClient.logErrorMessage('DataUpdateApiClient.getAllMakes() - Error while calling API: ', err);
-          callback(err);
-        } else {
-          console.debug('DataUpdateApiClient.getAllMakes() - returning: ', body);
-          callback(null, DataUpdateApiClient.mapMakes(JSON.parse(body)));
-        }
-      });
+    const headers = DataUpdateApiClient.getRequestHeaders();
+    this.doGet(path, headers, [], {}, (err, body) => {
+      if (err) {
+        console.error('DataUpdateApiClient.getAllMakes() - Error while calling API: ', err);
+        callback(err);
+      } else {
+        console.debug(`DataUpdateApiClient.getAllMakes() - returning ${body.length} items`);
+        callback(null, DataUpdateApiClient.mapMakes(body));
+      }
+    });
   }
 
   static getAllRecalls(callback) {
     const path = `${RECALLS_BACKEND_URL}/recalls`;
-    request.get({ url: path, headers: DataUpdateApiClient.getRequestHeaders() },
-      (err, res, body) => {
-        console.info('DataUpdateApiClient.getAllRecalls() - HTTP response code ', res && res.statusCode);
-
-        if (err != null) {
-          DataUpdateApiClient.logErrorMessage('DataUpdateApiClient.getAllRecalls() - Error while calling API: ', err);
-          callback(err);
-        } else {
-          console.debug('DataUpdateApiClient.getAllRecalls() - returning: ', body);
-          callback(null, DataUpdateApiClient.mapRecalls(JSON.parse(body)));
-        }
-      });
+    const headers = DataUpdateApiClient.getRequestHeaders();
+    this.doGet(path, headers, [], {}, (err, body) => {
+      if (err) {
+        console.error('DataUpdateApiClient.getAllRecalls() - Error while calling API: ', err);
+        callback(err);
+      } else {
+        console.debug(`DataUpdateApiClient.getAllRecalls() - returning ${body.length} items`);
+        callback(null, DataUpdateApiClient.mapRecalls(body));
+      }
+    });
   }
 
   static updateRecalls(recalls, callback) {
-    const path = `${RECALLS_BACKEND_URL}/recalls`;
     if (_.isArray(recalls) && recalls.length === 0) {
       console.info('DataUpdateApiClient.updateRecalls() - payload contains no recalls. Skipping this request.');
       callback();
     } else {
-      request.patch({
-        url: path, body: recalls, json: true, headers: DataUpdateApiClient.getRequestHeaders(),
-      }, (err, res) => {
-        console.info('DataUpdateApiClient.updateRecalls() - HTTP response code ', res && res.statusCode);
-        if (err != null) {
-          DataUpdateApiClient.logErrorMessage('DataUpdateApiClient.updateRecalls() - Error while calling API: ', err);
+      const path = `${RECALLS_BACKEND_URL}/recalls`;
+      const headers = DataUpdateApiClient.getRequestHeaders();
+      sequential(this.getBodiesForPatch(recalls)
+        .map(body => this.getPatchPromise(path, body, headers)))
+        .then((responses => callback(null, responses)))
+        .catch((err) => {
+          console.error('DataUpdateApiClient.updateRecalls() - Error while calling API: ', err);
           callback(err);
-        } else {
-          callback(null, res);
-        }
-      });
+        });
     }
   }
 
@@ -82,48 +75,39 @@ class DataUpdateApiClient {
    * @param {MakeDbRecordDto[]} makes
    */
   static updateMakes(makes, callback) {
-    const path = `${RECALLS_BACKEND_URL}/makes`;
-    const serializedMakes = makes.map(make => make.serialize());
-    const headers = DataUpdateApiClient.getRequestHeaders();
-
     if (_.isArray(makes) && makes.length === 0) {
       console.info('DataUpdateApiClient.updateMakes() - payload contains no makes. Skipping this request.');
       callback();
     } else {
-      request.patch({
-        url: path, body: serializedMakes, json: true, headers,
-      }, (err, res) => {
-        console.info('DataUpdateApiClient.updateMakes() - HTTP response code ', res && res.statusCode);
-        if (err != null) {
-          DataUpdateApiClient.logErrorMessage('DataUpdateApiClient.updateMakes() - Error while calling API: ', err);
+      const path = `${RECALLS_BACKEND_URL}/makes`;
+      const serializedMakes = makes.map(make => make.serialize());
+      const headers = DataUpdateApiClient.getRequestHeaders();
+      sequential(this.getBodiesForPatch(serializedMakes)
+        .map(body => this.getPatchPromise(path, body, headers)))
+        .then((responses => callback(null, responses)))
+        .catch((err) => {
+          console.error('DataUpdateApiClient.updateMakes() - Error while calling API: ', err);
           callback(err);
-        } else {
-          callback(null, res);
-        }
-      });
+        });
     }
   }
 
   static updateModels(models, callback) {
-    const path = `${RECALLS_BACKEND_URL}/models`;
-    const serializedModels = models.map(model => model.serialize());
-    const headers = DataUpdateApiClient.getRequestHeaders();
-
-    if (_.isArray(models) && models.length === 0) {
+    if (!models || (_.isArray(models) && models.length === 0)) {
       console.info('DataUpdateApiClient.updateModels() - payload contains no models. Skipping this request.');
       callback();
     } else {
-      request.patch({
-        url: path, body: serializedModels, json: true, headers,
-      }, (err, res) => {
-        console.info('DataUpdateApiClient.updateModels() - HTTP response code ', res && res.statusCode);
-        if (err != null) {
-          DataUpdateApiClient.logErrorMessage('DataUpdateApiClient.updateModels() - Error while calling API: ', err);
+      const path = `${RECALLS_BACKEND_URL}/models`;
+      const serializedModels = models.map(model => model.serialize());
+      const headers = DataUpdateApiClient.getRequestHeaders();
+
+      sequential(this.getBodiesForPatch(serializedModels)
+        .map(body => this.getPatchPromise(path, body, headers)))
+        .then(responses => callback(null, responses))
+        .catch((err) => {
+          console.error('DataUpdateApiClient.updateModels() - Error while calling API: ', err);
           callback(err);
-        } else {
-          callback(null, res);
-        }
-      });
+        });
     }
   }
 
@@ -185,6 +169,75 @@ class DataUpdateApiClient {
         }
       });
     }
+  }
+
+  /**
+   * for to long body (more than PAGINATION_ITEMS_COUNT) request will be split into few
+   * if any error was returned, last one will be called by callback
+   *
+   * slice not include body[end] element, but body[end - 1]
+   */
+  static getBodiesForPatch(body) {
+    const bodyLength = body.length;
+    const bodies = [];
+    for (let start = 0; start < bodyLength; start += PAGINATION_ITEMS_COUNT) {
+      const end = (start + PAGINATION_ITEMS_COUNT - 1) <= bodyLength
+        ? start + PAGINATION_ITEMS_COUNT : bodyLength;
+      const serializedBody = body.slice(start, end);
+      bodies.push(serializedBody);
+      console.debug(`Calling API for PATCH with [${start}:${end - 1}] of ${bodyLength} items`);
+    }
+    return bodies;
+  }
+
+  static getPatchPromise(path, body, headers) {
+    return () => new Promise((resolve, reject) => {
+      request.patch({
+        url: path,
+        body,
+        json: true,
+        headers,
+      }, (err, res) => {
+        console.info(`${path} - HTTP response code ${res && res.statusCode}`);
+        if (err) {
+          reject(err);
+        } else {
+          resolve(res);
+        }
+      });
+    });
+  }
+
+  /**
+   * when response contains lastEvaluatedKey (more than 1MB response)
+   * get will be regenerated with exclusiveStartKey query param (value: lastEvaluatedKey)
+   * and response merged
+   */
+  static doGet(path, headers, resultSet, queryParams, callback) {
+    request.get({
+      url: path, qs: queryParams, headers,
+    }, (err, res, body) => {
+      console.info(`${path} with queryParams: ${JSON.stringify(queryParams)} - HTTP response code ${res && res.statusCode}`);
+      if (err) {
+        console.error(path, ' - Error while calling API: ', err);
+        callback(err);
+      } else {
+        const data = JSON.parse(body);
+        const set = resultSet.concat(data.items);
+        if (data.lastEvaluatedKey) {
+          console.debug(path, ' - lastEvaluatedKey : ', data.lastEvaluatedKey, ' detected, generating additional request');
+          this.doGet(
+            path,
+            headers,
+            set,
+            Object.assign({ exclusiveStartKey: data.lastEvaluatedKey }),
+            callback,
+          );
+        } else {
+          callback(null, set);
+        }
+      }
+    });
   }
 
   /**

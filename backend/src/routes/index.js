@@ -26,21 +26,24 @@ router.get('/*', (req, res, next) => {
 
 /** endpoints for fetching data required for data-update process */
 router.get('/recalls', (req, res) => {
-  recallsResource.getAllRecalls((err, data) => {
+  logger.debug(`Exclusive start key: ${req.query.exclusiveStartKey}`);
+  recallsResource.getAllRecalls(req.query.exclusiveStartKey, (err, data) => {
     returnApiResponse(err, res, data);
   });
 });
 
 router.get('/makes', (req, res) => {
+  logger.debug(`Exclusive start key: ${req.query.exclusiveStartKey}`);
   const makesResource = new MakesResource(recallsRepository);
-  makesResource.getAllMakes((err, data) => {
+  makesResource.getAllMakes(req.query.exclusiveStartKey, (err, data) => {
     returnApiResponse(err, res, data);
   });
 });
 
 router.get('/models', (req, res) => {
+  logger.debug(`Exclusive start key: ${req.query.exclusiveStartKey}`);
   const modelsResource = new ModelsResource(recallsRepository);
-  modelsResource.getAllModels((err, data) => {
+  modelsResource.getAllModels(req.query.exclusiveStartKey, (err, data) => {
     returnApiResponse(err, res, data);
   });
 });

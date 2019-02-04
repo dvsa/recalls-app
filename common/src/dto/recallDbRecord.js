@@ -22,13 +22,12 @@ class RecallDbRecordDto {
     this.recall_number = recallNumber;
     this.vin_range = [];
     this.build_range = [];
-
-    if (make) { this.make = make; }
-    if (concern) { this.concern = concern; }
-    if (defect) { this.defect = defect; }
-    if (remedy) { this.remedy = remedy; }
-    if (vehicleNumber) { this.vehicle_number = vehicleNumber; }
-    if (model) { this.model = model; }
+    this.make = make;
+    this.concern = concern;
+    this.defect = defect;
+    this.remedy = remedy;
+    this.vehicle_number = vehicleNumber;
+    this.model = model;
 
     if (vinStart || vinEnd) {
       this.vin_range = [RecallDbRecordDto.createRangeObject(vinStart, vinEnd)];
