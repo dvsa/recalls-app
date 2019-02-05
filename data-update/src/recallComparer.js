@@ -1,4 +1,5 @@
 const _ = require('lodash');
+const { logger } = require('cvr-common/src/logger/loggerFactory');
 const ModelDbRecordDto = require('cvr-common/src/dto/modelDbRecord');
 const MakeDbRecordDto = require('cvr-common/src/dto/makeDbRecord');
 
@@ -68,7 +69,7 @@ class RecallComparer {
     const deletedKeys = [];
     for (const [key, previousEntry] of previousMap) {
       if (!currentMap.has(key)) {
-        console.debug(`The following key is no longer present in the current dataset and will be deleted: ${keyName} = ${key}`);
+        logger.debug(`The following key is no longer present in the current dataset and will be deleted: ${keyName} = ${key}`);
         deletedKeys.push(previousEntry[keyName]);
       }
     }
@@ -151,12 +152,12 @@ class RecallComparer {
    * @param {Map<RecallDbRecordDto>} currentRecalls
    */
   static handleInvalidRecall(key, previousVersion, currentRecalls) {
-    console.warn(`Invalid recall with key ${key}`);
+    logger.warn(`Invalid recall with key ${key}`);
     if (previousVersion != null) {
-      console.info('Replacing invalid recall with previous version');
+      logger.info('Replacing invalid recall with previous version');
       currentRecalls.set(key, previousVersion);
     } else {
-      console.info('No previous version present, removing invalid recall');
+      logger.info('No previous version present, removing invalid recall');
       currentRecalls.delete(key);
     }
   }
@@ -179,7 +180,7 @@ class RecallComparer {
    */
   static areRecallsDifferent(previousRecall, currentRecall) {
     if (previousRecall == null && currentRecall) {
-      console.debug(`RecallComparer.areRecallsDifferent() - Detected a new make, model, recall number combination: '${currentRecall.make_model_recall_number}'.`);
+      logger.debug(`RecallComparer.areRecallsDifferent() - Detected a new make, model, recall number combination: '${currentRecall.make_model_recall_number}'.`);
       return true;
     }
     const sortedPreviousRecall = previousRecall;
@@ -201,7 +202,7 @@ class RecallComparer {
    */
   static areModelsDifferent(previousModel, currentModel) {
     if (previousModel == null && currentModel) {
-      console.debug(`RecallComparer.areModelsDifferent() - Detected a new type and make combination: '${currentModel.type_make}'.`);
+      logger.debug(`RecallComparer.areModelsDifferent() - Detected a new type and make combination: '${currentModel.type_make}'.`);
       return true;
     }
     return RecallComparer.areObjectsDifferent(
@@ -216,7 +217,7 @@ class RecallComparer {
    */
   static areMakesDifferent(previousMake, currentMake) {
     if (previousMake == null && currentMake) {
-      console.debug(`RecallComparer.areMakesDifferent() - Detected a new type of recall: '${currentMake.type}'.`);
+      logger.debug(`RecallComparer.areMakesDifferent() - Detected a new type of recall: '${currentMake.type}'.`);
       return true;
     }
     return RecallComparer.areObjectsDifferent(
@@ -275,7 +276,7 @@ class RecallComparer {
     diffMessage += '--- Second object: ----------------------------\r';
     diffMessage += `${JSON.stringify(secondObject)}\r`;
     diffMessage += '======= Diff ending =============================';
-    console.debug(diffMessage);
+    logger.debug(diffMessage);
   }
 
   static sortByStartEnd(ranges) {

@@ -1,4 +1,4 @@
-
+const { logger } = require('cvr-common/src/logger/loggerFactory');
 const Parser = require('./csvRecallsParser');
 const RecallComparer = require('./recallComparer');
 const DataUpdateApiClient = require('./dataUpdateApiClient');
@@ -13,22 +13,22 @@ class RecallDataProcessor {
 
   static download(s3, srcBucket, srcKey, next) {
     // Download the csv file from S3
-    console.info('Downloading csv data from S3');
+    logger.info('Downloading csv data from S3');
     s3.getObject({
       Bucket: srcBucket,
       Key: srcKey,
     },
     (err, data) => {
       if (err) {
-        console.error('Error when downloading csv file from S3 bucket:', err);
+        logger.error('Error when downloading csv file from S3 bucket:', err);
         next(err);
       } else {
         const csvBuffer = data.Body;
         if (csvBuffer == null) {
-          console.error('File is empty');
+          logger.error('File is empty');
           next(new Error('Downloaded CSV file is empty'));
         } else {
-          console.info(`File length: ${data.ContentLength}, last modified: ${data.LastModified}`);
+          logger.info(`File length: ${data.ContentLength}, last modified: ${data.LastModified}`);
           const s3Properties = new S3BucketObjectProperties(s3, srcBucket, srcKey);
           next(null, s3Properties, csvBuffer);
         }
@@ -38,19 +38,19 @@ class RecallDataProcessor {
 
   static parse(s3Properties, data, next) {
     if (!(data instanceof Buffer)) {
-      console.error(RecallDataProcessor.bufferError);
+      logger.error(RecallDataProcessor.bufferError);
       next(new Error(RecallDataProcessor.bufferError));
     } else if (data.length === 0) {
-      console.error(RecallDataProcessor.noDataError);
+      logger.error(RecallDataProcessor.noDataError);
       next(new Error(RecallDataProcessor.noDataError));
     } else {
-      console.info('Parsing the buffered CSV data');
+      logger.info('Parsing the buffered CSV data');
       const parser = new Parser(data, 'CP1252');
       const recalls = parser.parse();
 
-      console.info(`Number of recalls: ${recalls.size}`);
+      logger.info(`Number of recalls: ${recalls.size}`);
       if (recalls.size === 0) {
-        console.error('Recall file is empty');
+        logger.error('Recall file is empty');
         next(new Error(RecallDataProcessor.noDataError));
       } else {
         next(null, s3Properties, recalls);
@@ -59,12 +59,12 @@ class RecallDataProcessor {
   }
 
   static compare(s3Properties, currentRecalls, next) {
-    console.info('Comparing parsed CSV data with database contents');
+    logger.info('Comparing parsed CSV data with database contents');
 
     DataUpdateApiClient.getAllRecalls((recallsErr, previousRecalls) => {
       if (recallsErr) {
-        console.warn(`Error while fetching recalls from API: ${JSON.stringify(recallsErr)}`);
-        console.info('Unable to find modified recalls due to missing data. Skipping the comparison process');
+        logger.warn(`Error while fetching recalls from API: ${JSON.stringify(recallsErr)}`);
+        logger.info('Unable to find modified recalls due to missing data. Skipping the comparison process');
         next(null, [], [], []);
       } else {
         DataUpdateApiClient.getAllModels((modelsErr, previousModels) => {
@@ -100,9 +100,9 @@ class RecallDataProcessor {
   }
 
   static insert(s3Properties, modifiedEntries, deletedEntries, next) {
-    console.info(`Number of modified recalls entries: ${modifiedEntries.recalls.length}`);
-    console.info(`Number of modified makes entries: ${modifiedEntries.makes.length}`);
-    console.info(`Number of modified models entries: ${modifiedEntries.models.length}`);
+    logger.info(`Number of modified recalls entries: ${modifiedEntries.recalls.length}`);
+    logger.info(`Number of modified makes entries: ${modifiedEntries.makes.length}`);
+    logger.info(`Number of modified models entries: ${modifiedEntries.models.length}`);
 
     DataUpdateApiClient.updateRecalls(modifiedEntries.recalls, (recallsErr) => {
       DataUpdateApiClient.updateMakes(modifiedEntries.makes, (makesErr) => {
@@ -123,9 +123,9 @@ class RecallDataProcessor {
   }
 
   static delete(s3Properties, deletedEntries, next) {
-    console.info(`Number of recalls to delete: ${deletedEntries.recalls.length}`);
-    console.info(`Number of makes to delete: ${deletedEntries.makes.length}`);
-    console.info(`Number of models to delete: ${deletedEntries.models.length}`);
+    logger.info(`Number of recalls to delete: ${deletedEntries.recalls.length}`);
+    logger.info(`Number of makes to delete: ${deletedEntries.makes.length}`);
+    logger.info(`Number of models to delete: ${deletedEntries.models.length}`);
 
     DataUpdateApiClient.deleteRecalls(deletedEntries.recalls, (recallsErr) => {
       DataUpdateApiClient.deleteMakes(deletedEntries.makes, (makesErr) => {
@@ -157,26 +157,26 @@ class RecallDataProcessor {
     const thresholdPercentagePoints = envVariables.deleteThreshold;
     const deletedRecordsPercentagePoints = numberOfDeletions / totalRecords * 100;
     const isExceeded = deletedRecordsPercentagePoints > thresholdPercentagePoints;
-    console.debug(`Does deleting ${numberOfDeletions} out of ${totalRecords} records exceed the threshold of ${thresholdPercentagePoints}%? - ${isExceeded}`);
+    logger.debug(`Does deleting ${numberOfDeletions} out of ${totalRecords} records exceed the threshold of ${thresholdPercentagePoints}%? - ${isExceeded}`);
     return isExceeded;
   }
 
   static handleUpdateError(typeOfData, err) {
     if (err) {
-      console.error(`Error while updating ${typeOfData}: ${err}`);
+      logger.error(`Error while updating ${typeOfData}: ${err}`);
     }
   }
 
   static handleDeletionError(typeOfData, err) {
     if (err) {
-      console.error(`Error while deleting ${typeOfData}: ${err}`);
+      logger.error(`Error while deleting ${typeOfData}: ${err}`);
     }
   }
 
   static handleModifiedModels(modelsErr, previousModels, currentModelsMap) {
     if (modelsErr) {
-      console.warn(`Error while fetching models from API: ${JSON.stringify(modelsErr)}`);
-      console.info('Models will not be updated due to missing data');
+      logger.warn(`Error while fetching models from API: ${JSON.stringify(modelsErr)}`);
+      logger.info('Models will not be updated due to missing data');
       return [];
     }
     const previousModelsMap = RecallDataProcessor.mapModelsByTypeMake(previousModels);
@@ -186,8 +186,8 @@ class RecallDataProcessor {
 
   static handleModifiedMakes(makesErr, previousMakes, currentMakesMap) {
     if (makesErr) {
-      console.warn(`Error while fetching makes from API: ${JSON.stringify(makesErr)}`);
-      console.info('Makes will not be updated due to missing data');
+      logger.warn(`Error while fetching makes from API: ${JSON.stringify(makesErr)}`);
+      logger.info('Makes will not be updated due to missing data');
       return [];
     }
     const previousMakesMap = RecallDataProcessor.mapMakesByType(previousMakes);
@@ -197,7 +197,7 @@ class RecallDataProcessor {
 
   static handleDeletedMakes(makesErr, previousMakes, currentMakesMap) {
     if (makesErr) {
-      console.info('Makes will not be deleted due to missing data');
+      logger.info('Makes will not be deleted due to missing data');
       return [];
     }
 
@@ -208,7 +208,7 @@ class RecallDataProcessor {
 
   static handleDeletedModels(modelsErr, previousModels, currentModelsMap) {
     if (modelsErr) {
-      console.info('Models will not be deleted due to missing data');
+      logger.info('Models will not be deleted due to missing data');
       return [];
     }
     const previousModelsMap = RecallDataProcessor.mapModelsByTypeMake(previousModels);
@@ -243,7 +243,7 @@ class RecallDataProcessor {
     for (const recall of recalls) {
       mappedRecalls.set(recall.make_model_recall_number, recall);
     }
-    console.info(`Mapped ${mappedRecalls.size} recalls`);
+    logger.info(`Mapped ${mappedRecalls.size} recalls`);
     return mappedRecalls;
   }
 
@@ -256,7 +256,7 @@ class RecallDataProcessor {
     for (const model of models) {
       mappedModels.set(model.type_make, model);
     }
-    console.info(`Mapped ${mappedModels.size} models`);
+    logger.info(`Mapped ${mappedModels.size} models`);
     return mappedModels;
   }
 
@@ -269,7 +269,7 @@ class RecallDataProcessor {
     for (const make of makes) {
       mappedMakes.set(make.type, make);
     }
-    console.info(`Mapped ${mappedMakes.size} makes`);
+    logger.info(`Mapped ${mappedMakes.size} makes`);
     return mappedMakes;
   }
 
@@ -279,13 +279,13 @@ class RecallDataProcessor {
       CopySource: `${s3Properties.srcBucket}/${s3Properties.srcKey}`,
       Key: destKey,
     };
-    console.debug('Copying CSV file to assets bucket. Params: ', params);
+    logger.debug('Copying CSV file to assets bucket. Params: ', params);
     s3Properties.s3.copyObject(params, (err, data) => {
       if (err) {
-        console.error('Error while copying CSV file to assets bucket', err);
+        logger.error('Error while copying CSV file to assets bucket', err);
         callback(err);
       } else {
-        console.info('The file has been copied successfully. Response: ', data);
+        logger.info('The file has been copied successfully. Response: ', data);
         callback(null, data);
       }
     });
