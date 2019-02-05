@@ -4,7 +4,8 @@
   "description": "Common components for other recall modules",
   "scripts": {
     "test": "mocha \"test/**/*.test.js\" --exit",
-    "build": "npm install && npm test && npm run lint && npm run prod",
+    "retire": "retire",
+    "build": "npm prune && npm install && npm test && npm run lint && npm run retire && npm run prod",
     "prod": "npm prune --production && npm install --production",
     "lint": "eslint ."
   },
@@ -15,11 +16,12 @@
     "safe-json-stringify": "^1.2.0"
   },
   "devDependencies": {
-    "mocha": "^5.2.0",
     "chai": "^4.2.0",
-    "sinon": "^7.1.1",
     "eslint": "^5.7.0",
     "eslint-config-airbnb-base": "^13.1.0",
-    "eslint-plugin-import": "^2.14.0"
+    "eslint-plugin-import": "^2.14.0",
+    "mocha": "^5.2.0",
+    "retire": "^2.0.2",
+    "sinon": "^7.1.1"
   }
 }

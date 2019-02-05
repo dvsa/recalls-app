@@ -10,8 +10,9 @@
     "start": "nodemon ./src/scripts/local.js --watch ../common --watch ./",
     "debug": "nodemon --inspect-brk=9229 --nolazy ./src/scripts/local.js --watch ../common --watch ./",
     "test": "export APP_NAME=test && nyc mocha \"src/test/**/*.test.js\" --exit",
+    "retire": "retire",
     "lint": "eslint .",
-    "build": "npm install && npm run lint && npm test && npm run prod",
+    "build": "npm prune && npm install && npm run lint && npm test && npm run retire && npm run prod",
     "prod": "npm prune --production && npm install --production && zip -r ../cvr-backend.zip * --exclude /src/test"
   },
   "repository": {
@@ -24,14 +25,14 @@
   "license": "MIT",
   "homepage": "https://github.com/dvsa/recalls-app#readme",
   "dependencies": {
-    "cvr-common": "file:../common",
     "aws-sdk": "^2.338.0",
     "aws-serverless-express": "^3.3.5",
     "body-parser": "^1.18.3",
+    "cvr-common": "file:../common",
     "express": "^4.16.4",
     "express-http-context": "^1.2.0",
-    "promise-sequential": "^1.1.1",
-    "lodash": "^4.17.11"
+    "lodash": "^4.17.11",
+    "promise-sequential": "^1.1.1"
   },
   "devDependencies": {
     "chai": "^4.2.0",
@@ -41,6 +42,7 @@
     "mocha": "^5.2.0",
     "nodemon": "^1.18.7",
     "nyc": "^13.1.0",
+    "retire": "^2.0.2",
     "sinon": "^7.1.1"
   },
   "nyc": {

@@ -10,8 +10,9 @@
     "start": "nodemon ./scripts/local.js --watch ../common --watch ./",
     "debug": "nodemon --nolazy --inspect-brk=8228 ./scripts/local.js --ext js,njk --watch ../common --watch ./",
     "test": "export APP_NAME=test && nyc mocha \"test/**/*.test.js\" --exit",
+    "retire": "retire",
     "lint": "eslint .",
-    "build": "npm install && npm run lint && npm test && npm run prod",
+    "build": "npm prune && npm install && npm run lint && npm test && npm run retire && npm run prod",
     "prod": "npm prune --production && npm install --production && zip -r ../cvr-frontend.zip * --exclude /test"
   },
   "repository": {
@@ -42,6 +43,7 @@
     "mocha": "^5.2.0",
     "nodemon": "^1.18.7",
     "nyc": "^13.1.0",
+    "retire": "^2.0.2",
     "sinon": "^7.1.1"
   },
   "nyc": {
