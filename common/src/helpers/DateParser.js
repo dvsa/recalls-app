@@ -1,3 +1,5 @@
+const { logger } = require('../logger/loggerFactory');
+
 const DATE_INVALID = 'invalid';
 
 class DateParser {
@@ -15,7 +17,7 @@ class DateParser {
     const dateSegments = date.match(new RegExp(/(\d+)\/(\d+)\/(\d+)/));
 
     if (dateSegments == null || dateSegments.length !== 4) {
-      console.warn(`Unable to parse the following date: ${date}. Please use the following format: dd/mm/yyyy`);
+      logger.warn(`Unable to parse the following date: ${date}. Please use the following format: dd/mm/yyyy`);
       return DATE_INVALID;
     }
 
@@ -28,7 +30,7 @@ class DateParser {
     const isYearLengthValid = year.length === 2 || year.length === 4;
     if (Number.isNaN(parsedDate.getTime()) || !isYearLengthValid
       || parsedDate.getFullYear > (new Date().getFullYear())) {
-      console.warn(`Unable to parse the following date: ${date}. Please use the following format: dd/mm/yyyy`);
+      logger.warn(`Unable to parse the following date: ${date}. Please use the following format: dd/mm/yyyy`);
       return DATE_INVALID;
     }
     return parsedDate;

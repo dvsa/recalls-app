@@ -2,6 +2,7 @@ const _ = require('lodash');
 const { logger } = require('cvr-common/src/logger/loggerFactory');
 const ModelDbRecordDto = require('cvr-common/src/dto/modelDbRecord');
 const MakeDbRecordDto = require('cvr-common/src/dto/makeDbRecord');
+const envVariables = require('./config/environmentVariables');
 
 const RECALL_FIELDS_TO_COMPARE = [
   'make_model_recall_number',
@@ -166,8 +167,7 @@ class RecallComparer {
     const simplifiedPreviousObject = _.pick(previousObject, fieldsToCompare);
     const simplifiedCurrentObject = _.pick(currentObject, fieldsToCompare);
     const areDifferent = !_.isEqual(simplifiedPreviousObject, simplifiedCurrentObject);
-    if (areDifferent) {
-      // TODO: BL-9227 execute this block of code only when logging level is set to DEBUG
+    if (areDifferent && envVariables.logLevel === 'debug') {
       RecallComparer.displayObjectDiff(simplifiedPreviousObject, simplifiedCurrentObject);
     }
     return areDifferent;

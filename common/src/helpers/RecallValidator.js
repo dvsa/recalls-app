@@ -1,3 +1,4 @@
+const { logger } = require('../logger/loggerFactory');
 const ValidationResult = require('./ValidationResult');
 
 const PRODUCT_GROUPS = ['R', 'RM', 'RCOMP', 'RCT', 'RPT', 'RSPV', 'RTW', 'RPC'];
@@ -37,9 +38,9 @@ class RecallValidator {
     }
 
     if (!isValid) {
-      console.warn(`Recall ${make} ${model} with recall number ${recallNumber} is invalid.`);
+      logger.warn(`Recall ${make} ${model} with recall number ${recallNumber} is invalid.`);
       for (const reason of failureReasons) {
-        console.info(`Reason: ${reason}`);
+        logger.info(`Reason: ${reason}`);
       }
     }
 
