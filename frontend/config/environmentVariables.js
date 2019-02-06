@@ -4,4 +4,5 @@ module.exports = {
   recallsBackendUrl: process.env.RECALLS_BACKEND_URL,
   logLevel: process.env.LOG_LEVEL,
   documentsBaseUrl: process.env.DOCUMENTS_BASE_URL,
+  recallsBackendApiKey: process.env.BACKEND_API_KEY,
 };
