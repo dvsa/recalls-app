@@ -10,7 +10,8 @@ const RecallDbRecordDto = require('cvr-common/src/dto/recallDbRecord');
 const envVariables = require('./config/environmentVariables');
 
 const RECALLS_BACKEND_URL = envVariables.recallsBackendUrl;
-const PAGINATION_ITEMS_COUNT = 250;
+const PAGINATION_ITEMS_COUNT = 100;
+const MAX_RETRIES = 3;
 
 class DataUpdateApiClient {
   static getAllModels(callback) {
@@ -112,17 +113,14 @@ class DataUpdateApiClient {
       logger.info('DataUpdateApiClient.deleteRecalls() - payload contains no recall keys. Skipping this request.');
       callback();
     } else {
-      request.delete({
-        url: path, body: recalls, json: true, headers: DataUpdateApiClient.getRequestHeaders(),
-      }, (err, res) => {
-        logger.info(`DataUpdateApiClient.deleteRecalls() - Deleting ${recalls.length} recalls. HTTP response code: `, res && res.statusCode);
-        if (err != null) {
-          DataUpdateApiClient.logErrorMessage('DataUpdateApiClient.deleteRecalls() - Error while calling API: ', err);
+      logger.info(`DataUpdateApiClient.deleteRecalls() - Deleting ${recalls.length} recalls.`);
+      sequential(this.getBodiesForPatch(recalls)
+        .map(body => this.getDeletePromise(path, body)))
+        .then(responses => callback(null, responses))
+        .catch((err) => {
+          logger.error('DataUpdateApiClient.deleteRecalls() - Error while calling API: ', err);
           callback(err);
-        } else {
-          callback(null, res);
-        }
-      });
+        });
     }
   }
 
@@ -137,7 +135,7 @@ class DataUpdateApiClient {
       }, (err, res) => {
         logger.info(`DataUpdateApiClient.deleteMakes() - Deleting ${makes.length} makes. HTTP response code `, res && res.statusCode);
         if (err != null) {
-          DataUpdateApiClient.logErrorMessage('DataUpdateApiClient.deleteMakes() - Error while calling API: ', err);
+          logger.error('DataUpdateApiClient.deleteMakes() - Error while calling API: ', err);
           callback(err);
         } else {
           callback(null, res);
@@ -152,17 +150,14 @@ class DataUpdateApiClient {
       logger.info('DataUpdateApiClient.deleteModels() - payload contains no keys. Skipping this request.');
       callback();
     } else {
-      request.delete({
-        url: path, body: models, json: true, headers: DataUpdateApiClient.getRequestHeaders(),
-      }, (err, res) => {
-        logger.info(`DataUpdateApiClient.deleteModels() - Deleting ${models.length} models. HTTP response code `, res && res.statusCode);
-        if (err != null) {
-          DataUpdateApiClient.logErrorMessage('DataUpdateApiClient.deleteModels() - Error while calling API: ', err);
+      logger.info(`DataUpdateApiClient.deleteModels() - Deleting ${models.length} models.`);
+      sequential(this.getBodiesForPatch(models)
+        .map(body => this.getDeletePromise(path, body)))
+        .then(responses => callback(null, responses))
+        .catch((err) => {
+          logger.error('DataUpdateApiClient.deleteModels() - Error while calling API: ', err);
           callback(err);
-        } else {
-          callback(null, res);
-        }
-      });
+        });
     }
   }
 
@@ -187,19 +182,59 @@ class DataUpdateApiClient {
 
   static getPatchPromise(path, body) {
     return () => new Promise((resolve, reject) => {
-      request.patch({
-        url: path,
-        body,
-        json: true,
-        headers: DataUpdateApiClient.getRequestHeaders(),
-      }, (err, res) => {
-        logger.info(`${path} - HTTP response code ${res && res.statusCode}`);
-        if (err) {
-          reject(err);
-        } else {
-          resolve(res);
-        }
-      });
+      const patchRequestWithRetry = (retriesNumber) => {
+        request.patch({
+          url: path,
+          body,
+          json: true,
+          headers: DataUpdateApiClient.getRequestHeaders(),
+        }, (err, res) => {
+          logger.info(`getPatchPromise() - ${path} - HTTP response code ${res && res.statusCode}`);
+          if (err) {
+            const newRetriesNumber = retriesNumber - 1;
+            if (newRetriesNumber === 0) {
+              logger.error(`getPatchPromise() - ${path} - retries number exceeded max number of retries(${MAX_RETRIES})`);
+              reject(err);
+            } else {
+              logger.warn(`getPatchPromise() - ${path} - error, retrying request`);
+              patchRequestWithRetry(newRetriesNumber);
+            }
+          } else {
+            resolve(res);
+          }
+        });
+      };
+
+      patchRequestWithRetry(MAX_RETRIES);
+    });
+  }
+
+  static getDeletePromise(path, body) {
+    return () => new Promise((resolve, reject) => {
+      const deleteRequestWithRetry = (retriesNumber) => {
+        request.delete({
+          url: path,
+          body,
+          json: true,
+          headers: DataUpdateApiClient.getRequestHeaders(),
+        }, (err, res) => {
+          logger.info(`getDeletePromise() - ${path} - HTTP response code ${res && res.statusCode}`);
+          if (err) {
+            const newRetriesNumber = retriesNumber - 1;
+            if (newRetriesNumber === 0) {
+              logger.error(`getDeletePromise() - ${path} - retries number exceeded max number of retries(${MAX_RETRIES})`);
+              reject(err);
+            } else {
+              logger.warn(`getDeletePromise() - ${path} - error, retrying request`);
+              deleteRequestWithRetry(newRetriesNumber);
+            }
+          } else {
+            resolve(res);
+          }
+        });
+      };
+
+      deleteRequestWithRetry(MAX_RETRIES);
     });
   }
 
@@ -268,14 +303,6 @@ class DataUpdateApiClient {
     logger.debug('Setting request headers:', headers);
 
     return headers;
-  }
-
-  static logErrorMessage(message, apiErr) {
-    const statusCode = apiErr && apiErr.statusCode;
-    const statusMessage = apiErr && apiErr.statusMessage;
-    const body = apiErr && apiErr.body;
-
-    logger.error(`${message} - ${statusCode} ${statusMessage} - ${body}`);
   }
 }
 
