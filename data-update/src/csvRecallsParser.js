@@ -1,3 +1,4 @@
+const { logger } = require('cvr-common/src/logger/loggerFactory');
 const DateParser = require('cvr-common/src/helpers/DateParser');
 const RecallDbRecordDto = require('cvr-common/src/dto/recallDbRecord');
 
@@ -84,13 +85,13 @@ class CsvRecallsParser {
     let recalls = new Map();
     csvConverter.csv2json(this.data, (err, json) => {
       if (err) {
-        console.error(`Error while parsing the csv data: ${err}`);
+        logger.error(`Error while parsing the csv data: ${err}`);
       } else {
-        console.info(`Number of CSV records: ${json.length}`);
+        logger.info(`Number of CSV records: ${json.length}`);
 
         for (const line of json) {
           if (this.isAnyRequiredFieldMissing(line)) {
-            console.warn(`The following CSV line cannot be processed as it is missing one of the required fields (Make, Model, Remedy, Recalls Number): \r${JSON.stringify(line)}`);
+            logger.warn(`The following CSV line cannot be processed as it is missing one of the required fields (Make, Model, Remedy, Recalls Number): \r${JSON.stringify(line)}`);
           } else {
             const recall = this.csvLineToRecall(line);
             recalls = this.addRecallOrMergeIfExists(recall, recalls);

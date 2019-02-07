@@ -65,32 +65,35 @@ class LoggerFactory {
     this.logContext = loggerContext;
 
     // Set logger request-wide properties by adding a middlewere
-    app.use((req, res, next) => {
-      // Extract APIGW request id from the lambda event
-      const awsRequestId = req.apiGateway && req.apiGateway.event.requestContext ? req.apiGateway.event.requestContext.requestId : 'N/A';
+    if (app) {
+      app.use((req, res, next) => {
+        // Extract APIGW request id from the lambda event
+        const awsRequestId = req.apiGateway && req.apiGateway.event.requestContext ? req.apiGateway.event.requestContext.requestId : 'N/A';
 
-      // If function name not present extract it from lambda context
-      if (!this.logConfig.functionName) {
-        this.logConfig.functionName = this.logContext.get(sessionStorageKeys.FUNCTION_NAME);
-      }
+        // If function name not present extract it from lambda context
+        if (!this.logConfig.functionName) {
+          this.logConfig.functionName = this.logContext.get(sessionStorageKeys.FUNCTION_NAME);
+        }
 
-      // If parent caller service sent a requestId set it as this
-      // requests ID as well. Use API Gateway request ID otherwise
-      if (req.headers[requestHeaders.PARENT_REQUEST_ID]) {
-        this.logContext.set(
-          sessionStorageKeys.REQUEST_ID_KEY,
-          req.headers[requestHeaders.PARENT_REQUEST_ID],
-        );
-      } else {
-        this.logContext.set(sessionStorageKeys.REQUEST_ID_KEY, awsRequestId);
-      }
+        // If parent caller service sent a requestId set it as this
+        // requests ID as well. Use API Gateway request ID otherwise
+        if (req.headers[requestHeaders.PARENT_REQUEST_ID]) {
+          this.logContext.set(
+            sessionStorageKeys.REQUEST_ID_KEY,
+            req.headers[requestHeaders.PARENT_REQUEST_ID],
+          );
+        } else {
+          this.logContext.set(sessionStorageKeys.REQUEST_ID_KEY, awsRequestId);
+        }
 
-      this.logContext.set(sessionStorageKeys.API_GATEWAY_REQUEST_ID_KEY, awsRequestId);
-      this.logContext.set(sessionStorageKeys.CALLER_NAME, req.headers[requestHeaders.CALLER_NAME]);
-      this.logContext.set(sessionStorageKeys.REQUEST_PATH_KEY, req.url);
-      this.logContext.set(sessionStorageKeys.QUERY_PARAMS_KEY, req.query);
-      next();
-    });
+        this.logContext.set(sessionStorageKeys.API_GATEWAY_REQUEST_ID_KEY, awsRequestId);
+        this.logContext.set(sessionStorageKeys.CALLER_NAME,
+          req.headers[requestHeaders.CALLER_NAME]);
+        this.logContext.set(sessionStorageKeys.REQUEST_PATH_KEY, req.url);
+        this.logContext.set(sessionStorageKeys.QUERY_PARAMS_KEY, req.query);
+        next();
+      });
+    }
   }
 
   get logger() {
