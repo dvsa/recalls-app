@@ -20,6 +20,7 @@ const SECOND_RECALLS = [new RecallDbRecordDto('launchDate2', 'recNumber2')];
 const RECALLS_API_RESPONSE = { items: RECALLS };
 const FIRST_PAGINATION_RECALLS_API_RESPONSE = { items: RECALLS, lastEvaluatedKey: 10 };
 const SECOND_PAGINATION_RECALLS_API_RESPONSE = { items: SECOND_RECALLS };
+const RECALL_KEYS = ['key1', 'key2'];
 
 const FIRST_MAKE = new SerializableMakeDbRecordDto('type', ['make1']);
 const SECOND_MAKE = new SerializableMakeDbRecordDto('type2', ['make2']);
@@ -29,6 +30,7 @@ const MANY_MAKES = [new MakeDbRecordDto(FIRST_MAKE.type, new Set(FIRST_MAKE.make
   new MakeDbRecordDto(SECOND_MAKE.type, new Set(SECOND_MAKE.makes))];
 const FIRST_PAGINATION_MAKES_API_RESPONSE = { items: [FIRST_MAKE], lastEvaluatedKey: 1 };
 const SECOND_PAGINATION_MAKES_API_RESPONSE = { items: [SECOND_MAKE] };
+const MAKE_KEYS = ['key1', 'key2'];
 
 const FIRST_MODEL = new SerializableModelDbRecordDto('vehicle-BMW', ['E90']);
 const SECOND_MODEL = new SerializableModelDbRecordDto('vehicle-Audi', ['A6']);
@@ -38,15 +40,18 @@ const MANY_MODELS = [new ModelDbRecordDto(FIRST_MODEL.type_make, new Set(FIRST_M
   new ModelDbRecordDto(SECOND_MODEL.type_make, new Set(SECOND_MODEL.models))];
 const FIRST_PAGINATION_MODELS_API_RESPONSE = { items: [FIRST_MODEL], lastEvaluatedKey: 1 };
 const SECOND_PAGINATION_MODELS_API_RESPONSE = { items: [SECOND_MODEL] };
+const MODEL_KEYS = ['key1', 'key2'];
 
 describe('DataUpdateApiClient', () => {
   beforeEach(() => {
     this.get = sinon.stub(request, 'get');
     this.patch = sinon.stub(request, 'patch');
+    this.delete = sinon.stub(request, 'delete');
   });
   afterEach(() => {
     this.get.restore();
     this.patch = this.patch.restore();
+    this.delete = this.delete.restore();
   });
   describe('updateRecalls()', () => {
     it('An error is raised when API request fails', (done) => {
@@ -73,6 +78,16 @@ describe('DataUpdateApiClient', () => {
       dataUpdateApiClient.updateRecalls(MANY_RECALLS, (err, res) => {
         expect(err).to.equal(null);
         expect(res).to.deep.equal(MANY_RESULTS);
+        done();
+      });
+    });
+    it('A response is returned when API request fails at first try, but succeds on retry', (done) => {
+      this.patch.onFirstCall().yields(ERROR);
+      this.patch.onSecondCall().yields(null, RESULTS);
+
+      dataUpdateApiClient.updateRecalls(RECALLS, (err, res) => {
+        expect(err).to.equal(null);
+        expect(res).to.deep.equal(RESULTS);
         done();
       });
     });
@@ -105,6 +120,16 @@ describe('DataUpdateApiClient', () => {
         done();
       });
     });
+    it('A response is returned when API request fails at first try, but succeds on retry', (done) => {
+      this.patch.onFirstCall().yields(ERROR);
+      this.patch.onSecondCall().yields(null, RESULTS);
+
+      dataUpdateApiClient.updateMakes(MAKES, (err, res) => {
+        expect(err).to.equal(null);
+        expect(res).to.deep.equal(RESULTS);
+        done();
+      });
+    });
   });
   describe('updateModels()', () => {
     it('An error is raised when API request fails', (done) => {
@@ -131,6 +156,16 @@ describe('DataUpdateApiClient', () => {
       dataUpdateApiClient.updateModels(MANY_MODELS, (err, res) => {
         expect(err).to.equal(null);
         expect(res).to.deep.equal(MANY_RESULTS);
+        done();
+      });
+    });
+    it('A response is returned when API request fails at first try, but succeds on retry', (done) => {
+      this.patch.onFirstCall().yields(ERROR);
+      this.patch.onSecondCall().yields(null, RESULTS);
+
+      dataUpdateApiClient.updateModels(MODELS, (err, res) => {
+        expect(err).to.equal(null);
+        expect(res).to.deep.equal(RESULTS);
         done();
       });
     });
@@ -227,6 +262,104 @@ describe('DataUpdateApiClient', () => {
       dataUpdateApiClient.getAllModels((err, res) => {
         expect(err).to.equal(ERROR);
         expect(res).to.equal(undefined);
+        done();
+      });
+    });
+  });
+  describe('deleteRecalls()', () => {
+    it('An error is raised when API request fails', (done) => {
+      this.delete.yields(ERROR);
+
+      dataUpdateApiClient.deleteRecalls(RECALL_KEYS, (err, res) => {
+        expect(err).to.equal(ERROR);
+        expect(res).to.deep.equal(undefined);
+        done();
+      });
+    });
+    it('A response is returned when API request succeeds', (done) => {
+      this.delete.yields(null, RESULTS);
+
+      dataUpdateApiClient.deleteRecalls(RECALL_KEYS, (err, res) => {
+        expect(err).to.equal(null);
+        expect(res).to.deep.equal(RESULTS);
+        done();
+      });
+    });
+    it('A response is returned when API request succeeds with pagination', (done) => {
+      this.delete.yields(null, MANY_RESULTS);
+
+      dataUpdateApiClient.deleteRecalls(RECALL_KEYS, (err, res) => {
+        expect(err).to.equal(null);
+        expect(res).to.deep.equal(MANY_RESULTS);
+        done();
+      });
+    });
+    it('A response is returned when API request fails at first try, but succeds on retry', (done) => {
+      this.delete.onFirstCall().yields(ERROR);
+      this.delete.onSecondCall().yields(null, RESULTS);
+
+      dataUpdateApiClient.deleteRecalls(RECALL_KEYS, (err, res) => {
+        expect(err).to.equal(null);
+        expect(res).to.deep.equal(RESULTS);
+        done();
+      });
+    });
+  });
+  describe('deleteMakes()', () => {
+    it('An error is raised when API request fails', (done) => {
+      this.delete.yields(ERROR);
+
+      dataUpdateApiClient.deleteMakes(MAKE_KEYS, (err, res) => {
+        expect(err).to.equal(ERROR);
+        expect(res).to.deep.equal(undefined);
+        done();
+      });
+    });
+    it('A response is returned when API request succeeds', (done) => {
+      this.delete.yields(null, RESULTS);
+
+      dataUpdateApiClient.deleteMakes(MAKE_KEYS, (err, res) => {
+        expect(err).to.equal(null);
+        expect(res).to.deep.equal(RESULTS);
+        done();
+      });
+    });
+  });
+  describe('deleteModels()', () => {
+    it('An error is raised when API request fails', (done) => {
+      this.delete.yields(ERROR);
+
+      dataUpdateApiClient.deleteModels(MODEL_KEYS, (err, res) => {
+        expect(err).to.equal(ERROR);
+        expect(res).to.deep.equal(undefined);
+        done();
+      });
+    });
+    it('A response is returned when API request succeeds', (done) => {
+      this.delete.yields(null, RESULTS);
+
+      dataUpdateApiClient.deleteModels(MODEL_KEYS, (err, res) => {
+        expect(err).to.equal(null);
+        expect(res).to.deep.equal(RESULTS);
+        done();
+      });
+    });
+    it('A response is returned when API request succeeds with pagination', (done) => {
+      this.delete.yields(null, MANY_RESULTS);
+
+      dataUpdateApiClient.deleteModels(MODEL_KEYS, (err, res) => {
+        expect(err).to.equal(null);
+        expect(res).to.deep.equal(MANY_RESULTS);
+        done();
+      });
+    });
+    it('A response is returned when API request fails at first try, but succeds on retry', (done) => {
+      this.delete.onFirstCall().yields(ERROR);
+      this.delete.onSecondCall().yields(null, RESULTS);
+
+      dataUpdateApiClient.deleteModels(MODEL_KEYS, (err, res) => {
+        expect(err).to.equal(null);
+        expect(res).to.deep.equal(RESULTS);
         done();
       });
     });
