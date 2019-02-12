@@ -11,58 +11,107 @@ function convertCsvToRecallDtos(csvPath) {
 
 describe('RecallComparer', () => {
   describe('findDeletedRecallsPrimaryKeys()', () => {
-    it('Returns primary keys of deleted recalls', () => {
+    it('Returns primary keys of deleted recalls when all recalls have model present', () => {
       /** In a real scenario previousRecalls would be fetched from the API
        * and currentRecalls would come from a recently uploaded CSV file */
-      const previousRecalls = convertCsvToRecallDtos(`${__dirname}/data/testData-BeforeDeleting.csv`);
-      const currentRecalls = convertCsvToRecallDtos(`${__dirname}/data/testData-AfterDeleting.csv`);
+      const previousRecalls = convertCsvToRecallDtos(`${__dirname}/data/testData-BeforeDeleting.csv`).correctRecalls;
+      const currentRecalls = convertCsvToRecallDtos(`${__dirname}/data/testData-AfterDeleting.csv`).correctRecalls;
 
       const comparer = new RecallComparer(previousRecalls, currentRecalls);
-      const deletedRecalls = comparer.findDeletedRecallsPrimaryKeys();
+      const deletedRecalls = comparer.findDeletedRecallsPrimaryKeys([]);
 
       expect(deletedRecalls).to.have.lengthOf(2);
       expect(deletedRecalls).to.include('OTHER EQUIPMENT-Composite X-RCOMP/2009/009');
       expect(deletedRecalls).to.include('MITSUBISHI-LANCER EVO-R/2014/013');
     });
+
+    it('Returns primary keys of deleted recalls but without keys of recalls that have missing model', () => {
+      /** In a real scenario previousRecalls would be fetched from the API
+       * and currentRecalls would come from a recently uploaded CSV file */
+      const previousRecalls = convertCsvToRecallDtos(`${__dirname}/data/testData-BeforeDeleting.csv`).correctRecalls;
+      const currentRecalls = convertCsvToRecallDtos(`${__dirname}/data/testData-AfterDeleting.csv`).correctRecalls;
+      const recallsWithMissingModel = convertCsvToRecallDtos(`${__dirname}/data/missingModelCases/testDataWithoutModels.csv`).recallsWithMissingModel;
+
+      const comparer = new RecallComparer(previousRecalls, currentRecalls);
+      const deletedRecalls = comparer.findDeletedRecallsPrimaryKeys(recallsWithMissingModel);
+
+      expect(deletedRecalls).to.have.lengthOf(1);
+      expect(deletedRecalls).to.include('OTHER EQUIPMENT-Composite X-RCOMP/2009/009');
+    });
   });
   describe('findDeletedMakesPrimaryKeys()', () => {
     it('Returns primary keys of deleted makes', () => {
-      const previousRecalls = convertCsvToRecallDtos(`${__dirname}/data/testData-BeforeDeleting.csv`);
-      const currentRecalls = convertCsvToRecallDtos(`${__dirname}/data/testData-AfterDeleting.csv`);
+      const previousRecalls = convertCsvToRecallDtos(`${__dirname}/data/testData-BeforeDeleting.csv`).correctRecalls;
+      const currentRecalls = convertCsvToRecallDtos(`${__dirname}/data/testData-AfterDeleting.csv`).correctRecalls;
 
       const comparer = new RecallComparer(previousRecalls, currentRecalls);
-      const previousMakes = comparer.constructor.extractMakesFromRecalls(previousRecalls);
-      const currentMakes = RecallComparer.extractMakesFromRecalls(currentRecalls);
+      const previousMakes = comparer.constructor.extractMakesFromRecalls(previousRecalls, [], []);
+      const currentMakes = RecallComparer.extractMakesFromRecalls(currentRecalls, [], []);
 
-      const deletedMakes = RecallComparer.findDeletedMakesPrimaryKeys(previousMakes, currentMakes);
+      const deletedMakes = RecallComparer.findDeletedMakesPrimaryKeys(previousMakes, currentMakes,
+        []);
 
       expect(deletedMakes).to.have.lengthOf(1);
       expect(deletedMakes).to.include('equipment');
     });
+    it('Returns primary keys of deleted makes without keys that appeared in recallsWithMissingModel array', () => {
+      const previousRecalls = convertCsvToRecallDtos(`${__dirname}/data/missingModelCases/testData-Before.csv`).correctRecalls;
+      const currentRecallsCollection = convertCsvToRecallDtos(`${__dirname}/data/missingModelCases/testData-After.csv`);
+      const currentRecalls = currentRecallsCollection.correctRecalls;
+      const recallsWithMissingModel = currentRecallsCollection.recallsWithMissingModel;
+
+      const comparer = new RecallComparer(previousRecalls, currentRecalls);
+      const previousMakes = comparer.constructor.extractMakesFromRecalls(previousRecalls, [], []);
+      const currentMakes = RecallComparer.extractMakesFromRecalls(currentRecalls, previousRecalls,
+        recallsWithMissingModel);
+
+      const deletedMakes = RecallComparer.findDeletedMakesPrimaryKeys(previousMakes, currentMakes,
+        recallsWithMissingModel);
+
+      expect(deletedMakes).to.have.lengthOf(0);
+    });
   });
   describe('findDeletedModelsPrimaryKeys()', () => {
     it('Returns primary keys of deleted models', () => {
-      const previousRecalls = convertCsvToRecallDtos(`${__dirname}/data/testData-BeforeDeleting.csv`);
-      const currentRecalls = convertCsvToRecallDtos(`${__dirname}/data/testData-AfterDeleting.csv`);
+      const previousRecalls = convertCsvToRecallDtos(`${__dirname}/data/testData-BeforeDeleting.csv`).correctRecalls;
+      const currentRecalls = convertCsvToRecallDtos(`${__dirname}/data/testData-AfterDeleting.csv`).correctRecalls;
 
       const comparer = new RecallComparer(previousRecalls, currentRecalls);
-      const previousModels = comparer.constructor.extractModelsFromRecalls(previousRecalls);
-      const currentModels = RecallComparer.extractModelsFromRecalls(currentRecalls);
+      const previousModels = comparer.constructor.extractModelsFromRecalls(previousRecalls, [], []);
+      const currentModels = RecallComparer.extractModelsFromRecalls(currentRecalls, [], []);
 
       const deletedModels = RecallComparer.findDeletedModelsPrimaryKeys(
-        previousModels, currentModels,
+        previousModels, currentModels, [],
       );
 
       expect(deletedModels).to.have.lengthOf(1);
       expect(deletedModels).to.include('equipment-OTHER EQUIPMENT');
+    });
+    it('Returns primary keys of deleted models without keys that appeared in recallsWithMissingModel array', () => {
+      const previousRecalls = convertCsvToRecallDtos(`${__dirname}/data/missingModelCases/testData-Before.csv`).correctRecalls;
+      const currentRecallsCollection = convertCsvToRecallDtos(`${__dirname}/data/missingModelCases/testData-After.csv`);
+      const currentRecalls = currentRecallsCollection.correctRecalls;
+      const recallsWithMissingModel = currentRecallsCollection.recallsWithMissingModel;
+
+      const comparer = new RecallComparer(previousRecalls, currentRecalls);
+      const previousModels = comparer.constructor.extractModelsFromRecalls(previousRecalls, [], []);
+      const currentModels = RecallComparer.extractModelsFromRecalls(currentRecalls, previousRecalls,
+        recallsWithMissingModel);
+
+      const deletedModels = RecallComparer.findDeletedModelsPrimaryKeys(
+        previousModels, currentModels, recallsWithMissingModel,
+      );
+
+      expect(deletedModels).to.have.lengthOf(1);
+      expect(deletedModels).to.include('vehicle-A MAKE Y');
     });
   });
   describe('findModifiedAndValidRecalls()', () => {
     it('Returns recalls that were modified or added under new make-model-recallNumber combination', () => {
       /** In a real scenario previousRecalls would be fetched from the API
        * and currentRecalls would come from a recently uploaded CSV file */
-      const previousRecalls = convertCsvToRecallDtos(`${__dirname}/data/testData.csv`);
-      const currentRecalls = convertCsvToRecallDtos(`${__dirname}/data/testDataWithAdditionalRecalls.csv`);
+      const previousRecalls = convertCsvToRecallDtos(`${__dirname}/data/testData.csv`).correctRecalls;
+      const currentRecalls = convertCsvToRecallDtos(`${__dirname}/data/testDataWithAdditionalRecalls.csv`).correctRecalls;
 
       const comparer = new RecallComparer(previousRecalls, currentRecalls);
       const modifiedRecalls = comparer.findModifiedAndValidRecalls();
@@ -80,8 +129,8 @@ describe('RecallComparer', () => {
       expect(modifiedRecalls[4].build_range).to.have.lengthOf(2);
     });
     it('Does not treat reordered entries as modifications (sorts compared collections)', () => {
-      const previousRecalls = convertCsvToRecallDtos(`${__dirname}/data/testDataWithAdditionalRecalls.csv`);
-      const currentRecalls = convertCsvToRecallDtos(`${__dirname}/data/testDataWithAdditionalRecalls-Reordered.csv`);
+      const previousRecalls = convertCsvToRecallDtos(`${__dirname}/data/testDataWithAdditionalRecalls.csv`).correctRecalls;
+      const currentRecalls = convertCsvToRecallDtos(`${__dirname}/data/testDataWithAdditionalRecalls-Reordered.csv`).correctRecalls;
 
       const comparer = new RecallComparer(previousRecalls, currentRecalls);
       const modifiedRecalls = comparer.findModifiedAndValidRecalls();
@@ -91,13 +140,13 @@ describe('RecallComparer', () => {
   });
   describe('findModifiedModels()', () => {
     it('Returns a set of updated makes for given recall type and model', () => {
-      const previousRecalls = convertCsvToRecallDtos(`${__dirname}/data/testData.csv`);
-      const currentRecalls = convertCsvToRecallDtos(`${__dirname}/data/testDataWithAdditionalRecalls.csv`);
+      const previousRecalls = convertCsvToRecallDtos(`${__dirname}/data/testData.csv`).correctRecalls;
+      const currentRecalls = convertCsvToRecallDtos(`${__dirname}/data/testDataWithAdditionalRecalls.csv`).correctRecalls;
 
       const comparer = new RecallComparer(previousRecalls, currentRecalls);
       // previousModels would normally be fetched from the back-end
-      const previousModels = comparer.constructor.extractModelsFromRecalls(previousRecalls);
-      const currentModels = RecallComparer.extractModelsFromRecalls(currentRecalls);
+      const previousModels = comparer.constructor.extractModelsFromRecalls(previousRecalls, [], []);
+      const currentModels = RecallComparer.extractModelsFromRecalls(currentRecalls, [], []);
       const modifiedModels = RecallComparer.findModifiedModels(previousModels, currentModels);
 
       expect(modifiedModels).to.have.lengthOf(3);
@@ -112,13 +161,13 @@ describe('RecallComparer', () => {
   });
   describe('findModifiedMakes()', () => {
     it('Returns a set of updated makes for given recall type and model', () => {
-      const previousRecalls = convertCsvToRecallDtos(`${__dirname}/data/testData.csv`);
-      const currentRecalls = convertCsvToRecallDtos(`${__dirname}/data/testDataWithAdditionalRecalls.csv`);
+      const previousRecalls = convertCsvToRecallDtos(`${__dirname}/data/testData.csv`).correctRecalls;
+      const currentRecalls = convertCsvToRecallDtos(`${__dirname}/data/testDataWithAdditionalRecalls.csv`).correctRecalls;
 
       const comparer = new RecallComparer(previousRecalls, currentRecalls);
       // previousMakes would normally be fetched from the back-end
-      const previousMakes = comparer.constructor.extractMakesFromRecalls(previousRecalls);
-      const currentMakes = RecallComparer.extractMakesFromRecalls(currentRecalls);
+      const previousMakes = comparer.constructor.extractMakesFromRecalls(previousRecalls, [], []);
+      const currentMakes = RecallComparer.extractMakesFromRecalls(currentRecalls, [], []);
       const modifiedMakes = RecallComparer.findModifiedMakes(previousMakes, currentMakes);
 
       expect(modifiedMakes).to.have.lengthOf(2);
@@ -126,6 +175,44 @@ describe('RecallComparer', () => {
       expect(modifiedMakes[1].type).to.equal('equipment');
       expect(modifiedMakes[0].makes).to.include('BMW');
       expect(modifiedMakes[1].makes).to.include('OTHER EQUIPMENT');
+    });
+  });
+  describe('extractModelsFromRecalls()', () => {
+    it('Should extract models from valid recalls and recalls without model that need model fetched from recall\'s previous version', () => {
+      const previousRecalls = convertCsvToRecallDtos(`${__dirname}/data/missingModelCases/testData-Before.csv`).correctRecalls;
+      const currentRecallsCollection = convertCsvToRecallDtos(`${__dirname}/data/missingModelCases/testData-After.csv`);
+      const currentRecalls = currentRecallsCollection.correctRecalls;
+      const recallsWithMissingModel = currentRecallsCollection.recallsWithMissingModel;
+
+      const comparer = new RecallComparer(previousRecalls, currentRecalls);
+      const extractedModels = comparer.constructor
+        .extractModelsFromRecalls(currentRecalls, previousRecalls, recallsWithMissingModel);
+
+      expect(extractedModels).to.have.lengthOf(8);
+      expect(extractedModels.get('vehicle-MERCEDES BENZ').models).to.have.lengthOf(1);
+      expect(extractedModels.get('vehicle-MITSUBISHI').models).to.have.lengthOf(1);
+      expect(extractedModels.get('vehicle-BMW').models).to.have.lengthOf(1);
+      expect(extractedModels.get('vehicle-NEW MAKE').models).to.have.lengthOf(2);
+      expect(extractedModels.get('vehicle-GRAY & ADAMS').models).to.have.lengthOf(1);
+      expect(extractedModels.get('vehicle-A MAKE Z').models).to.have.lengthOf(3);
+      expect(extractedModels.get('equipment-OTHER EQUIPMENT').models).to.have.lengthOf(1);
+      expect(extractedModels.get('equipment-A MAKE X').models).to.have.lengthOf(3);
+    });
+  });
+  describe('extractMakesFromRecalls()', () => {
+    it('Should extract makes from valid recalls and recalls without model which has previous version in the database', () => {
+      const previousRecalls = convertCsvToRecallDtos(`${__dirname}/data/missingModelCases/testData-Before.csv`).correctRecalls;
+      const currentRecallsCollection = convertCsvToRecallDtos(`${__dirname}/data/missingModelCases/testData-After.csv`);
+      const currentRecalls = currentRecallsCollection.correctRecalls;
+      const recallsWithMissingModel = currentRecallsCollection.recallsWithMissingModel;
+
+      const comparer = new RecallComparer(previousRecalls, currentRecalls);
+      const extractedMakes = comparer.constructor
+        .extractMakesFromRecalls(currentRecalls, previousRecalls, recallsWithMissingModel);
+
+      expect(extractedMakes).to.have.lengthOf(2);
+      expect(extractedMakes.get('vehicle').makes).to.have.lengthOf(6);
+      expect(extractedMakes.get('equipment').makes).to.have.lengthOf(2);
     });
   });
 });

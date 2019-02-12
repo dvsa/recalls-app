@@ -36,45 +36,78 @@ class RecallComparer {
   }
 
   /**
+   * @param {RecallDbRecordDto[]} recallsWithMissingModel
    * @returns {string[]} primary keys of recalls that should be deleted
    */
-  findDeletedRecallsPrimaryKeys() {
-    return RecallComparer.findDeletedKeys(this.previousRecalls, this.currentRecalls, 'make_model_recall_number');
+  findDeletedRecallsPrimaryKeys(recallsWithMissingModel) {
+    return RecallComparer.findDeletedKeys(this.previousRecalls, this.currentRecalls, recallsWithMissingModel, 'make_model_recall_number');
   }
 
   /**
    * @param {Map<String, MakeDbRecordDto>} previousMakes outdated makes from DB
    * @param {Map<String, MakeDbRecordDto>} currentMakes current makes from CSV
+   * @param {RecallDbRecordDto[]} recallsWithMissingModel current recalls with missing models
    * @returns {string[]} primary keys of makes that should be deleted
    */
-  static findDeletedMakesPrimaryKeys(previousMakes, currentMakes) {
-    return RecallComparer.findDeletedKeys(previousMakes, currentMakes, 'type');
+  static findDeletedMakesPrimaryKeys(previousMakes, currentMakes, recallsWithMissingModel) {
+    return RecallComparer.findDeletedKeys(previousMakes, currentMakes, recallsWithMissingModel, 'type');
   }
 
   /**
    * @param {Map<String, ModelDbRecordDto>} previousModels outdated models from DB
    * @param {Map<String, ModelDbRecordDto>} currentModels current models from CSV
+   * @param {RecallDbRecordDto[]} recallsWithMissingModel current recalls with missing models
    * @returns {string[]} primary keys of models that should be deleted
    */
-  static findDeletedModelsPrimaryKeys(previousModels, currentModels) {
-    return RecallComparer.findDeletedKeys(previousModels, currentModels, 'type_make');
+  static findDeletedModelsPrimaryKeys(previousModels, currentModels, recallsWithMissingModel) {
+    return RecallComparer.findDeletedKeys(previousModels, currentModels, recallsWithMissingModel, 'type_make');
   }
 
   /**
    * @param {Map} previousMap previous objects containing primary keys as one of their properties
    * @param {Map} currentMap current objects containing primary keys as one of their properties
+   * @param {RecallDbRecordDto[]} recallsWithMissingModel array of recalls without models
    * @param {string} keyName name of a property that stores the primary key
    * @returns {string[]} primary keys of records that should be deleted
    */
-  static findDeletedKeys(previousMap, currentMap, keyName) {
+  static findDeletedKeys(previousMap, currentMap, recallsWithMissingModel, keyName) {
     const deletedKeys = [];
     for (const [key, previousEntry] of previousMap) {
       if (!currentMap.has(key)) {
-        logger.debug(`The following key is no longer present in the current dataset and will be deleted: ${keyName} = ${key}`);
-        deletedKeys.push(previousEntry[keyName]);
+        if (RecallComparer.isKeyOnTheList(keyName, key, previousEntry, recallsWithMissingModel)) {
+          logger.debug(`The following key is no longer present in the current dataset but has missing model, so won't be deleted: ${keyName} = ${key}`);
+        } else {
+          logger.debug(`The following key is no longer present in the current dataset and will be deleted: ${keyName} = ${key}`);
+          deletedKeys.push(previousEntry[keyName]);
+        }
       }
     }
     return deletedKeys;
+  }
+
+  /**
+   * Checks if the key (recall, make or model) appears on the list of recalls without model.
+   * If it does, it won't be marked to be deleted.
+   *
+   * @param {string} keyName name of a property that stores the primary key
+   * @param {string} previousKey key of entry from the database
+   * @param {object} previousEntry entry from the database
+   * @param {RecallDbRecordDto[]} recallsWithMissingModel array of recalls without models
+   */
+  static isKeyOnTheList(keyName, previousKey, previousEntry, recallsWithMissingModel) {
+    let isOnList = false;
+    recallsWithMissingModel.forEach((recall) => {
+      if (keyName === 'make_model_recall_number' && recall.make === previousEntry.make
+      && recall.recall_number === previousEntry.recall_number) {
+        isOnList = true;
+      } else if (keyName === 'type' && recall.type === previousEntry.type) {
+        isOnList = true;
+      } else if (keyName === 'type_make' && `${recall.type}-${recall.make}` === previousKey) {
+        isOnList = true;
+      }
+    });
+
+    return isOnList;
   }
 
   /**
@@ -131,6 +164,7 @@ class RecallComparer {
 
     for (const [type, currentMake] of currentMakes) {
       const previousMake = previousMakes.get(type);
+
       if (RecallComparer.areMakesDifferent(previousMake, currentMake)) {
         modifiedMakes.push(currentMake);
       }
@@ -205,6 +239,7 @@ class RecallComparer {
       logger.debug(`RecallComparer.areModelsDifferent() - Detected a new type and make combination: '${currentModel.type_make}'.`);
       return true;
     }
+
     return RecallComparer.areObjectsDifferent(
       previousModel.serialize(), currentModel.serialize(), MODEL_FIELDS_TO_COMPARE,
     );
@@ -226,13 +261,19 @@ class RecallComparer {
   }
 
   /**
-   * @param {Map<RecallDbRecordDto>} recalls
+   * @param {Map<String, RecallDbRecordDto>} recalls
+   * @param {Map<String, RecallDbRecordDto>} previousRecallsMap
+   * @param {RecallDbRecordDto[]} recallsWithMissingModel
    * @returns {Map<ModelDbRecordDto>} sets of models grouped by type-make keys
    */
-  static extractModelsFromRecalls(recalls) {
+  static extractModelsFromRecalls(recalls, previousRecallsMap, recallsWithMissingModel) {
     const models = new Map();
+    const recallsWithModel = RecallComparer.addModelsToRecallsWithoutModels(
+      recallsWithMissingModel, previousRecallsMap,
+    );
+    const allRecalls = Array.from(recalls.values()).concat(recallsWithModel);
 
-    for (const recall of recalls.values()) {
+    for (const recall of allRecalls) {
       const typeMakeKey = `${recall.type}-${recall.make}`;
       if (models.has(typeMakeKey)) {
         models.get(typeMakeKey).models.add(recall.model);
@@ -245,13 +286,41 @@ class RecallComparer {
   }
 
   /**
+   * For each recall that has missing model
+   * fetches recalls from the database based on recall number and make
+   * and adds them to the recall.
+   *
+   * @param {RecallDbRecordDto[]} recallsWithMissingModel
+   * @param {Map<String, RecallDbRecordDto>} previousRecallsMap
+   * @returns {RecallDbRecordDto []} array of recalls with models completed
+   */
+  static addModelsToRecallsWithoutModels(recallsWithMissingModel, previousRecallsMap) {
+    const recallsWithModel = [];
+    for (const recall of recallsWithMissingModel) {
+      for (const prevRecall of previousRecallsMap.values()) {
+        if (recall.recall_number === prevRecall.recall_number
+          && recall.make === prevRecall.make) {
+          recallsWithModel.push(prevRecall);
+        }
+      }
+    }
+    return recallsWithModel;
+  }
+
+  /**
    * @param {Map<RecallDbRecordDto>} recalls
+   * @param {Map<String, RecallDbRecordDto>} previousRecallsMap
+   * @param {RecallDbRecordDto[]} recallsWithMissingModel
    * @returns {Map<MakeDbRecordDto>} sets of makes grouped by type-make keys
    */
-  static extractMakesFromRecalls(recalls) {
+  static extractMakesFromRecalls(recalls, previousRecallsMap, recallsWithMissingModel) {
     const makes = new Map();
+    const recallsWithMissingModelAlreadyExisting = RecallComparer.extractMakesFromPreviousRecalls(
+      previousRecallsMap, recallsWithMissingModel,
+    );
+    const allRecalls = Array.from(recalls.values()).concat(recallsWithMissingModelAlreadyExisting);
 
-    for (const recall of recalls.values()) {
+    for (const recall of allRecalls) {
       const typeKey = recall.type;
       if (makes.has(typeKey)) {
         makes.get(typeKey).makes.add(recall.make);
@@ -261,6 +330,29 @@ class RecallComparer {
     }
 
     return makes;
+  }
+
+  /**
+   * For each recall that has missing model checks if we have it in our database,
+   * and if we do, adds it to the array of recalls without models we should retrieve makes from.
+   *
+   * @param {RecallDbRecordDto[]} recallsWithMissingModel
+   * @param {Map<String, RecallDbRecordDto>} previousRecallsMap
+   * @returns {RecallDbRecordDto []} array of recalls without models
+   */
+  static extractMakesFromPreviousRecalls(previousRecallsMap, recallsWithMissingModel) {
+    const recallsWithMissingModelAlreadyExisting = [];
+    for (const recall of recallsWithMissingModel) {
+      const found = _.find(Array.from(previousRecallsMap.values()),
+        prevRecall => prevRecall.recall_number === recall.recall_number
+        && prevRecall.make === recall.make);
+
+      if (found !== undefined) {
+        recallsWithMissingModelAlreadyExisting.push(recall);
+      }
+    }
+
+    return recallsWithMissingModelAlreadyExisting;
   }
 
   static displayObjectDiff(firstObject, secondObject) {

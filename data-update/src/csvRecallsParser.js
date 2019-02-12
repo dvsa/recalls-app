@@ -4,6 +4,7 @@ const RecallDbRecordDto = require('cvr-common/src/dto/recallDbRecord');
 
 const iconv = require('iconv-lite');
 const csvConverter = require('json-2-csv');
+const RecallsCollection = require('./dto/recallsCollection');
 
 class CsvRecallsParser {
   constructor(bufferedData, sourceEncoding) {
@@ -37,6 +38,13 @@ class CsvRecallsParser {
       || (!line.Model || trim(line.Model).length === 0)
       || (!line.Remedy || trim(line.Remedy).length === 0)
       || (!line['Recalls Number'] || trim(line['Recalls Number']).length === 0);
+  }
+
+  isOnlyModelMissing(line) {
+    const trim = this.constructor.trimIfNotEmpty;
+    return (!line.Model || trim(line.Model).length === 0)
+      && (line.Make && trim(line.Make).length !== 0)
+      && (line['Recalls Number'] && trim(line['Recalls Number']).length !== 0);
   }
 
   static trimIfNotEmpty(field) {
@@ -77,12 +85,14 @@ class CsvRecallsParser {
   }
 
   /**
-   * Parses the CSV file, returns a collection of recalls
-   * Recalls are mapped by make_model_recall_number key
-   * @returns { recalls: Map<String, RecallDbRecordDto> }
+   * Parses the CSV file, returns a collection of recalls,
+   * containing of correct recalls map and an array of recalls without model.
+   * Recalls are mapped by make_model_recall_number key.
+   * @returns { RecallsCollection }
    */
   parse() {
     let recalls = new Map();
+    const recallsWithMissingModel = [];
     csvConverter.csv2json(this.data, (err, json) => {
       if (err) {
         logger.error(`Error while parsing the csv data: ${err}`);
@@ -91,7 +101,13 @@ class CsvRecallsParser {
 
         for (const line of json) {
           if (this.isAnyRequiredFieldMissing(line)) {
-            logger.warn(`The following CSV line cannot be processed as it is missing one of the required fields (Make, Model, Remedy, Recalls Number): \r${JSON.stringify(line)}`);
+            if (this.isOnlyModelMissing(line)) {
+              logger.warn(`The CSV line has only Model missing and will be kept, so any recall with ${line['Recalls Number']} recall number and ${line.Make} make won't be deleted`);
+              const recallWithMissingModel = this.csvLineToRecall(line);
+              recallsWithMissingModel.push(recallWithMissingModel);
+            } else {
+              logger.warn(`The following CSV line cannot be processed as it is missing one of the required fields (Make, Model, Remedy, Recalls Number): \r${JSON.stringify(line)}`);
+            }
           } else {
             const recall = this.csvLineToRecall(line);
             recalls = this.addRecallOrMergeIfExists(recall, recalls);
@@ -100,7 +116,7 @@ class CsvRecallsParser {
       }
     }, { delimiter: { array: '\n', field: ',' } });
 
-    return recalls;
+    return new RecallsCollection(recalls, recallsWithMissingModel);
   }
 }
 
