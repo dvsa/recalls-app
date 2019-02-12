@@ -1,5 +1,5 @@
-const request = require('request');
 const sinon = require('sinon');
+const request = require('cvr-common/src/helpers/HttpRequest');
 const RecallDbRecordDto = require('cvr-common/src/dto/recallDbRecord');
 const MakeDbRecordDto = require('cvr-common/src/dto/makeDbRecord');
 const SerializableMakeDbRecordDto = require('cvr-common/src/dto/serializableMakeDbRecord');

@@ -21,8 +21,7 @@
     "iconv-lite": "^0.4.24",
     "json-2-csv": "^2.4.0",
     "lodash": "^4.17.11",
-    "promise-sequential": "^1.1.1",
-    "request": "^2.88.0"
+    "promise-sequential": "^1.1.1"
   },
   "devDependencies": {
     "mocha": "^5.2.0",

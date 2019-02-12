@@ -12,6 +12,7 @@
   "license": "MIT",
   "dependencies": {
     "bunyan": "^1.8.12",
+    "request": "^2.88.0",
     "safe-json-stringify": "^1.2.0"
   },
   "devDependencies": {
