@@ -1,5 +1,5 @@
 const httpContext = require('express-http-context');
-const request = require('request');
+const request = require('cvr-common/src/helpers/HttpRequest');
 const sessionStorageConstants = require('cvr-common/src/constants/sessionStorageKeys');
 const requestHeaders = require('cvr-common/src/constants/requestHeaders');
 const RecallDto = require('cvr-common/src/dto/recall');

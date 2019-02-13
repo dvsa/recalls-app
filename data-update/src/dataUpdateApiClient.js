@@ -1,7 +1,7 @@
-const request = require('request');
 const crypto = require('crypto');
 const sequential = require('promise-sequential');
 const _ = require('lodash');
+const request = require('cvr-common/src/helpers/HttpRequest');
 const requestHeaders = require('cvr-common/src/constants/requestHeaders');
 const { logger } = require('cvr-common/src/logger/loggerFactory');
 const ModelDbRecordDto = require('cvr-common/src/dto/modelDbRecord');
