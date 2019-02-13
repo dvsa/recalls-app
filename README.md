@@ -58,11 +58,14 @@ You can execute unit tests from *test* directory and check test coverage using i
 
 Check code quality using eslint in all modules with `npm run lint` or with `npm run lint:<module_name>` to check a specific module
 
+## Checking dependencies for vulnerabilities
+You can run `npm run retire` to scan all modules for vulnerable NPM packages. Use `npm run retire:<module_name>` to scan a single module. This action is performed automatically during "build" and "validate" scripts - known vulnerabilities will be detected by pre-push checks or when the application is being built.
+
 ## Updating package-lock
 You can update the package lockfile in all modules via `npm run update-package-lock`. This should ensure all modules/packages use newest versions of compatible dependencies.
 
 ## Running full validation
-To simplify things you can run all checks on all modules by running `npm run validate`. This should ensure all module tests and code quality checks pass.
+To simplify things you can run all checks on all modules by running `npm run validate`. This should ensure all module tests and code quality checks pass. It will also find known NPM package vulnerabilities.
 
 ## Creating application zip for production
 

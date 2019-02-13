@@ -12,6 +12,12 @@
     "install:module:backend": "(cd backend && npm install)",
     "install:module:data-update": "(cd data-update && npm install)",
     "install:module:database": "(cd database && npm install)",
+    "retire": "npm-run-all -p -l retire:*",
+    "retire:backend": "(cd backend && npm run retire)",
+    "retire:common": "(cd common && npm run retire)",
+    "retire:data-update": "(cd data-update && npm run retire)",
+    "retire:database": "(cd database && npm run retire)",
+    "retire:frontend": "(cd frontend && npm run retire)",
     "start": "npm-run-all -p -l start:*",
     "start:frontend": "(cd frontend && npm start)",
     "start:backend": "(cd backend && npm start)",
@@ -30,7 +36,7 @@
     "build:backend": "npm run build:common && (cd backend && npm run build)",
     "build:database": "npm run build:common && (cd database && npm run build)",
     "build:data-update": "npm run build:common && (cd data-update && npm run build)",
-    "validate": "export FORCE_COLOR=1 && npm-run-all -l install:all -p -c lint test",
+    "validate": "export FORCE_COLOR=1 && npm-run-all -l install:all -p -c lint test && npm run retire",
     "clean": "npm-run-all -p -l clean:*",
     "clean:common": "rm -rf common/node_modules",
     "clean:frontend": "rm -rf frontend/node_modules",
@@ -55,7 +61,8 @@
   "homepage": "https://github.com/dvsa/recalls-app#readme",
   "devDependencies": {
     "husky": "^1.1.2",
-    "npm-run-all": "^4.1.5"
+    "npm-run-all": "^4.1.5",
+    "retire": "^2.0.2"
   },
   "husky": {
     "hooks": {
