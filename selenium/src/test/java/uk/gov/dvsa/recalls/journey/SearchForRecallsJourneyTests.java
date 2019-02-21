@@ -69,7 +69,8 @@ public class SearchForRecallsJourneyTests extends BaseTest {
         // The following sentence is visible: "How to check if the vehicle is recalled"
         assertTrue(resultsPage.isHowToCheckSentenceValid(RECALL_TYPE_VEHICLE), "'How to check if the vehicle is recalled' is visible");
         // The following sentence is visible: "Number of affected vehicles"
-        assertTrue(resultsPage.isNumberOfAffectedRecallTypesHeaderValid(RECALL_TYPE_VEHICLE_PLURAL), "this should fail");
+        assertTrue(resultsPage.isNumberOfAffectedRecallTypesHeaderValid(RECALL_TYPE_VEHICLE_PLURAL), "this should");
+        assertTrue(false);
 
         //When I click the "Search again" button, I am redirected to the landing page
         resultsPage.clickSearchAgainButton();
