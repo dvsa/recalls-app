@@ -57,6 +57,7 @@ task selenium(type: Test) {
     }
 
     systemProperties = (Map<String, String>)System.getProperties().findAll {it.key.startsWith("test.")}
+    systemProperties "org.uncommons.reportng.failures-only": false
 }
 
 test.dependsOn selenium
