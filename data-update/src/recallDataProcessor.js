@@ -46,19 +46,22 @@ class RecallDataProcessor {
     } else {
       logger.info('Parsing the buffered CSV data');
       const parser = new Parser(data, 'CP1252');
-      const recalls = parser.parse();
+      const recallsCollection = parser.parse();
+      const recalls = recallsCollection.correctRecalls;
+      const recallsWithMissingModel = recallsCollection.recallsWithMissingModel;
 
       logger.info(`Number of recalls: ${recalls.size}`);
+      logger.info(`Number of recalls without model: ${recallsWithMissingModel.length}`);
       if (recalls.size === 0) {
         logger.error('Recall file is empty');
         next(new Error(RecallDataProcessor.noDataError));
       } else {
-        next(null, s3Properties, recalls);
+        next(null, s3Properties, recallsCollection);
       }
     }
   }
 
-  static compare(s3Properties, currentRecalls, next) {
+  static compare(s3Properties, recallsCollection, next) {
     logger.info('Comparing parsed CSV data with database contents');
 
     DataUpdateApiClient.getAllRecalls((recallsErr, previousRecalls) => {
@@ -72,14 +75,18 @@ class RecallDataProcessor {
             const previousRecallsMap = RecallDataProcessor.mapRecallsByMakeModelRecallNum(
               previousRecalls,
             );
+            const currentRecalls = recallsCollection.correctRecalls;
+            const recallsWithMissingModel = recallsCollection.recallsWithMissingModel;
             const comparer = new RecallComparer(previousRecallsMap, currentRecalls);
             const modifiedRecalls = comparer.findModifiedAndValidRecalls();
-            const currentMakes = RecallComparer.extractMakesFromRecalls(currentRecalls);
-            const currentModels = RecallComparer.extractModelsFromRecalls(currentRecalls);
+            const currentMakes = RecallComparer.extractMakesFromRecalls(currentRecalls,
+              previousRecallsMap, recallsWithMissingModel);
+            const currentModels = RecallComparer.extractModelsFromRecalls(currentRecalls,
+              previousRecallsMap, recallsWithMissingModel);
 
             const deletedEntries = RecallDataProcessor.handleDeletedEntries(
               makesErr, modelsErr, comparer,
-              previousMakes, currentMakes, previousModels, currentModels,
+              previousMakes, currentMakes, previousModels, currentModels, recallsWithMissingModel,
             );
 
             if (RecallDataProcessor.isDeleteThresholdExceeded(
@@ -195,7 +202,7 @@ class RecallDataProcessor {
     return RecallComparer.findModifiedMakes(previousMakesMap, currentMakesMap);
   }
 
-  static handleDeletedMakes(makesErr, previousMakes, currentMakesMap) {
+  static handleDeletedMakes(makesErr, previousMakes, currentMakesMap, recallsWithMissingModel) {
     if (makesErr) {
       logger.info('Makes will not be deleted due to missing data');
       return [];
@@ -203,17 +210,22 @@ class RecallDataProcessor {
 
     const previousMakesMap = RecallDataProcessor.mapMakesByType(previousMakes);
 
-    return RecallComparer.findDeletedMakesPrimaryKeys(previousMakesMap, currentMakesMap);
+    return RecallComparer.findDeletedMakesPrimaryKeys(
+      previousMakesMap,
+      currentMakesMap,
+      recallsWithMissingModel,
+    );
   }
 
-  static handleDeletedModels(modelsErr, previousModels, currentModelsMap) {
+  static handleDeletedModels(modelsErr, previousModels, currentModelsMap, recallsWithMissingModel) {
     if (modelsErr) {
       logger.info('Models will not be deleted due to missing data');
       return [];
     }
     const previousModelsMap = RecallDataProcessor.mapModelsByTypeMake(previousModels);
 
-    return RecallComparer.findDeletedModelsPrimaryKeys(previousModelsMap, currentModelsMap);
+    return RecallComparer.findDeletedModelsPrimaryKeys(previousModelsMap, currentModelsMap,
+      recallsWithMissingModel);
   }
 
   static handleModifiedEntries(makesErr, modelsErr, modifiedRecalls,
@@ -226,11 +238,13 @@ class RecallDataProcessor {
   }
 
   static handleDeletedEntries(makesErr, modelsErr, comparer,
-    previousMakes, currentMakes, previousModels, currentModels) {
+    previousMakes, currentMakes, previousModels, currentModels, recallsWithMissingModel) {
     return new RecallsMakesModels(
-      comparer.findDeletedRecallsPrimaryKeys(),
-      RecallDataProcessor.handleDeletedMakes(makesErr, previousMakes, currentMakes),
-      RecallDataProcessor.handleDeletedModels(modelsErr, previousModels, currentModels),
+      comparer.findDeletedRecallsPrimaryKeys(recallsWithMissingModel),
+      RecallDataProcessor.handleDeletedMakes(makesErr, previousMakes, currentMakes,
+        recallsWithMissingModel),
+      RecallDataProcessor.handleDeletedModels(modelsErr, previousModels, currentModels,
+        recallsWithMissingModel),
     );
   }
 

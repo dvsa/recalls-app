@@ -9,6 +9,7 @@ const dataUpdateApiClient = require('../dataUpdateApiClient');
 const S3BucketObjectProperties = require('../dto/s3BucketObjectProperties');
 const RecallsMakesModels = require('../dto/recallsMakesModels');
 const envVariables = require('../config/environmentVariables');
+const RecallsCollection = require('../dto/recallsCollection');
 
 let sandbox;
 const MAKE_TOYOTA = 'Toyota';
@@ -104,9 +105,9 @@ describe('RecallDataProcessor', () => {
       const recallNumber = 'R/2010/184';
 
       recallDataProcessor.parse(s3Properties, data, (err, s3Prop, recalls) => {
-        expect(recalls).to.have.lengthOf(3);
+        expect(recalls.correctRecalls).to.have.lengthOf(3);
 
-        const firstRecall = recalls.values().next().value;
+        const firstRecall = recalls.correctRecalls.values().next().value;
         expect(firstRecall.make).to.equal(make);
         expect(firstRecall.model).to.equal(model);
         expect(firstRecall.type).to.equal(type);
@@ -118,6 +119,30 @@ describe('RecallDataProcessor', () => {
         expect(firstRecall.defect).to.equal('Some defect');
         expect(firstRecall.remedy).to.equal('Short remedy');
         expect(firstRecall.vehicle_number).to.equal('1');
+      });
+    });
+
+    it('should keep recalls without model', () => {
+      const data = fs.readFileSync(`${__dirname}/data/missingModelCases/testDataWithoutModels.csv`);
+      const make = 'MERCEDES BENZ';
+      const model = 'SPRINTER';
+      const recallNumber = 'R/2010/184';
+      const recallWithoutModelMake = 'MITSUBISHI';
+      const recallWithoutModelRecallNumber = 'R/2014/013';
+
+      recallDataProcessor.parse(s3Properties, data, (err, s3Prop, recalls) => {
+        expect(recalls.correctRecalls).to.have.lengthOf(1);
+        expect(recalls.recallsWithMissingModel).to.have.lengthOf(2);
+
+        const firstRecall = recalls.correctRecalls.values().next().value;
+        expect(firstRecall.make).to.equal(make);
+        expect(firstRecall.model).to.equal(model);
+        expect(firstRecall.recall_number).to.equal(recallNumber);
+
+        const firstRecallWithoutModel = recalls.recallsWithMissingModel[0];
+        expect(firstRecallWithoutModel.make).to.equal(recallWithoutModelMake);
+        expect(firstRecallWithoutModel.model).to.be.a('null');
+        expect(firstRecallWithoutModel.recall_number).to.equal(recallWithoutModelRecallNumber);
       });
     });
 
@@ -161,8 +186,9 @@ describe('RecallDataProcessor', () => {
       const currentRecalls = new Map();
       currentRecalls.set(FIRST_RECALL.make_model_recall_number, FIRST_RECALL);
       currentRecalls.set(SECOND_RECALL.make_model_recall_number, SECOND_RECALL);
+      const recallsCollection = new RecallsCollection(currentRecalls, []);
 
-      recallDataProcessor.compare(s3Properties, currentRecalls,
+      recallDataProcessor.compare(s3Properties, recallsCollection,
         (err, s3Prop, modifiedEntries) => {
           expect(modifiedEntries.recalls).to.be.an('array');
           expect(modifiedEntries.recalls).to.have.lengthOf(1);
@@ -186,8 +212,9 @@ describe('RecallDataProcessor', () => {
       const currentRecalls = new Map();
       currentRecalls.set(FIRST_RECALL.make_model_recall_number, FIRST_RECALL);
       currentRecalls.set(SECOND_RECALL.make_model_recall_number, SECOND_RECALL);
+      const recallsCollection = new RecallsCollection(currentRecalls, []);
 
-      recallDataProcessor.compare(s3Properties, currentRecalls,
+      recallDataProcessor.compare(s3Properties, recallsCollection,
         (err, s3Prop, modifiedEntries, deletedEntries) => {
           expect(deletedEntries.recalls).to.be.an('array');
           expect(deletedEntries.recalls).to.have.lengthOf(1);
@@ -207,8 +234,9 @@ describe('RecallDataProcessor', () => {
 
       currentRecalls.set(FIRST_RECALL.make_model_recall_number, FIRST_RECALL);
       currentRecalls.set(SECOND_RECALL.make_model_recall_number, SECOND_RECALL);
+      const recallsCollection = new RecallsCollection(currentRecalls, []);
 
-      recallDataProcessor.compare(s3Properties, currentRecalls,
+      recallDataProcessor.compare(s3Properties, recallsCollection,
         (err, s3Prop, modifiedEntries) => {
           expect(modifiedEntries.recalls).to.be.an('array');
           expect(modifiedEntries.recalls).to.have.lengthOf(1);
@@ -227,8 +255,9 @@ describe('RecallDataProcessor', () => {
 
       const currentRecalls = new Map();
       currentRecalls.set(FIRST_RECALL_INVALID.make_model_recall_number, FIRST_RECALL_INVALID);
+      const recallsCollection = new RecallsCollection(currentRecalls, []);
 
-      recallDataProcessor.compare(s3Properties, currentRecalls,
+      recallDataProcessor.compare(s3Properties, recallsCollection,
         (err, s3Prop, modifiedEntries, deletedEntries) => {
           expect(modifiedEntries.recalls).to.be.an('array');
           expect(modifiedEntries.recalls).to.have.lengthOf(0);
@@ -254,8 +283,9 @@ describe('RecallDataProcessor', () => {
       const currentRecalls = new Map();
       currentRecalls.set(INVALID_RECALL.make_model_recall_number, INVALID_RECALL);
       currentRecalls.set(FIRST_RECALL.make_model_recall_number, FIRST_RECALL);
+      const recallsCollection = new RecallsCollection(currentRecalls, []);
 
-      recallDataProcessor.compare(s3Properties, currentRecalls,
+      recallDataProcessor.compare(s3Properties, recallsCollection,
         (err, s3Prop, modifiedEntries, deletedEntries) => {
           expect(modifiedEntries.recalls).to.be.an('array');
           expect(modifiedEntries.recalls).to.have.lengthOf(0);
