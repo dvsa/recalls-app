@@ -46,7 +46,6 @@ logger.info(`Init ver ${packagesJson.version}`);
 
 env.addGlobal('ASSETS_BASE_URL', envVariables.assetsBaseUrl);
 env.addGlobal('BASE_URL', envVariables.baseUrl);
-env.addGlobal('VERSION', packagesJson.version);
 
 const indexRouter = require('./routes');
 

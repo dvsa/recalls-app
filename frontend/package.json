@@ -12,8 +12,8 @@
     "test": "export APP_NAME=test && nyc mocha \"test/**/*.test.js\" --exit",
     "retire": "retire",
     "lint": "eslint .",
-    "build": "npm prune && npm install && npm run lint && npm test && npm run retire && npm run prod",
-    "prod": "npm prune --production && npm install --production && zip -r ../cvr-frontend.zip * --exclude /test"
+    "build": "npm prune && npm install ../common && npm install && npm run lint && npm test && npm run retire && npm run prod",
+    "prod": "npm prune --production && npm install ../common --production && npm install --production && zip -r ../cvr-frontend.zip * --exclude /test"
   },
   "repository": {
     "type": "git",
@@ -25,9 +25,9 @@
   "license": "MIT",
   "homepage": "https://github.com/dvsa/recalls-app#readme",
   "dependencies": {
-    "cvr-common": "file:../common",
     "aws-serverless-express": "^3.3.5",
     "body-parser": "^1.18.3",
+    "cvr-common": "file:../common",
     "express": "^4.16.4",
     "express-http-context": "^1.2.0",
     "helmet": "^3.14.0",
@@ -41,7 +41,7 @@
     "eslint-plugin-import": "^2.14.0",
     "mocha": "^5.2.0",
     "nodemon": "^1.18.7",
-    "nyc": "^13.1.0",
+    "nyc": "^13.3.0",
     "retire": "^2.0.2",
     "sinon": "^7.1.1"
   },
