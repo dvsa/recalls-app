@@ -7,19 +7,19 @@
     "loadDevData": "node ./scripts/loadDevData.js $AWS_REGION $ENVIRONMENT",
     "test": "nyc mocha \"test/**/*.test.js\" --exit",
     "retire": "retire",
-    "build": "npm prune && npm install && npm run retire"
+    "build": "npm prune && npm install ../common && npm install && npm run retire"
   },
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "cvr-common": "file:../common",
     "aws-sdk": "^2.338.0",
+    "cvr-common": "file:../common",
     "fast-csv": "^2.4.1"
   },
   "devDependencies": {
     "chai": "^4.2.0",
     "mocha": "^5.2.0",
-    "nyc": "^13.1.0",
+    "nyc": "^13.3.0",
     "retire": "^2.0.2"
   }
 }

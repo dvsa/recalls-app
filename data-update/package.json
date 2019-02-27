@@ -10,8 +10,8 @@
     "test": "export APP_NAME=test && mocha \"src/test/**/*.test.js\" --exit",
     "retire": "retire",
     "lint": "eslint .",
-    "build": "npm prune && npm install && npm run lint && npm test && npm run retire && npm run prod",
-    "prod": "npm prune --production && npm install --production && zip -r ../cvr-data-update.zip * --exclude /src/test"
+    "build": "npm prune && npm install ../common && npm install && npm run lint && npm test && npm run retire && npm run prod",
+    "prod": "npm prune --production && npm install ../common --production && npm install --production && zip -r ../cvr-data-update.zip * --exclude /src/test"
   },
   "author": "",
   "license": "MIT",
