@@ -100,6 +100,11 @@ class CsvRecallsParser {
         logger.info(`Number of CSV records: ${json.length}`);
 
         for (const line of json) {
+          // Turns out this parser is not-too-smart and appends \r at the end of last header
+          // when the line endings are CRLF. This is to get around this issue
+          if (!line['Build End'] && line['Build End\r']) {
+            line['Build End'] = line['Build End\r'];
+          }
           if (this.isAnyRequiredFieldMissing(line)) {
             if (this.isOnlyModelMissing(line)) {
               logger.warn(`The CSV line has only Model missing and will be kept, so any recall with ${line['Recalls Number']} recall number and ${line.Make} make won't be deleted`);
