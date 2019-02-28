@@ -122,6 +122,18 @@ describe('RecallDataProcessor', () => {
       });
     });
 
+    it('should parse end dates even when file has CRLF style line endings', () => {
+      const data = fs.readFileSync(`${__dirname}/data/testDataCRLF.csv`);
+      const buildEndDate = '2016-03-01';
+
+      recallDataProcessor.parse(s3Properties, data, (err, s3Prop, recalls) => {
+        expect(recalls.correctRecalls).to.have.lengthOf(1);
+
+        const firstRecall = recalls.correctRecalls.values().next().value;
+        expect(firstRecall.build_range[0].end).to.equal(buildEndDate);
+      });
+    });
+
     it('should keep recalls without model', () => {
       const data = fs.readFileSync(`${__dirname}/data/missingModelCases/testDataWithoutModels.csv`);
       const make = 'MERCEDES BENZ';
