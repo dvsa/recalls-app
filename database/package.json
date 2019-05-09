@@ -7,7 +7,7 @@
     "loadDevData": "node ./scripts/loadDevData.js $AWS_REGION $ENVIRONMENT",
     "test": "nyc mocha \"test/**/*.test.js\" --exit",
     "retire": "retire",
-    "build": "npm prune && npm install ../common && npm install && npm run retire"
+    "build": "npm prune && npm install ../common && npm install"
   },
   "author": "",
   "license": "MIT",

@@ -5,7 +5,7 @@
   "scripts": {
     "test": "mocha \"test/**/*.test.js\" --exit",
     "retire": "retire",
-    "build": "npm prune && npm install && npm test && npm run lint && npm run retire && npm run prod",
+    "build": "npm prune && npm install && npm test && npm run lint && npm run prod",
     "prod": "npm prune --production && npm install --production",
     "lint": "eslint ."
   },
