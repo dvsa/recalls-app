@@ -16,7 +16,7 @@ repositories {
 }
 
 dependencies {
-    compile "org.seleniumhq.selenium:selenium-java:2.53.1"
+    compile "org.seleniumhq.selenium:selenium-java:3.141.59"
     compile "org.testng:testng:6.10"
     compile("org.uncommons:reportng:1.1.4") {
         exclude group: "org.testng", module: "testng"
