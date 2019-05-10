@@ -4,6 +4,7 @@ import org.openqa.selenium.Platform;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxProfile;
+import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
@@ -43,12 +44,15 @@ public class DriverFactory {
                 profile.setPreference("network.http.prompt-temp-redirect", false);
                 profile.setPreference("javascript.enabled", javascriptEnabled);
 
+                FirefoxOptions options = new FirefoxOptions();
+                options.setProfile(profile);
+
                 capability.setVersion(browserVersion);
                 capability.setJavascriptEnabled(javascriptEnabled);
                 Logger.info("Javascript is enabled: " + String
                         .valueOf(capability.isJavascriptEnabled()));
                 capability.setCapability(FirefoxDriver.PROFILE, profile);
-                driver = BrowserFactory.createDriver(new FirefoxDriver(profile));
+                driver = BrowserFactory.createDriver(new FirefoxDriver(options));
                 break;
             }
             case CHROME: {
