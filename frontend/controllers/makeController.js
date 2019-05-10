@@ -4,6 +4,8 @@ const recallSearch = require('../service/recallSearch');
 const makeValidator = require('../validators/vehicleMake');
 const messages = require('../messages/messages.en');
 const SmartSurveyFeedback = require('../helpers/SmartSurveyFeedback');
+const envVariables = require('../config/environmentVariables');
+
 
 class MakeController {
   static makesList(errorMessage, response, recallType) {
@@ -24,6 +26,7 @@ class MakeController {
           recallsAvailabilityNotice,
           smartSurveyFeedback,
           errorMessage,
+          documentsBaseUrl: envVariables.documentsBaseUrl,
         });
       }
     });
