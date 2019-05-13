@@ -41,7 +41,7 @@
     "eslint-plugin-import": "^2.14.0",
     "mocha": "^5.2.0",
     "nodemon": "^1.18.7",
-    "nyc": "^13.3.0",
+    "nyc": "^14.1.0",
     "retire": "^2.0.2",
     "sinon": "^7.1.1"
   },
