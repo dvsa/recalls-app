@@ -52,6 +52,7 @@ public class DriverFactory {
                 Logger.info("Javascript is enabled: " + String
                         .valueOf(capability.isJavascriptEnabled()));
                 capability.setCapability(FirefoxDriver.PROFILE, profile);
+                System.setProperty("webdriver.gecko.driver", "src/main/resources/selenium/driver/geckodriver");
                 driver = BrowserFactory.createDriver(new FirefoxDriver(options));
                 break;
             }
