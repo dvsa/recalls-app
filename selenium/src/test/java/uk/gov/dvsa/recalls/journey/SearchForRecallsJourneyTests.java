@@ -30,6 +30,10 @@ public class SearchForRecallsJourneyTests extends BaseTest {
         //I go to cvr home page
         RecallInformationSearchPage recallInformationSearchPage = recalls.goToRecallInformationSearchPage();
 
+        //THEN I will see links for full CSV data and data guide
+        assertTrue(recallInformationSearchPage.csvDataLinkExists());
+        assertTrue(recallInformationSearchPage.dataGuideLinkExists());
+
         //When I select no options and click continue, an error appears
         recallInformationSearchPage.clickContiniueWithNoOptionsSelected();
         recallInformationSearchPage.formErrorMessageIsVisible();
@@ -37,6 +41,10 @@ public class SearchForRecallsJourneyTests extends BaseTest {
         //And I select vehicle recalls option
         //Then I'm redirected to the SelectMake page
         SelectVehicleMakePage selectMakePage = recallInformationSearchPage.selectVehicleRecallAndContinue();
+
+        //And I will see links for full CSV data and data guide
+        assertTrue(selectMakePage.csvDataLinkExists());
+        assertTrue(selectMakePage.dataGuideLinkExists());
 
         //When I select no options and click continue, an error appears
         selectMakePage.clickContinueWithNoOptionsSelected();
@@ -86,10 +94,18 @@ public class SearchForRecallsJourneyTests extends BaseTest {
         //I go to cvr home page
         RecallInformationSearchPage recallInformationSearchPage = recalls.goToRecallInformationSearchPage();
 
+        //THEN I will see links for full CSV data and data guide
+        assertTrue(recallInformationSearchPage.csvDataLinkExists());
+        assertTrue(recallInformationSearchPage.dataGuideLinkExists());
+
         //And I select equipment recalls option
         //Then I'm redirected to the SelectMake page
         SelectEquipmentMakePage selectMakePage = recallInformationSearchPage.selectEquipmentRecallAndContinue();
 
+        //And I will see links for full CSV data and data guide
+        assertTrue(selectMakePage.csvDataLinkExists());
+        assertTrue(selectMakePage.dataGuideLinkExists());
+        
         //When I select no options and click continue, an error appears
         selectMakePage.clickContinueWithNoOptionsSelected();
         selectMakePage.formErrorMessageIsVisible();

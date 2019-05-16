@@ -12,6 +12,8 @@ import uk.gov.dvsa.recalls.ui.base.Page;
 public abstract class SelectMakePage extends Page {
 
     private WebDriverWait wait = new WebDriverWait(driver, 5);
+    @FindBy(id = "csv-data-link") private WebElement csvDataLink;
+    @FindBy(id = "data-guide-link") private WebElement dataGuideLink;
     @FindBy(id = "continue-button") private WebElement continueButton;
     @FindBy(id = "make") private WebElement vehicleMakeDropdown;
     @FindBy(className = "error-message") private WebElement errorMessage;
@@ -50,5 +52,21 @@ public abstract class SelectMakePage extends Page {
     public RecallNotListedPage clickWhyMakeIsNotListedLink() {
         recallNotListedLink.click();
         return new RecallNotListedPage();
+    }
+
+    public boolean csvDataLinkExists() {
+        return csvDataLink.isDisplayed();
+    }
+
+    public String getCsvDataLink() {
+        return csvDataLink.getAttribute("href");
+    }
+
+    public boolean dataGuideLinkExists() {
+        return dataGuideLink.isDisplayed();
+    }
+
+    public String getDataGuideLink() {
+        return dataGuideLink.getAttribute("href");
     }
 }
