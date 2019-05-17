@@ -3,10 +3,12 @@ const request = require('cvr-common/src/helpers/HttpRequest');
 const sessionStorageConstants = require('cvr-common/src/constants/sessionStorageKeys');
 const requestHeaders = require('cvr-common/src/constants/requestHeaders');
 const RecallDto = require('cvr-common/src/dto/recall');
+const DateParser = require('cvr-common/src/helpers/DateParser');
 const { logger } = require('cvr-common/src/logger/loggerFactory');
 const envVariables = require('../config/environmentVariables');
 
 const RECALLS_BACKEND_URL = envVariables.recallsBackendUrl;
+const LAUNCH_DATE_FORMAT = 'DD-MM-YYYY';
 
 class RecallSearch {
   static fetchAllMakes(type, callback) {
@@ -77,7 +79,7 @@ class RecallSearch {
       recall.model,
       recall.recallNumber,
       recall.defectDescription,
-      recall.launchDate,
+      DateParser.parseDateToFormat(recall.launchDate, LAUNCH_DATE_FORMAT),
       recall.concern,
       recall.remedy,
       recall.affectedVehiclesNumber,

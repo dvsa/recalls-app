@@ -31,11 +31,25 @@ function createRecallDto(make) {
     'Model',
     'Number',
     'Description',
-    'Launch date',
+    '2018-01-02',
     'Concern',
     'Remedy',
     'Affected number',
     [{ start: '2010-04-19', end: '2018-05-20' }],
+  );
+}
+
+function createResponseRecallDto(recallDto) {
+  return new RecallDto(
+    recallDto.make,
+    recallDto.model,
+    recallDto.recallNumber,
+    recallDto.defectDescription,
+    '02-01-2018',
+    recallDto.concern,
+    recallDto.remedy,
+    recallDto.affectedVehiclesNumber,
+    recallDto.buildRange,
   );
 }
 
@@ -125,8 +139,8 @@ describe('RecallSearch', () => {
 
       expect(mappedRecalls).to.be.an('array');
       expect(mappedRecalls).to.have.lengthOf(2);
-      expect(mappedRecalls).to.deep.include(citroenRecall);
-      expect(mappedRecalls).to.deep.include(landRoverRecall);
+      expect(mappedRecalls).to.deep.include(createResponseRecallDto(citroenRecall));
+      expect(mappedRecalls).to.deep.include(createResponseRecallDto(landRoverRecall));
       done();
     });
   });

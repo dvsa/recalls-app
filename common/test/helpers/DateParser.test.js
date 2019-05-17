@@ -76,4 +76,54 @@ describe('DateParser', () => {
       done();
     });
   });
+  describe('parseDateToFormat()', () => {
+    it('Should convert date to correct format DD-MM-YYYY', (done) => {
+      const parsedDate = DateParser.parseDateToFormat('2018-01-24', 'DD-MM-YYYY');
+
+      expect(parsedDate).to.equal('24-01-2018');
+      done();
+    });
+    it('Should convert date to correct format MM/DD/YYYY', (done) => {
+      const parsedDate = DateParser.parseDateToFormat('2019-01-20', 'MM/DD/YYYY');
+
+      expect(parsedDate).to.equal('01/20/2019');
+      done();
+    });
+    it('Should return null if date is null', (done) => {
+      const parsedDate = DateParser.parseDateToFormat(null, 'DD-MM-YYYY');
+
+      expect(parsedDate).to.be.null;
+      done();
+    });
+    it('Should return null if date is empty', (done) => {
+      const parsedDate = DateParser.parseDateToFormat('', 'DD-MM-YYYY');
+
+      expect(parsedDate).to.be.null;
+      done();
+    });
+    it('Should return null if format is null', (done) => {
+      const parsedDate = DateParser.parseDateToFormat('2018-01-01', null);
+
+      expect(parsedDate).to.be.null;
+      done();
+    });
+    it('Should return null if format is empty', (done) => {
+      const parsedDate = DateParser.parseDateToFormat('2018-01-01', '');
+
+      expect(parsedDate).to.be.null;
+      done();
+    });
+    it('Should return error if date is invalid', (done) => {
+      const parsedDate = DateParser.parseDateToFormat('a', 'DD-MM-YYYY');
+
+      expect(parsedDate).to.equal(DATE_INVALID);
+      done();
+    });
+    it('Should return error if date is with wrong format', (done) => {
+      const parsedDate = DateParser.parseDateToFormat('2018-01-1', 'DD-MM-YYYY');
+
+      expect(parsedDate).to.equal(DATE_INVALID);
+      done();
+    });
+  });
 });
