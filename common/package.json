@@ -13,6 +13,7 @@
   "license": "MIT",
   "dependencies": {
     "bunyan": "^1.8.12",
+    "dayjs": "^1.8.14",
     "request": "^2.88.0",
     "safe-json-stringify": "^1.2.0"
   },
