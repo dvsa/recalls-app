@@ -13,8 +13,13 @@ const yearController = new YearController();
 const resultsController = new ResultsController();
 
 router.get('/cookie-policy', (req, response) => {
-  logger.info('Request to render cookies received');
+  logger.info('Request to render cookie policy received');
   landingPageController.cookiePolicy(response);
+});
+
+router.get('/cookie-preferences', (req, response) => {
+  logger.info('Request to render cookie preferences received');
+  landingPageController.cookiePreferences(response);
 });
 
 router.get('/terms-and-conditions', (req, response) => {

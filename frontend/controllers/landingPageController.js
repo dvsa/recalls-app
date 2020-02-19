@@ -28,6 +28,12 @@ class FrontendController {
     });
   }
 
+  static cookiePreferences(response) {
+    response.render('cookie-preferences.njk', {
+      smartSurveyFeedback: SmartSurveyFeedback.getInstance(),
+    });
+  }
+
   static termsAndConditions(response) {
     response.render('terms-and-conditions.njk', {
       smartSurveyFeedback: SmartSurveyFeedback.getInstance(),
