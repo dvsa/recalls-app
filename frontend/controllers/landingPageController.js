@@ -22,8 +22,8 @@ class FrontendController {
     }
   }
 
-  static cookies(response) {
-    response.render('cookies.njk', {
+  static cookiePolicy(response) {
+    response.render('cookie-policy.njk', {
       smartSurveyFeedback: SmartSurveyFeedback.getInstance(),
     });
   }

@@ -12,9 +12,9 @@ const envVariables = require('../config/environmentVariables');
 const yearController = new YearController();
 const resultsController = new ResultsController();
 
-router.get('/cookies', (req, response) => {
+router.get('/cookie-policy', (req, response) => {
   logger.info('Request to render cookies received');
-  landingPageController.cookies(response);
+  landingPageController.cookiePolicy(response);
 });
 
 router.get('/terms-and-conditions', (req, response) => {
