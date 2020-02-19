@@ -23,9 +23,18 @@ describe('LandingPageController', () => {
     });
   });
 
-  describe('cookies', () => {
+  describe('cookiePolicy', () => {
     it('should pass smart survey feedback variables to the template', () => {
-      landingPageController.cookies(res);
+      landingPageController.cookiePolicy(res);
+
+      expect(res.render.calledOnce).to.equal(true);
+      expect(res.render.args[0][1]).to.include.keys('smartSurveyFeedback');
+    });
+  });
+
+  describe('cookiePreferences', () => {
+    it('should pass smart survey feedback variables to the template', () => {
+      landingPageController.cookiePreferences(res);
 
       expect(res.render.calledOnce).to.equal(true);
       expect(res.render.args[0][1]).to.include.keys('smartSurveyFeedback');
