@@ -1,5 +1,20 @@
 <!-- cookie-message -->
-<div id="global-cookie-message">
-  <p>GOV.UK uses cookies to make the site simpler. <a href="{{ BASE_URL }}/cookie-policy">Find out more about cookies</a></p>
+<div id="cm_cookie_notification" >
+    <div class="govuk-width-container">
+        <div class="govuk-grid-row ">
+            <div class=" govuk-grid-column-two-thirds govuk-!-margin-top-5">
+                <div>
+                    <span class="govuk-heading-m">Tell us whether you accept cookies</span>
+                    <p class="govuk-body">We use <a class="govuk-link" href="/cookie-preferences">cookies to collect information</a> about how you use the MOT testing service. We use this information to make the service work as well as possible.</p>
+                </div>
+                <div class="js-show govuk-grid-column-full govuk-grid-column-one-half-from-desktop">
+                    <button class="govuk-button" type="submit">Accept all cookies</button>
+                </div>
+                <div class="govuk-grid-column-full govuk-grid-column-one-half-from-desktop">
+                    <a role="button" class="govuk-button" href="/cookie-preferences">Set cookie preferences</a>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 <!-- /cookie-message -->
