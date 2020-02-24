@@ -1,8 +1,37 @@
 <!-- body-scripts -->
 <!--[if (gte IE 9) | (!IE)]><!-->
+<script>
+const cookieManagerConfig = {
+      'delete-undefined-cookies': true,
+      'user-preference-cookie-name': 'seen_cookie_message',
+      'user-preference-cookie-secure': false,
+      'user-preference-saved-callback': function() {
+        document.getElementById('cookie-preference-success').classList.remove('hidden');
+        window.scrollTo(0, 0);
+      },
+      'user-preference-cookie-expiry-days': 365,
+      'user-preference-configuration-form-id': 'cookie-manager-form',
+      'cookie-banner-id': 'cm_cookie_notification',
+      'cookie-banner-visibility-class': 'hidden',
+      'cookie-banner-visible-on-page-with-preference-form': false,
+      'set-checkboxes-in-preference-form': true,
+      'cookie-manifest': [
+        {
+          'category-name': 'essential',
+          optional: false,
+          cookies: ['seen_cookie_message','incap_ses_','nlbi_','visid_incap_'],
+        },
+        {
+          'category-name': 'analytics',
+          optional: true,
+          cookies: ['_ga', '_gat', '_gid', '_utma', '_utmt', '_utmb', '_utmc', '_utmz'],
+        },
+      ],
+    }
+</script>
+
 <script type="text/javascript" src="{{ ASSETS_BASE_URL }}/javascripts/vendor.bundle.js"></script>
 <script type="text/javascript" src="{{ ASSETS_BASE_URL }}/javascripts/dvsa.bundle.js"></script>
-<script type="text/javascript" src="{{ ASSETS_BASE_URL }}/javascripts/dvsa-cvr.bundle.js"></script>
 
 <!--<![endif]-->
 
